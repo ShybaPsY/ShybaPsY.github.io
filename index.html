@@ -1,1 +1,559 @@
-"Hello World" 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gabriel Mendes Lopes - Desenvolvedor Backend</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #1a1b26;
+            --foreground: #a9b1d6;
+            --comment: #565f89;
+            --green: #9ece6a;
+            --yellow: #e0af68;
+            --blue: #7aa2f7;
+            --magenta: #bb9af7;
+            --cyan: #7dcfff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        #terminal {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 600px;
+            background-color: rgba(26, 27, 38, 0.85);
+            border: 1px solid var(--comment);
+            border-radius: 8px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+
+        #terminal-header {
+            background-color: var(--comment);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--background);
+            font-weight: bold;
+        }
+        
+        #terminal-header .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        #terminal-header .button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .button.red { background-color: #ff5f56; }
+        .button.yellow { background-color: #ffbd2e; }
+        .button.green { background-color: #27c93f; }
+
+        #terminal-body {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            word-wrap: break-word;
+            position: relative;
+        }
+        
+        .matrix-canvas-local {
+            position: fixed;
+            display: block;
+            background-color: var(--background);
+            z-index: 100;
+        }
+
+        #terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #terminal-body::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+
+        #terminal-body::-webkit-scrollbar-thumb {
+            background-color: var(--comment);
+            border-radius: 4px;
+        }
+
+        .line {
+            line-height: 1.5;
+        }
+
+        .prompt-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: var(--green);
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: var(--foreground);
+            font-family: 'Fira Code', monospace;
+            font-size: 1em;
+            flex-grow: 1;
+            outline: none;
+        }
+        
+        #command-input:disabled {
+            background-color: transparent;
+        }
+        
+        a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .output-command {
+            color: var(--magenta);
+        }
+        
+        .output-text {
+            white-space: pre-wrap;
+        }
+        
+        .highlight {
+            color: var(--yellow);
+            font-weight: bold;
+        }
+        
+        .title-blue {
+            color: var(--blue);
+        }
+
+        .detail-green {
+            color: var(--green);
+        }
+        
+        .detail-cyan {
+            color: var(--cyan);
+        }
+
+        .ascii-art {
+            color: var(--green);
+            font-weight: bold;
+            font-size: 0.8em;
+            line-height: 1.2;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--foreground);
+            animation: blink 1s step-end infinite;
+            vertical-align: bottom;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            from, to { background-color: transparent; }
+            50% { background-color: var(--foreground); }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <div id="terminal-header">
+            <div class="buttons">
+                <div class="button red"></div>
+                <div class="button yellow"></div>
+                <div class="button green"></div>
+            </div>
+            <div>gabriel_lopes@portfolio: ~</div>
+        </div>
+        <div id="terminal-body" onclick="document.getElementById('command-input').focus()">
+            <div id="output"></div>
+            <div class="prompt-line">
+                <span class="prompt">$&gt;</span>
+                <input type="text" id="command-input" autocomplete="off" autofocus>
+                <span id="cursor" class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const output = document.getElementById('output');
+            const commandInput = document.getElementById('command-input');
+            const terminalBody = document.getElementById('terminal-body');
+            const cursor = document.getElementById('cursor');
+            const promptLine = document.querySelector('.prompt-line');
+
+            // --- State Management ---
+            let commandHistory = [];
+            let historyIndex = 0;
+            let isMatrixRunning = false;
+
+            // --- ASCII Art and Welcome Message ---
+            const asciiArt = `<span class="ascii-art">
+.______    _______ .___  ___.    ____    ____  __  .__   __.  _______   ______   
+|   _  \\  |   ____||   \\/   |    \\   \\  /   / |  | |  \\ |  | |       \\ /  __  \\  
+|  |_)  | |  |__   |  \\  /  |     \\   \\/   /  |  | |   \\|  | |  .--.  |  |  |  | 
+|   _  <  |   __|  |  |\\/|  |      \\      /   |  | |  . \`  | |  |  |  |  |  |  | 
+|  |_)  | |  |____ |  |  |  |       \\    /    |  | |  |\\   | |  '--'  |  \`--'  | 
+|______/  |_______||__|  |__|        \\__/     |__| |__| \\__| |_______/ \\______/  
+                                                                                 
+</span>`;
+            
+            const welcomeMessage = asciiArt + `
+  <span class="highlight">Este é o meu Portfólio Interativo!</span>
+  
+  Meu nome é Gabriel Mendes Lopes e sou um Desenvolvedor Backend.
+  
+  Digite '<span class="output-command">help</span>' para ver a lista de comandos disponíveis.
+            `;
+
+            // --- COMMANDS OBJECT ---
+            const commands = {
+                help: `
+  <span class="highlight">Comandos Disponíveis:</span>
+  
+  <span class="output-command">sobre</span>          - Mostra informações sobre mim.
+  <span class="output-command">experiencia</span>    - Exibe minha experiência profissional.
+  <span class="output-command">projetos</span>       - Lista meus principais projetos.
+  <span class="output-command">skills</span>         - Lista minhas habilidades técnicas e interpessoais.
+  <span class="output-command">cursos</span>         - Exibe meus cursos e certificações.
+  <span class="output-command">idiomas</span>        - Lista os idiomas que eu falo.
+  <span class="output-command">contato</span>        - Exibe minhas informações de contato.
+  <span class="output-command">download cv</span>    - Link para baixar meu currículo.
+  <span class="output-command">clear</span>          - Limpa a tela.
+  <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
+  <span class="output-command">matrix</span>         - Ativa um easter egg.`,
+                sobre: `
+  <span class="highlight">Sobre Mim</span>
+  
+  Olá! Sou Gabriel Mendes Lopes, um <span class="title-blue">desenvolvedor backend</span> apaixonado por criar soluções eficientes, escaláveis e robustas. 
+  Atualmente, estou no 4º termo do curso de <span class="title-blue">Sistemas de Informação na FIPP</span> (Faculdade de Informática de Presidente Prudente).
+  Resido em Anhumas, SP.
+  
+  Busco uma oportunidade para iniciar minha carreira como desenvolvedor júnior, com grande interesse em backend e análise de dados. 
+  Sou proativo, dedicado e estou sempre em busca de aprendizado contínuo para me tornar um profissional de excelência.`,
+                experiencia: `
+  <span class="highlight">Experiência Profissional</span>
+
+  <span class="output-command">Atendimento ao Cliente Nível 1</span> - <span class="detail-cyan">Paschoalotto</span>
+  <span class="comment">Outubro 2022 - Outubro 2023 (1 ano e 1 mês)</span>
+  
+  - Responsável pela resolução de problemas de clientes, negociação de dívidas e recuperação de crédito.
+  - Aprimoramento contínuo das habilidades de comunicação, negociação e resolução de conflitos.`,
+                projetos: `
+  <span class="highlight">Meus Projetos</span>
+  
+  1. <span class="title-blue">API de E-commerce</span>
+     - <span class="detail-green">Descrição:</span> Uma API completa para uma plataforma de e-commerce, com gerenciamento de produtos, usuários, pedidos e pagamentos.
+     - <span class="detail-green">Tecnologias:</span> Node.js, Express, MongoDB, JWT.
+     - <span class="detail-green">Repositório:</span> <a href="https://github.com/ShybaPsY/api-ecommerce-example" target="_blank">github.com/ShybaPsY/api-ecommerce-example</a>
+  
+  2. <span class="title-blue">Sistema de Gerenciamento de Tarefas</span>
+     - <span class="detail-green">Descrição:</span> Uma aplicação backend para um sistema de 'To-Do list' colaborativo em tempo real.
+     - <span class="detail-green">Tecnologias:</span> Python, Django, PostgreSQL, WebSockets.
+     - <span class="detail-green">Repositório:</span> <a href="https://github.com/ShybaPsY/task-manager-example" target="_blank">github.com/ShybaPsY/task-manager-example</a>
+  
+  3. <span class="title-blue">Microsserviço de Autenticação</span>
+     - <span class="detail-green">Descrição:</span> Um serviço dedicado para autenticação e autorização de usuários, pronto para ser integrado em diversas aplicações.
+     - <span class="detail-green">Tecnologias:</span> Go, Gin, Docker.
+     - <span class="detail-green">Repositório:</span> <a href="https://github.com/ShybaPsY/auth-service-example" target="_blank">github.com/ShybaPsY/auth-service-example</a>`,
+                skills: `
+  <span class="highlight">Habilidades Técnicas e Interpessoais</span>
+
+  <span class="title-blue">Hard Skills (Técnicas):</span>
+  - <span class="output-command">Linguagens:</span> JavaScript (Node.js), Python, Go, Java, C/C++.
+  - <span class="output-command">Bancos de Dados:</span> PostgreSQL, MongoDB, MySQL.
+  - <span class="output-command">DevOps & Ferramentas:</span> Docker, Git, CI/CD, Nginx.
+  - <span class="output-command">Cloud:</span> Google Cloud, Microsoft Azure (AZ-900).
+  - <span class="output-command">Análise de Dados:</span> Power BI.
+  - <span class="output-command">Arquitetura:</span> Microsserviços, APIs RESTful, Mensageria (RabbitMQ/Kafka).
+
+  <span class="title-blue">Soft Skills (Interpessoais):</span>
+  - Comunicação, Resolução de Problemas, Proatividade, Trabalho em Equipe, Negociação.`,
+                cursos: `
+  <span class="highlight">Cursos e Certificações</span>
+
+  - <span class="title-blue">2024:</span> Curso Completo de Linguagem C e C++ <span class="detail-green">(UDEMY)</span>
+  - <span class="title-blue">2024:</span> Power BI <span class="detail-green">(SENAI)</span>
+  - <span class="title-blue">2024:</span> Python 1 <span class="detail-green">(SENAI)</span>
+  - <span class="title-blue">2024:</span> Soluções Integradas com IoT <span class="detail-green">(SENAI)</span>
+  - <span class="title-blue">2023:</span> Implantação de Serviços de IA em Nuvem - Google Cloud AI <span class="detail-green">(SENAI)</span>
+  - <span class="title-blue">2023:</span> Implantação de Serviços em Nuvem - Microsoft AZ-900 <span class="detail-green">(SENAI)</span>`,
+                idiomas: `
+  <span class="highlight">Idiomas</span>
+
+  - <span class="title-blue">Português:</span> <span class="detail-green">Nativo</span>
+  - <span class="title-blue">Inglês:</span> <span class="detail-green">Avançado (Nível C1)</span>
+  - <span class="title-blue">Espanhol:</span> <span class="detail-green">Básico</span>`,
+                contato: `
+  <span class="highlight">Entre em Contato</span>
+  
+  - <span class="title-blue">Email:</span> <a href="mailto:asdgabrielmlopes@gmail.com">asdgabrielmlopes@gmail.com</a>
+  - <span class="title-blue">WhatsApp:</span> <a href="https://wa.me/5518996189978?text=Ol%C3%A1%2C%20vim%20pelo%20seu%20portif%C3%B3lio" target="_blank">+55 18 99618-9978</a>
+  - <span class="title-blue">LinkedIn:</span> <a href="https://www.linkedin.com/in/gabriel-lopes-18b839270/" target="_blank">linkedin.com/in/gabriel-lopes-18b839270/</a>
+  - <span class="title-blue">GitHub:</span> <a href="https://github.com/ShybaPsY" target="_blank">github.com/ShybaPsY</a>`,
+                'download cv': `
+  <span class="highlight">Download do Currículo</span>
+  
+  Clique no link abaixo para baixar meu CV em formato PDF.
+  <span class="comment">// Lembre-se de hospedar seu PDF e substituir o link de placeholder!</span>
+
+  <span class="title-blue">Link:</span> <a href="seu-link-para-o-cv.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
+                bemvindo: welcomeMessage,
+                sudo: `
+  <span class="highlight">Acesso Negado.</span>
+  
+  Usuário não está no arquivo sudoers. Este incidente será reportado. ;)`,
+            };
+
+            // --- TYPING EFFECT FUNCTIONS ---
+            function typeText(targetElement, text, speed) {
+                return new Promise(resolve => {
+                    let i = 0;
+                    function type() {
+                        if (i < text.length) {
+                            targetElement.appendChild(document.createTextNode(text[i]));
+                            i++;
+                            terminalBody.scrollTop = terminalBody.scrollHeight;
+                            setTimeout(type, speed);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    type();
+                });
+            }
+
+            async function typeNodeContents(targetElement, sourceNode, defaultSpeed) {
+                const nodes = Array.from(sourceNode.childNodes);
+                for (const node of nodes) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const speed = node.parentElement.classList.contains('ascii-art') ? 5 : defaultSpeed;
+                        await typeText(targetElement, node.textContent, speed);
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        const newElement = document.createElement(node.tagName);
+                        for (const attr of node.attributes) {
+                            newElement.setAttribute(attr.name, attr.value);
+                        }
+                        targetElement.appendChild(newElement);
+                        await typeNodeContents(newElement, node, defaultSpeed);
+                    }
+                }
+            }
+
+            async function typeMessage(targetElement, htmlString, speed) {
+                const sourceElement = document.createElement('div');
+                sourceElement.innerHTML = htmlString;
+                await typeNodeContents(targetElement, sourceElement, speed);
+            }
+
+            // --- MATRIX EFFECT ---
+            let matrixAnimationId = null;
+
+            function startMatrixEffect() {
+                if (isMatrixRunning) return;
+                isMatrixRunning = true;
+
+                output.style.display = 'none';
+                promptLine.style.display = 'none';
+
+                const canvas = document.createElement('canvas');
+                canvas.classList.add('matrix-canvas-local');
+                document.body.appendChild(canvas); 
+                
+                const ctx = canvas.getContext('2d');
+                const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                const fontSize = 16;
+                let columns, drops;
+
+                const setup = () => {
+                    const rect = terminalBody.getBoundingClientRect();
+                    canvas.style.top = `${rect.top}px`;
+                    canvas.style.left = `${rect.left}px`;
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    columns = Math.floor(canvas.width / fontSize);
+                    drops = Array(columns).fill(1);
+                };
+
+                const draw = () => {
+                    ctx.fillStyle = 'rgba(26, 27, 38, 0.05)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#0F0';
+                    ctx.font = `${fontSize}px monospace`;
+                    for (let i = 0; i < drops.length; i++) {
+                        const text = characters[Math.floor(Math.random() * characters.length)];
+                        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                        drops[i]++;
+                    }
+                    matrixAnimationId = requestAnimationFrame(draw);
+                };
+
+                const stopEffect = async () => {
+                    if (!isMatrixRunning) return;
+                    cancelAnimationFrame(matrixAnimationId);
+                    window.removeEventListener('resize', setup);
+                    window.removeEventListener('keydown', stopEffectWrapper, { capture: true });
+                    window.removeEventListener('click', stopEffectWrapper, { capture: true });
+                    if (canvas.parentNode) canvas.remove();
+                    
+                    output.style.display = 'block';
+                    promptLine.style.display = 'flex';
+                    
+                    output.innerHTML = ''; 
+                    const welcomeLine = document.createElement('div');
+                    welcomeLine.classList.add('line', 'output-text');
+                    output.appendChild(welcomeLine);
+                    await typeMessage(welcomeLine, welcomeMessage, 10); 
+                    
+                    commandInput.disabled = false;
+                    cursor.style.display = 'inline-block';
+                    commandInput.focus();
+                    isMatrixRunning = false;
+                };
+
+                const stopEffectWrapper = () => stopEffect();
+                setup();
+                draw();
+                window.addEventListener('resize', setup);
+                window.addEventListener('keydown', stopEffectWrapper, { once: true, capture: true });
+                window.addEventListener('click', stopEffectWrapper, { once: true, capture: true });
+            }
+
+            // --- COMMAND EXECUTION LOGIC ---
+            async function executeCommand(command) {
+                if (isMatrixRunning) return;
+
+                commandInput.disabled = true;
+                cursor.style.display = 'none';
+
+                const commandLine = document.createElement('div');
+                commandLine.innerHTML = `<span class="prompt">$&gt;</span><span class="output-command">${command}</span>`;
+                output.appendChild(commandLine);
+
+                if (command) commandHistory.push(command);
+                historyIndex = commandHistory.length;
+                commandInput.value = '';
+
+                if (command.toLowerCase() === 'matrix') {
+                    startMatrixEffect();
+                    return; 
+                }
+
+                const responseLine = document.createElement('div');
+                responseLine.classList.add('line', 'output-text');
+                
+                let responseText;
+                let speed = 10;
+
+                if (command.toLowerCase() === 'clear') {
+                    output.innerHTML = '';
+                    responseText = "Digite '<span class=\"output-command\">help</span>' para ver a lista de comandos disponíveis.";
+                } else if (commands[command.toLowerCase()]) {
+                    responseText = commands[command.toLowerCase()];
+                    if (command.toLowerCase() === 'help' || command.toLowerCase() === 'bemvindo') {
+                        speed = 5;
+                    }
+                } else {
+                    responseText = `Comando não encontrado: <span class="highlight">${command}</span>. Digite '<span class="output-command">help</span>' para ver a lista de comandos.`;
+                }
+
+                if (responseText) {
+                    output.appendChild(responseLine);
+                    await typeMessage(responseLine, responseText, speed);
+                }
+
+                commandInput.disabled = false;
+                cursor.style.display = 'inline-block';
+                commandInput.focus();
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }
+
+            commandInput.addEventListener('keydown', async (e) => {
+                if (isMatrixRunning) return;
+                if (e.key === 'Enter' && !commandInput.disabled) {
+                    await executeCommand(commandInput.value);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        commandInput.value = commandHistory[historyIndex];
+                        commandInput.setSelectionRange(commandInput.value.length, commandInput.value.length);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        commandInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = commandHistory.length;
+                        commandInput.value = '';
+                    }
+                }
+            });
+
+            async function init() {
+                commandInput.disabled = true;
+                cursor.style.display = 'none';
+                
+                const initialLine = document.createElement('div');
+                initialLine.classList.add('line', 'output-text');
+                output.appendChild(initialLine);
+                await typeMessage(initialLine, welcomeMessage, 10); 
+                
+                commandInput.disabled = false;
+                cursor.style.display = 'inline-block';
+                commandInput.focus();
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
