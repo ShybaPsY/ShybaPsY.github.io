@@ -134,7 +134,10 @@
             font-family: 'Fira Code', monospace;
             font-size: 1em;
             flex-grow: 1;
+            width: 100%;
             outline: none;
+            caret-color: transparent;
+            padding: 0;
         }
         
         #command-input:disabled {
@@ -183,13 +186,34 @@
         }
 
         .cursor {
-            display: inline-block;
+            position: absolute;
+            top: 50%;
+            left: 0;
             width: 8px;
             height: 1.2em;
             background-color: var(--foreground);
             animation: blink 1s step-end infinite;
-            vertical-align: bottom;
-            margin-left: 2px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cursor-hidden {
+            opacity: 0;
+        }
+
+        .input-container {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-mirror {
+            position: absolute;
+            visibility: hidden;
+            white-space: pre;
+            font: inherit;
+            pointer-events: none;
+            padding: 0;
         }
 
         @keyframes blink {
@@ -213,8 +237,11 @@
             <div id="output"></div>
             <div class="prompt-line">
                 <span class="prompt">$&gt;</span>
-                <input type="text" id="command-input" autocomplete="off" autofocus>
-                <span id="cursor" class="cursor"></span>
+                <div class="input-container">
+                    <span id="input-mirror" class="input-mirror" aria-hidden="true"></span>
+                    <span id="cursor" class="cursor"></span>
+                    <input type="text" id="command-input" autocomplete="off" autofocus>
+                </div>
             </div>
         </div>
     </div>
@@ -227,11 +254,71 @@
             const terminalBody = document.getElementById('terminal-body');
             const cursor = document.getElementById('cursor');
             const promptLine = document.querySelector('.prompt-line');
+            const inputMirror = document.getElementById('input-mirror');
+
+            let isCursorLocked = false;
+
+            const updateCursorPosition = () => {
+                if (isCursorLocked) {
+                    return;
+                }
+
+                const isActive = document.activeElement === commandInput && !commandInput.disabled;
+                cursor.classList.toggle('cursor-hidden', !isActive);
+
+                if (!isActive) {
+                    return;
+                }
+
+                const selection = typeof commandInput.selectionStart === 'number'
+                    ? commandInput.selectionStart
+                    : commandInput.value.length;
+                const textBeforeCaret = commandInput.value.slice(0, selection) || '\u200b';
+
+                inputMirror.textContent = textBeforeCaret.replace(/ /g, '\u00a0');
+                cursor.style.left = `${inputMirror.offsetWidth}px`;
+            };
+
+            const scheduleCursorUpdate = () => window.requestAnimationFrame(updateCursorPosition);
+
+            const setCursorLock = (shouldLock) => {
+                isCursorLocked = shouldLock;
+                cursor.classList.toggle('cursor-hidden', shouldLock);
+                if (!shouldLock) {
+                    scheduleCursorUpdate();
+                }
+            };
+
+
+            ['input', 'keyup', 'keydown', 'click'].forEach((eventType) => {
+                commandInput.addEventListener(eventType, scheduleCursorUpdate);
+            });
+            commandInput.addEventListener('focus', scheduleCursorUpdate);
+            commandInput.addEventListener('blur', scheduleCursorUpdate);
+            window.addEventListener('resize', scheduleCursorUpdate);
 
             // --- State Management ---
             let commandHistory = [];
             let historyIndex = 0;
             let isMatrixRunning = false;
+
+            // --- Helpers ---
+            const escapeHtml = (value = '') => value.replace(/[&<>"']/g, (char) => {
+                switch (char) {
+                    case '&':
+                        return '&amp;';
+                    case '<':
+                        return '&lt;';
+                    case '>':
+                        return '&gt;';
+                    case '"':
+                        return '&quot;';
+                    case "'":
+                        return '&#39;';
+                    default:
+                        return char;
+                }
+            });
 
             // --- ASCII Art and Welcome Message ---
             const asciiArt = `<span class="ascii-art">
@@ -398,6 +485,8 @@
                 if (isMatrixRunning) return;
                 isMatrixRunning = true;
 
+                setCursorLock(true);
+
                 output.style.display = 'none';
                 promptLine.style.display = 'none';
 
@@ -452,8 +541,8 @@
                     await typeMessage(welcomeLine, welcomeMessage, 10); 
                     
                     commandInput.disabled = false;
-                    cursor.style.display = 'inline-block';
                     commandInput.focus();
+                    setCursorLock(false);
                     isMatrixRunning = false;
                 };
 
@@ -470,17 +559,19 @@
                 if (isMatrixRunning) return;
 
                 commandInput.disabled = true;
-                cursor.style.display = 'none';
+                setCursorLock(true);
 
                 const commandLine = document.createElement('div');
-                commandLine.innerHTML = `<span class="prompt">$&gt;</span><span class="output-command">${command}</span>`;
+                const sanitizedCommand = escapeHtml(command);
+                const normalizedCommand = command.toLowerCase();
+                commandLine.innerHTML = `<span class="prompt">$&gt;</span><span class="output-command">${sanitizedCommand}</span>`;
                 output.appendChild(commandLine);
 
                 if (command) commandHistory.push(command);
                 historyIndex = commandHistory.length;
                 commandInput.value = '';
 
-                if (command.toLowerCase() === 'matrix') {
+                if (normalizedCommand === 'matrix') {
                     startMatrixEffect();
                     return; 
                 }
@@ -491,16 +582,16 @@
                 let responseText;
                 let speed = 10;
 
-                if (command.toLowerCase() === 'clear') {
+                if (normalizedCommand === 'clear') {
                     output.innerHTML = '';
                     responseText = "Digite '<span class=\"output-command\">help</span>' para ver a lista de comandos disponíveis.";
-                } else if (commands[command.toLowerCase()]) {
-                    responseText = commands[command.toLowerCase()];
-                    if (command.toLowerCase() === 'help' || command.toLowerCase() === 'bemvindo') {
+                } else if (commands[normalizedCommand]) {
+                    responseText = commands[normalizedCommand];
+                    if (normalizedCommand === 'help' || normalizedCommand === 'bemvindo') {
                         speed = 5;
                     }
                 } else {
-                    responseText = `Comando não encontrado: <span class="highlight">${command}</span>. Digite '<span class="output-command">help</span>' para ver a lista de comandos.`;
+                    responseText = `Comando não encontrado: <span class="highlight">${sanitizedCommand}</span>. Digite '<span class="output-command">help</span>' para ver a lista de comandos.`;
                 }
 
                 if (responseText) {
@@ -509,8 +600,8 @@
                 }
 
                 commandInput.disabled = false;
-                cursor.style.display = 'inline-block';
                 commandInput.focus();
+                setCursorLock(false);
                 terminalBody.scrollTop = terminalBody.scrollHeight;
             }
 
@@ -524,22 +615,25 @@
                         historyIndex--;
                         commandInput.value = commandHistory[historyIndex];
                         commandInput.setSelectionRange(commandInput.value.length, commandInput.value.length);
+                        scheduleCursorUpdate();
                     }
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     if (historyIndex < commandHistory.length - 1) {
                         historyIndex++;
                         commandInput.value = commandHistory[historyIndex];
+                        scheduleCursorUpdate();
                     } else {
                         historyIndex = commandHistory.length;
                         commandInput.value = '';
+                        scheduleCursorUpdate();
                     }
                 }
             });
 
             async function init() {
                 commandInput.disabled = true;
-                cursor.style.display = 'none';
+                setCursorLock(true);
                 
                 const initialLine = document.createElement('div');
                 initialLine.classList.add('line', 'output-text');
@@ -547,8 +641,8 @@
                 await typeMessage(initialLine, welcomeMessage, 10); 
                 
                 commandInput.disabled = false;
-                cursor.style.display = 'inline-block';
                 commandInput.focus();
+                setCursorLock(false);
             }
 
             init();
