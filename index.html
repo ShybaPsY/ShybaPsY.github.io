@@ -94,9 +94,12 @@
         
         .matrix-canvas-local {
             position: fixed;
+            top: 0;
+            left: 0;
             display: block;
             background-color: var(--background);
-            z-index: 100;
+            z-index: 1;
+            pointer-events: none;
         }
 
         #terminal-body::-webkit-scrollbar {
@@ -253,7 +256,6 @@
             const commandInput = document.getElementById('command-input');
             const terminalBody = document.getElementById('terminal-body');
             const cursor = document.getElementById('cursor');
-            const promptLine = document.querySelector('.prompt-line');
             const inputMirror = document.getElementById('input-mirror');
 
             let isCursorLocked = false;
@@ -354,7 +356,7 @@
   <span class="output-command">download cv</span>    - Link para baixar meu currículo.
   <span class="output-command">clear</span>          - Limpa a tela.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
-  <span class="output-command">matrix</span>         - Ativa um easter egg.`,
+  <span class="output-command">matrix</span>         - Ativa um easter egg (use '<span class="output-command">clear</span>' para desativar).`,
                 sobre: `
   <span class="highlight">Sobre Mim</span>
   
@@ -480,84 +482,81 @@
 
             // --- MATRIX EFFECT ---
             let matrixAnimationId = null;
+            let matrixCanvas = null;
+            let matrixCleanup = null;
 
             function startMatrixEffect() {
-                if (isMatrixRunning) return;
+                if (isMatrixRunning) return false;
                 isMatrixRunning = true;
 
-                setCursorLock(true);
+                matrixCanvas = document.createElement('canvas');
+                matrixCanvas.classList.add('matrix-canvas-local');
+                document.body.appendChild(matrixCanvas); 
 
-                output.style.display = 'none';
-                promptLine.style.display = 'none';
-
-                const canvas = document.createElement('canvas');
-                canvas.classList.add('matrix-canvas-local');
-                document.body.appendChild(canvas); 
-                
-                const ctx = canvas.getContext('2d');
-                const characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                const ctx = matrixCanvas.getContext('2d');
+                const characters = '\u30a2\u30a1\u30ab\u30b5\u30bf\u30ca\u30cf\u30de\u30e4\u30e3\u30e9\u30ef\u30ac\u30b6\u30c0\u30d0\u30d1\u30a4\u30a3\u30ad\u30b7\u30c1\u30cb\u30d2\u30df\u30ea\u30f0\u30ae\u30b8\u30c2\u30d3\u30d4\u30a6\u30a5\u30af\u30b9\u30c4\u30cc\u30d5\u30e0\u30e6\u30e5\u30eb\u30b0\u30ba\u30d6\u30d7\u30a8\u30a7\u30b1\u30bb\u30c6\u30cd\u30d8\u30e1\u30ec\u30f1\u30b2\u30bc\u30c7\u30d9\u30da\u30aa\u30a9\u30b3\u30bd\u30c8\u30ce\u30db\u30e2\u30e8\u30e7\u30ed\u30f2\u30b4\u30be\u30c9\u30dc\u30dd\u30f4\u30c3\u30f3ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 const fontSize = 16;
-                let columns, drops;
+                let columns = 0;
+                let drops = [];
 
-                const setup = () => {
-                    const rect = terminalBody.getBoundingClientRect();
-                    canvas.style.top = `${rect.top}px`;
-                    canvas.style.left = `${rect.left}px`;
-                    canvas.width = rect.width;
-                    canvas.height = rect.height;
-                    columns = Math.floor(canvas.width / fontSize);
+                const handleResize = () => {
+                    matrixCanvas.width = window.innerWidth;
+                    matrixCanvas.height = window.innerHeight;
+                    columns = Math.floor(matrixCanvas.width / fontSize);
                     drops = Array(columns).fill(1);
                 };
 
-                const draw = () => {
-                    ctx.fillStyle = 'rgba(26, 27, 38, 0.05)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                let lastDraw = 0;
+                const frameInterval = 40;
+
+                const draw = (timestamp = 0) => {
+                    if (timestamp - lastDraw < frameInterval) {
+                        matrixAnimationId = requestAnimationFrame(draw);
+                        return;
+                    }
+                    lastDraw = timestamp;
+
+                    ctx.fillStyle = 'rgba(26, 27, 38, 0.06)';
+                    ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
                     ctx.fillStyle = '#0F0';
                     ctx.font = `${fontSize}px monospace`;
                     for (let i = 0; i < drops.length; i++) {
                         const text = characters[Math.floor(Math.random() * characters.length)];
                         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
                         drops[i]++;
                     }
                     matrixAnimationId = requestAnimationFrame(draw);
                 };
 
-                const stopEffect = async () => {
-                    if (!isMatrixRunning) return;
+                handleResize();
+                matrixAnimationId = requestAnimationFrame(draw);
+                window.addEventListener('resize', handleResize);
+
+                matrixCleanup = () => {
                     cancelAnimationFrame(matrixAnimationId);
-                    window.removeEventListener('resize', setup);
-                    window.removeEventListener('keydown', stopEffectWrapper, { capture: true });
-                    window.removeEventListener('click', stopEffectWrapper, { capture: true });
-                    if (canvas.parentNode) canvas.remove();
-                    
-                    output.style.display = 'block';
-                    promptLine.style.display = 'flex';
-                    
-                    output.innerHTML = ''; 
-                    const welcomeLine = document.createElement('div');
-                    welcomeLine.classList.add('line', 'output-text');
-                    output.appendChild(welcomeLine);
-                    await typeMessage(welcomeLine, welcomeMessage, 10); 
-                    
-                    commandInput.disabled = false;
-                    commandInput.focus();
-                    setCursorLock(false);
+                    window.removeEventListener('resize', handleResize);
+                    if (matrixCanvas && matrixCanvas.parentNode) matrixCanvas.remove();
+                    matrixCanvas = null;
+                    matrixAnimationId = null;
                     isMatrixRunning = false;
                 };
 
-                const stopEffectWrapper = () => stopEffect();
-                setup();
-                draw();
-                window.addEventListener('resize', setup);
-                window.addEventListener('keydown', stopEffectWrapper, { once: true, capture: true });
-                window.addEventListener('click', stopEffectWrapper, { once: true, capture: true });
+                return true;
+            }
+
+            function stopMatrixEffect() {
+                if (!isMatrixRunning) return;
+                if (typeof matrixCleanup === 'function') {
+                    matrixCleanup();
+                    matrixCleanup = null;
+                } else {
+                    isMatrixRunning = false;
+                }
             }
 
             // --- COMMAND EXECUTION LOGIC ---
             async function executeCommand(command) {
-                if (isMatrixRunning) return;
-
                 commandInput.disabled = true;
                 setCursorLock(true);
 
@@ -572,7 +571,20 @@
                 commandInput.value = '';
 
                 if (normalizedCommand === 'matrix') {
-                    startMatrixEffect();
+                    const matrixStarted = startMatrixEffect();
+
+                    const infoLine = document.createElement('div');
+                    infoLine.classList.add('line', 'output-text');
+                    infoLine.innerHTML = matrixStarted
+                        ? "<span class=\"highlight\">Efeito Matrix ativado.</span> Digite '<span class=\"output-command\">clear</span>' para desativar."
+                        : "<span class=\"comment\">Efeito Matrix já está ativo. Use '<span class=\"output-command\">clear</span>' para desativar.</span>";
+                    output.appendChild(infoLine);
+
+                    commandInput.disabled = false;
+                    commandInput.focus();
+                    setCursorLock(false);
+                    scheduleCursorUpdate();
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
                     return; 
                 }
 
@@ -583,8 +595,16 @@
                 let speed = 10;
 
                 if (normalizedCommand === 'clear') {
+                    const matrixWasRunning = isMatrixRunning;
+                    if (matrixWasRunning) {
+                        stopMatrixEffect();
+                    }
+
                     output.innerHTML = '';
                     responseText = "Digite '<span class=\"output-command\">help</span>' para ver a lista de comandos disponíveis.";
+                    if (matrixWasRunning) {
+                        responseText += "<br><span class=\"comment\">Efeito Matrix desativado.</span>";
+                    }
                 } else if (commands[normalizedCommand]) {
                     responseText = commands[normalizedCommand];
                     if (normalizedCommand === 'help' || normalizedCommand === 'bemvindo') {
@@ -606,7 +626,6 @@
             }
 
             commandInput.addEventListener('keydown', async (e) => {
-                if (isMatrixRunning) return;
                 if (e.key === 'Enter' && !commandInput.disabled) {
                     await executeCommand(commandInput.value);
                 } else if (e.key === 'ArrowUp') {
