@@ -593,19 +593,34 @@
 
             // --- TYPING EFFECT FUNCTIONS ---
             function typeText(targetElement, text, speed) {
+                // Continua "digitando" mesmo quando a aba perde foco
+                // usando o tempo decorrido para fazer catch‑up ao voltar.
                 return new Promise(resolve => {
                     let i = 0;
-                    function type() {
-                        if (i < text.length) {
+                    const start = performance.now();
+
+                    function tick() {
+                        const now = performance.now();
+                        const elapsed = now - start;
+                        const expectedCount = Math.floor(elapsed / speed);
+
+                        // Acrescenta os caracteres que deveriam ter sido
+                        // exibidos desde o início (catch-up ao retornar).
+                        while (i < Math.min(expectedCount, text.length)) {
                             targetElement.appendChild(document.createTextNode(text[i]));
                             i++;
-                            terminalBody.scrollTop = terminalBody.scrollHeight;
-                            setTimeout(type, speed);
+                        }
+
+                        terminalBody.scrollTop = terminalBody.scrollHeight;
+
+                        if (i < text.length) {
+                            setTimeout(tick, speed);
                         } else {
                             resolve();
                         }
                     }
-                    type();
+
+                    tick();
                 });
             }
 
