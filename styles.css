@@ -1,0 +1,438 @@
+/* ================================================
+   TERMINAL PORTFOLIO - STYLES
+   Gabriel Mendes Lopes
+   ================================================ */
+
+/* === THEME DEFINITIONS === */
+
+/* Tokyo Night (Default) */
+:root {
+    --background: #1a1b26;
+    --foreground: #a9b1d6;
+    --comment: #565f89;
+    --green: #9ece6a;
+    --yellow: #e0af68;
+    --blue: #7aa2f7;
+    --magenta: #bb9af7;
+    --cyan: #7dcfff;
+    --red: #f7768e;
+}
+
+/* Dracula */
+[data-theme="dracula"] {
+    --background: #282a36;
+    --foreground: #f8f8f2;
+    --comment: #6272a4;
+    --green: #50fa7b;
+    --yellow: #f1fa8c;
+    --blue: #bd93f9;
+    --magenta: #ff79c6;
+    --cyan: #8be9fd;
+    --red: #ff5555;
+}
+
+/* Gruvbox */
+[data-theme="gruvbox"] {
+    --background: #282828;
+    --foreground: #ebdbb2;
+    --comment: #928374;
+    --green: #b8bb26;
+    --yellow: #fabd2f;
+    --blue: #83a598;
+    --magenta: #d3869b;
+    --cyan: #8ec07c;
+    --red: #fb4934;
+}
+
+/* Nord */
+[data-theme="nord"] {
+    --background: #2e3440;
+    --foreground: #d8dee9;
+    --comment: #4c566a;
+    --green: #a3be8c;
+    --yellow: #ebcb8b;
+    --blue: #81a1c1;
+    --magenta: #b48ead;
+    --cyan: #88c0d0;
+    --red: #bf616a;
+}
+
+/* Cyberpunk */
+[data-theme="cyberpunk"] {
+    --background: #0a0e14;
+    --foreground: #b3b1ad;
+    --comment: #626a73;
+    --green: #91b362;
+    --yellow: #f9af4f;
+    --blue: #53bdfa;
+    --magenta: #f07178;
+    --cyan: #95e6cb;
+    --red: #ea6c73;
+}
+
+/* Matrix */
+[data-theme="matrix"] {
+    --background: #0d0d0d;
+    --foreground: #00ff00;
+    --comment: #008800;
+    --green: #00ff00;
+    --yellow: #33ff33;
+    --blue: #00cc00;
+    --magenta: #00ff66;
+    --cyan: #66ff66;
+    --red: #ff0000;
+}
+
+/* Catppuccin Mocha */
+[data-theme="catppuccin"] {
+    --background: #1e1e2e;
+    --foreground: #cdd6f4;
+    --comment: #6c7086;
+    --green: #a6e3a1;
+    --yellow: #f9e2af;
+    --blue: #89b4fa;
+    --magenta: #f5c2e7;
+    --cyan: #94e2d5;
+    --red: #f38ba8;
+}
+
+/* Theme transition */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* === BASE STYLES === */
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+}
+
+/* === TERMINAL STYLES === */
+
+#terminal {
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    max-height: 600px;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+}
+
+#terminal-header {
+    background-color: var(--comment);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--background);
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+}
+
+#terminal-header.dragging {
+    cursor: grabbing;
+}
+
+body.dragging-terminal {
+    user-select: none;
+}
+
+#terminal-header .buttons {
+    display: flex;
+    gap: 8px;
+}
+
+#terminal-header .button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.button.red { background-color: #ff5f56; }
+.button.yellow { background-color: #ffbd2e; }
+.button.green { background-color: #27c93f; }
+
+#terminal-body {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    word-wrap: break-word;
+    position: relative;
+}
+
+#terminal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#terminal-body::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+#terminal-body::-webkit-scrollbar-thumb {
+    background-color: var(--comment);
+    border-radius: 4px;
+}
+
+#terminal-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--foreground);
+}
+
+/* === INPUT STYLES === */
+
+.line {
+    line-height: 1.5;
+}
+
+.prompt-line {
+    display: flex;
+    align-items: center;
+}
+
+.prompt {
+    color: var(--green);
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+#command-input {
+    background: transparent;
+    border: none;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 1em;
+    flex-grow: 1;
+    width: 100%;
+    outline: none;
+    caret-color: transparent;
+    padding: 0;
+}
+
+#command-input:disabled {
+    background-color: transparent;
+}
+
+.input-container {
+    position: relative;
+    flex: 1;
+}
+
+.input-mirror {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font: inherit;
+    pointer-events: none;
+    padding: 0;
+}
+
+.cursor {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 1.2em;
+    background-color: var(--foreground);
+    animation: blink 1s step-end infinite;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cursor-hidden {
+    opacity: 0;
+}
+
+@keyframes blink {
+    from, to { background-color: transparent; }
+    50% { background-color: var(--foreground); }
+}
+
+/* === TEXT STYLES === */
+
+a {
+    color: var(--cyan);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.output-command {
+    color: var(--magenta);
+}
+
+.output-text {
+    white-space: pre-wrap;
+}
+
+.highlight {
+    color: var(--yellow);
+    font-weight: bold;
+}
+
+.title-blue {
+    color: var(--blue);
+}
+
+.detail-green {
+    color: var(--green);
+}
+
+.detail-cyan {
+    color: var(--cyan);
+}
+
+.comment {
+    color: var(--comment);
+}
+
+.error {
+    color: var(--red);
+}
+
+.ascii-art {
+    color: var(--green);
+    font-weight: bold;
+    font-size: 0.8em;
+    line-height: 1.2;
+    white-space: pre;
+}
+
+/* === MATRIX EFFECT === */
+
+.matrix-canvas-local {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: block;
+    background-color: var(--background);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* === RESIZE HANDLES === */
+
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+}
+
+.resize-handle-n {
+    top: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: n-resize;
+}
+
+.resize-handle-s {
+    bottom: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: s-resize;
+}
+
+.resize-handle-e {
+    right: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: e-resize;
+}
+
+.resize-handle-w {
+    left: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: w-resize;
+}
+
+.resize-handle-ne {
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: ne-resize;
+}
+
+.resize-handle-nw {
+    top: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+}
+
+.resize-handle-se {
+    bottom: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: se-resize;
+}
+
+.resize-handle-sw {
+    bottom: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;
+}
+
+body.resizing-terminal {
+    user-select: none;
+}
+
+body.resizing-terminal * {
+    cursor: inherit !important;
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 600px) {
+    #terminal {
+        height: 95vh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    .ascii-art {
+        font-size: 0.5em;
+    }
+}
