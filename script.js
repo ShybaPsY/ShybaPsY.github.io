@@ -369,6 +369,175 @@ document.addEventListener('DOMContentLoaded', () => {
   Digite '<span class="output-command">help</span>' para ver a lista de comandos disponíveis.
             `;
 
+    // === API INTEGRATIONS ===
+
+    // GitHub API
+    const GitHubAPI = {
+        username: 'ShybaPsY',
+        cache: {
+            stats: null,
+            timestamp: 0
+        },
+        cacheTime: 5 * 60 * 1000, // 5 minutes
+
+        async fetchStats() {
+            // Check cache first
+            const now = Date.now();
+            if (this.cache.stats && (now - this.cache.timestamp < this.cacheTime)) {
+                return this.cache.stats;
+            }
+
+            try {
+                // Fetch all repos to calculate statistics
+                const reposResponse = await fetch(`https://api.github.com/users/${this.username}/repos?per_page=100`);
+                if (!reposResponse.ok) throw new Error('Failed to fetch repos');
+                const repos = await reposResponse.json();
+
+                // Calculate total stars
+                const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+
+                // Fetch language data for each repository
+                const languages = {};
+                let totalBytes = 0;
+
+                for (const repo of repos) {
+                    try {
+                        // Fetch actual language bytes from GitHub API
+                        const langResponse = await fetch(`https://api.github.com/repos/${this.username}/${repo.name}/languages`);
+                        if (langResponse.ok) {
+                            const langData = await langResponse.json();
+
+                            // Aggregate language bytes
+                            for (const [lang, bytes] of Object.entries(langData)) {
+                                languages[lang] = (languages[lang] || 0) + bytes;
+                                totalBytes += bytes;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to fetch languages for ${repo.name}:`, err);
+                    }
+                }
+
+                // Calculate percentages and sort
+                const languageStats = Object.entries(languages)
+                    .map(([lang, bytes]) => ({
+                        name: lang,
+                        percentage: ((bytes / totalBytes) * 100).toFixed(2)
+                    }))
+                    .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
+                    .slice(0, 6); // Top 6 languages
+
+                // Fetch user data for additional stats
+                const userResponse = await fetch(`https://api.github.com/users/${this.username}`);
+                if (!userResponse.ok) throw new Error('Failed to fetch user');
+                const userData = await userResponse.json();
+
+                const stats = {
+                    totalStars,
+                    totalRepos: userData.public_repos,
+                    languages: languageStats
+                };
+
+                // Update cache
+                this.cache.stats = stats;
+                this.cache.timestamp = now;
+
+                return stats;
+            } catch (error) {
+                console.error('GitHub API error:', error);
+                return null;
+            }
+        },
+
+        formatStats(stats) {
+            if (!stats) {
+                return '<span class="error">Não foi possível carregar as estatísticas do GitHub.</span>\n\n<span class="comment">Verifique sua conexão com a internet.</span>';
+            }
+
+            let output = '<span class="highlight">Estatísticas do GitHub de Gabriel Lopes:</span>\n\n';
+
+            // Statistics section
+            output += '<span class="title-blue">📊 Estatísticas:</span>\n';
+            output += `  <span class="detail-cyan">⭐ Total de estrelas:</span>       <span class="detail-green">${stats.totalStars}</span>\n`;
+            output += `  <span class="detail-cyan">📁 Total de repositórios:</span>   <span class="detail-green">${stats.totalRepos}</span>\n\n`;
+
+            // Technologies section
+            output += '<span class="title-blue">💻 Tecnologias:</span>\n';
+            stats.languages.forEach(lang => {
+                const barLength = Math.round(parseFloat(lang.percentage) / 5); // Scale to fit terminal
+                const bar = '█'.repeat(barLength);
+                output += `  <span class="detail-cyan">${lang.name}</span> ${lang.percentage}% ${bar}\n`;
+            });
+
+            output += `\n<span class="comment">Veja mais em: <a href="https://github.com/${this.username}" target="_blank">github.com/${this.username}</a></span>`;
+
+            return output;
+        }
+    };
+
+    // Quote API
+    const QuoteAPI = {
+        cache: {
+            quote: null,
+            timestamp: 0
+        },
+        cacheTime: 60 * 1000, // 1 minute
+
+        // Fallback quotes in case API fails
+        fallbackQuotes: [
+            { text: "Talk is cheap. Show me the code.", author: "Linus Torvalds" },
+            { text: "First, solve the problem. Then, write the code.", author: "John Johnson" },
+            { text: "Code is like humor. When you have to explain it, it's bad.", author: "Cory House" },
+            { text: "Make it work, make it right, make it fast.", author: "Kent Beck" },
+            { text: "Simplicity is the soul of efficiency.", author: "Austin Freeman" },
+            { text: "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.", author: "Martin Fowler" },
+            { text: "Experience is the name everyone gives to their mistakes.", author: "Oscar Wilde" },
+            { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Harold Abelson" },
+            { text: "The best error message is the one that never shows up.", author: "Thomas Fuchs" },
+            { text: "It's not a bug – it's an undocumented feature.", author: "Anonymous" }
+        ],
+
+        async fetch() {
+            // Check cache first
+            const now = Date.now();
+            if (this.cache.quote && (now - this.cache.timestamp < this.cacheTime)) {
+                return this.cache.quote;
+            }
+
+            try {
+                const response = await fetch('https://api.quotable.io/random?tags=technology,famous-quotes');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch quote');
+                }
+                const data = await response.json();
+
+                const quote = {
+                    text: data.content,
+                    author: data.author
+                };
+
+                // Update cache
+                this.cache.quote = quote;
+                this.cache.timestamp = now;
+
+                return quote;
+            } catch (error) {
+                console.error('Quote API error:', error);
+                // Return random fallback quote
+                return this.fallbackQuotes[Math.floor(Math.random() * this.fallbackQuotes.length)];
+            }
+        },
+
+        format(quote) {
+            return `
+  <span class="detail-cyan">💭 Quote of the Moment:</span>
+
+  <span class="highlight">"${quote.text}"</span>
+
+  <span class="comment">— ${quote.author}</span>`;
+        }
+    };
+
     // === COMMANDS OBJECT ===
     const commands = {
         help: `
@@ -382,12 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="output-command">cursos</span>         - Exibe meus cursos e certificações.
   <span class="output-command">idiomas</span>        - Lista os idiomas que eu falo.
   <span class="output-command">contato</span>        - Exibe minhas informações de contato.
+  <span class="output-command">github</span>         - Mostra minhas estatísticas do GitHub.
   <span class="output-command">download cv</span>    - Link para baixar meu currículo.
-
-  <span class="title-blue">Exploração:</span>
-  <span class="output-command">ls</span>             - Lista arquivos e diretórios disponíveis.
-  <span class="output-command">tree</span>           - Mostra estrutura em árvore do portfolio.
-  <span class="output-command">neofetch</span>       - Informações do sistema (estilo Linux).
 
   <span class="title-blue">Customization:</span>
   <span class="output-command">themes</span>         - Lista os temas disponíveis.
@@ -396,12 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="title-blue">Utilities:</span>
   <span class="output-command">clear</span>          - Limpa a tela.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
-  <span class="output-command">secret</span>         - Descubra comandos escondidos.
-
-  <span class="title-blue">Tips:</span>
-  <span class="detail-green">Tab</span>            - Autocompleta comandos e temas.
-  <span class="detail-green">↑/↓</span>            - Navega no histórico de comandos.
-  <span class="comment">Aliases: about, cls, cv, contact, projects, exp, ?, etc.</span>`,
+  <span class="output-command">quote</span>          - Exibe uma citação inspiradora sobre programação.
+  <span class="output-command">extras</span>         - Comandos extras e exploração.`,
 
         sobre: `
   <span class="highlight">Sobre Mim</span>
@@ -489,6 +650,26 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="title-blue">Link:</span> <a href="Currículo - Gabriel Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
 
         bemvindo: welcomeMessage,
+
+        extras: `
+  <span class="highlight">Comandos Extras:</span>
+
+  <span class="title-blue">Exploração:</span>
+  <span class="output-command">ls</span>             - Lista arquivos e diretórios disponíveis.
+  <span class="output-command">tree</span>           - Mostra estrutura em árvore do portfolio.
+  <span class="output-command">neofetch</span>       - Informações do sistema (estilo Linux).
+
+  <span class="title-blue">Easter Eggs:</span>
+  <span class="output-command">secret</span>         - Descubra comandos escondidos.
+  <span class="output-command">coffee</span>         - Pegue um café virtual.
+  <span class="output-command">sudo</span>           - Tente obter permissões de root.
+  <span class="output-command">hack</span>           - Hackeie o mainframe (simulação).
+  <span class="output-command">42</span>             - A resposta definitiva.
+  <span class="output-command">vim</span>            - Entre no editor Vim.
+  <span class="output-command">sl</span>             - Locomotive ASCII.
+  <span class="output-command">matrix</span>         - Efeito Matrix no fundo.
+
+  <span class="comment">Digite qualquer comando acima para explorá-lo!</span>`,
 
         // === File System Style Commands ===
         ls: `
@@ -624,16 +805,22 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         secret: `
   <span class="highlight">🎉 Você encontrou um comando secreto!</span>
 
-  <span class="detail-cyan">Easter eggs disponíveis:</span>
-  - <span class="output-command">sudo</span> - Tente ser root
-  - <span class="output-command">coffee</span> - Pegue um café
-  - <span class="output-command">hack</span> - Hackeie o mainframe
-  - <span class="output-command">42</span> - A resposta definitiva
-  - <span class="output-command">vim</span> - Entre no Vim
-  - <span class="output-command">sl</span> - Trem ASCII
-  - <span class="output-command">matrix</span> - Efeito Matrix
+  <span class="comment">Para ver todos os easter eggs e comandos de exploração, digite:</span>
 
-  <span class="comment">Continue explorando para achar mais!</span>`,
+  <span class="output-command">extras</span>
+
+  <span class="comment">Continue explorando para achar mais surpresas! 🔍</span>`,
+
+        // === API Commands ===
+        github: async function() {
+            const stats = await GitHubAPI.fetchStats();
+            return GitHubAPI.formatStats(stats);
+        },
+
+        quote: async function() {
+            const quote = await QuoteAPI.fetch();
+            return QuoteAPI.format(quote);
+        },
     };
 
     // === COMMAND ALIASES ===
@@ -677,6 +864,10 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         // Theme aliases
         'tema': 'theme',
         'temas': 'themes',
+        // Extras aliases
+        'easter': 'extras',
+        'easteregg': 'extras',
+        'fun': 'extras',
     };
 
     // === TAB COMPLETION ===
