@@ -56,6 +56,759 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // === WINDOW MANAGER ===
+    const WindowManager = {
+        windows: {},
+        highestZIndex: 10,
+
+        createWindow(appId, title, width, height, content, resizable = true) {
+            if (this.windows[appId]) {
+                this.focusWindow(appId);
+                return this.windows[appId];
+            }
+
+            const windowEl = document.createElement('div');
+            windowEl.className = 'app-window';
+            windowEl.id = `window-${appId}`;
+            windowEl.style.width = `${width}px`;
+            windowEl.style.height = `${height}px`;
+            windowEl.style.left = `${150 + Object.keys(this.windows).length * 30}px`;
+            windowEl.style.top = `${80 + Object.keys(this.windows).length * 30}px`;
+            windowEl.style.zIndex = ++this.highestZIndex;
+
+            const resizeHandles = resizable ? `
+                <div class="app-resize-handle app-resize-e" data-resize="e"></div>
+                <div class="app-resize-handle app-resize-s" data-resize="s"></div>
+                <div class="app-resize-handle app-resize-se" data-resize="se"></div>
+            ` : '';
+
+            windowEl.innerHTML = `
+                ${resizeHandles}
+                <div class="app-window-header">
+                    <span class="app-window-title">${title}</span>
+                    <div class="app-window-close"></div>
+                </div>
+                <div class="app-window-body">${content}</div>
+            `;
+
+            document.getElementById('app-windows').appendChild(windowEl);
+            this.setupWindowDrag(windowEl);
+            if (resizable) this.setupWindowResize(windowEl);
+
+            windowEl.querySelector('.app-window-close').addEventListener('click', () => {
+                this.closeWindow(appId);
+            });
+
+            windowEl.addEventListener('mousedown', () => {
+                this.focusWindow(appId);
+            });
+
+            this.windows[appId] = windowEl;
+            this.focusWindow(appId);
+            return windowEl;
+        },
+
+        setupWindowDrag(windowEl) {
+            const header = windowEl.querySelector('.app-window-header');
+            let isDragging = false;
+            let offsetX = 0, offsetY = 0;
+
+            const startDrag = (e) => {
+                if (e.target.classList.contains('app-window-close')) return;
+                isDragging = true;
+                const rect = windowEl.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                header.classList.add('dragging');
+            };
+
+            const drag = (e) => {
+                if (!isDragging) return;
+                windowEl.style.left = `${e.clientX - offsetX}px`;
+                windowEl.style.top = `${e.clientY - offsetY}px`;
+            };
+
+            const stopDrag = () => {
+                isDragging = false;
+                header.classList.remove('dragging');
+            };
+
+            header.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        },
+
+        setupWindowResize(windowEl) {
+            const MIN_WIDTH = 250;
+            const MIN_HEIGHT = 200;
+            let isResizing = false;
+            let resizeDir = null;
+            let startX, startY, startWidth, startHeight;
+
+            const startResize = (e) => {
+                e.stopPropagation();
+                isResizing = true;
+                resizeDir = e.target.dataset.resize;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = windowEl.offsetWidth;
+                startHeight = windowEl.offsetHeight;
+                document.body.style.cursor = e.target.style.cursor || 'se-resize';
+                document.body.style.userSelect = 'none';
+            };
+
+            const doResize = (e) => {
+                if (!isResizing) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                if (resizeDir.includes('e')) {
+                    windowEl.style.width = `${Math.max(MIN_WIDTH, startWidth + dx)}px`;
+                }
+                if (resizeDir.includes('s')) {
+                    windowEl.style.height = `${Math.max(MIN_HEIGHT, startHeight + dy)}px`;
+                }
+            };
+
+            const stopResize = () => {
+                isResizing = false;
+                resizeDir = null;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            };
+
+            windowEl.querySelectorAll('.app-resize-handle').forEach(handle => {
+                handle.addEventListener('mousedown', startResize);
+            });
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+        },
+
+        focusWindow(appId) {
+            if (!this.windows[appId]) return;
+            this.windows[appId].style.zIndex = ++this.highestZIndex;
+        },
+
+        closeWindow(appId) {
+            const windowEl = this.windows[appId];
+            if (!windowEl) return;
+
+            if (appId === 'music') MusicApp.stop();
+            if (appId === 'player') ASCIIPlayerApp.stop();
+            if (appId === 'games') GamesApp.cleanup();
+
+            windowEl.remove();
+            delete this.windows[appId];
+        }
+    };
+
+    // === THEME PICKER APP ===
+    const ThemePickerApp = {
+        themeColors: {
+            'tokyo-night': ['#1a1b26', '#9ece6a', '#7aa2f7', '#bb9af7', '#f7768e'],
+            'dracula': ['#282a36', '#50fa7b', '#bd93f9', '#ff79c6', '#ff5555'],
+            'gruvbox': ['#282828', '#b8bb26', '#83a598', '#d3869b', '#fb4934'],
+            'nord': ['#2e3440', '#a3be8c', '#81a1c1', '#b48ead', '#bf616a'],
+            'cyberpunk': ['#0a0e14', '#91b362', '#53bdfa', '#f07178', '#ea6c73'],
+            'matrix': ['#0d0d0d', '#00ff00', '#00cc00', '#00ff66', '#ff0000'],
+            'catppuccin': ['#1e1e2e', '#a6e3a1', '#89b4fa', '#f5c2e7', '#f38ba8']
+        },
+
+        open() {
+            let content = '<div class="theme-grid">';
+            for (const [key, theme] of Object.entries(ThemeManager.themes)) {
+                const colors = this.themeColors[key];
+                const isActive = key === ThemeManager.current ? 'active' : '';
+                content += `
+                    <div class="theme-card ${isActive}" data-theme="${key}">
+                        <div class="theme-card-name">${theme.name}</div>
+                        <div class="theme-card-colors">
+                            ${colors.map(c => `<div class="theme-color-swatch" style="background-color: ${c}"></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            content += '</div>';
+
+            const windowEl = WindowManager.createWindow('themes', 'Theme Picker', 320, 380, content);
+
+            windowEl.querySelectorAll('.theme-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const themeName = card.dataset.theme;
+                    ThemeManager.apply(themeName);
+                    windowEl.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                });
+            });
+        }
+    };
+
+    // === ASCII PLAYER APP ===
+    const ASCIIPlayerApp = {
+        animationInterval: null,
+        frameIndex: 0,
+        currentAnimation: null,
+        resizeObserver: null,
+        cols: 40,
+        rows: 15,
+
+        getGridSize() {
+            const display = document.getElementById('ascii-display');
+            if (!display) return { cols: 40, rows: 15 };
+
+            const charWidth = 8.4;  // Approximate width of monospace char at 14px
+            const charHeight = 15.4; // Approximate height with line-height 1.1
+
+            const availableWidth = display.clientWidth - 24;  // minus padding
+            const availableHeight = display.clientHeight - 24;
+
+            const cols = Math.max(20, Math.floor(availableWidth / charWidth));
+            const rows = Math.max(8, Math.floor(availableHeight / charHeight));
+
+            return { cols, rows };
+        },
+
+        generateCubeFrames(cols, rows) {
+            const frames = [];
+            for (let angle = 0; angle < 360; angle += 15) {
+                const rad = angle * Math.PI / 180;
+                let frame = '';
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const dx = (x - cols/2) / (cols/4);
+                        const dy = (y - rows/2) / (rows/4);
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        const wave = Math.sin(dist * 2 - rad * 2);
+                        const chars = ' .:-=+*#%@';
+                        frame += chars[Math.floor((wave + 1) * 4.5)];
+                    }
+                    frame += '\n';
+                }
+                frames.push(frame);
+            }
+            return frames;
+        },
+
+        generateWaveFrames(cols, rows) {
+            const frames = [];
+            for (let t = 0; t < 20; t++) {
+                let frame = '';
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const wave = Math.sin(x * 0.2 + t * 0.5) * (rows/2 - 1) + rows/2;
+                        frame += y > wave ? '~' : ' ';
+                    }
+                    frame += '\n';
+                }
+                frames.push(frame);
+            }
+            return frames;
+        },
+
+        generateFireFrames(cols, rows) {
+            const frames = [];
+            const chars = ' .:-=+*#%@';
+            for (let f = 0; f < 15; f++) {
+                let frame = '';
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const intensity = Math.random() * (rows - y) / rows;
+                        frame += chars[Math.min(Math.floor(intensity * 9), 9)];
+                    }
+                    frame += '\n';
+                }
+                frames.push(frame);
+            }
+            return frames;
+        },
+
+        generateBallFrames(cols, rows) {
+            const frames = [];
+            for (let i = 0; i < 20; i++) {
+                const x = Math.floor(Math.abs(Math.sin(i * 0.3)) * (cols - 1));
+                const y = Math.floor(Math.abs(Math.sin(i * 0.5)) * (rows - 2));
+                let frame = '';
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if (row === y && col === x) frame += 'O';
+                        else if (row === rows - 1) frame += '_';
+                        else frame += ' ';
+                    }
+                    frame += '\n';
+                }
+                frames.push(frame);
+            }
+            return frames;
+        },
+
+        generateFrames(animName) {
+            const { cols, rows } = this.getGridSize();
+            this.cols = cols;
+            this.rows = rows;
+
+            switch(animName) {
+                case 'cube': return this.generateCubeFrames(cols, rows);
+                case 'wave': return this.generateWaveFrames(cols, rows);
+                case 'fire': return this.generateFireFrames(cols, rows);
+                case 'ball': return this.generateBallFrames(cols, rows);
+                default: return [];
+            }
+        },
+
+        open() {
+            const content = `
+                <div class="ascii-player">
+                    <div class="ascii-display" id="ascii-display">Select an animation</div>
+                    <div class="ascii-controls">
+                        <button class="ascii-btn" data-anim="cube">3D Cube</button>
+                        <button class="ascii-btn" data-anim="wave">Wave</button>
+                        <button class="ascii-btn" data-anim="fire">Fire</button>
+                        <button class="ascii-btn" data-anim="ball">Ball</button>
+                        <button class="ascii-btn" data-anim="stop">Stop</button>
+                    </div>
+                </div>
+            `;
+
+            const windowEl = WindowManager.createWindow('player', 'ASCII Video Player', 400, 350, content);
+
+            windowEl.querySelectorAll('.ascii-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const anim = btn.dataset.anim;
+                    if (anim === 'stop') {
+                        this.stop();
+                    } else {
+                        this.play(anim);
+                    }
+                    windowEl.querySelectorAll('.ascii-btn').forEach(b => b.classList.remove('active'));
+                    if (anim !== 'stop') btn.classList.add('active');
+                });
+            });
+
+            // Setup resize observer to regenerate frames when window is resized
+            const display = document.getElementById('ascii-display');
+            if (display && window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(() => {
+                    if (this.currentAnimation && this.animationInterval) {
+                        this.play(this.currentAnimation);
+                    }
+                });
+                this.resizeObserver.observe(display);
+            }
+        },
+
+        play(animName) {
+            this.stop(true); // Don't clear currentAnimation
+            this.currentAnimation = animName;
+            this.frameIndex = 0;
+            const display = document.getElementById('ascii-display');
+            if (!display) return;
+
+            const frames = this.generateFrames(animName);
+            this.animationInterval = setInterval(() => {
+                if (!document.getElementById('ascii-display')) {
+                    this.stop();
+                    return;
+                }
+                display.textContent = frames[this.frameIndex];
+                this.frameIndex = (this.frameIndex + 1) % frames.length;
+            }, 100);
+        },
+
+        stop(keepAnimation = false) {
+            if (this.animationInterval) {
+                clearInterval(this.animationInterval);
+                this.animationInterval = null;
+            }
+            if (!keepAnimation) {
+                this.currentAnimation = null;
+            }
+            const display = document.getElementById('ascii-display');
+            if (display && !keepAnimation) display.textContent = 'Select an animation';
+            if (this.resizeObserver && !keepAnimation) {
+                this.resizeObserver.disconnect();
+                this.resizeObserver = null;
+            }
+        }
+    };
+
+    // === MUSIC APP ===
+    const MusicApp = {
+        audio: null,
+        isPlaying: false,
+        volume: 0.5,
+        visualizerInterval: null,
+        currentStation: 0,
+
+        stations: [
+            { name: 'Lofi Girl', url: 'https://boxradio-edge-00.streamafrica.net/lofi' },
+            { name: 'Chillofi Radio', url: 'https://azc.rdstream-5677.dez.ovh/listen/chillofi/radio.mp3' },
+            { name: 'FLUX FM ChillHop', url: 'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/' },
+            { name: 'bigFM LoFi Focus', url: 'https://audiotainment-sw.streamabc.net/atsw-lofifocus-mp3-128-3757575' },
+            { name: 'Lofi 24/7', url: 'http://usa9.fastcast4u.com/proxy/jamz?mp=/1' }
+        ],
+
+        open() {
+            const bars = Array(16).fill(0).map(() => '<div class="visualizer-bar" style="height: 4px;"></div>').join('');
+            const stationOptions = this.stations.map((s, i) =>
+                `<option value="${i}"${i === this.currentStation ? ' selected' : ''}>${s.name}</option>`
+            ).join('');
+
+            const content = `
+                <div class="music-player">
+                    <div class="music-visualizer" id="music-visualizer">${bars}</div>
+                    <div class="music-station">
+                        <select id="station-select" class="station-select">${stationOptions}</select>
+                    </div>
+                    <div class="music-info" id="music-status">Select station & press Play</div>
+                    <div class="music-controls">
+                        <button class="music-btn" id="music-play-btn">Play</button>
+                        <div class="volume-control">
+                            <span>Vol:</span>
+                            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const windowEl = WindowManager.createWindow('music', 'Lofi Radio', 320, 250, content);
+
+            const playBtn = windowEl.querySelector('#music-play-btn');
+            const volumeSlider = windowEl.querySelector('#volume-slider');
+            const stationSelect = windowEl.querySelector('#station-select');
+
+            playBtn.addEventListener('click', () => {
+                if (this.isPlaying) {
+                    this.stop();
+                    playBtn.textContent = 'Play';
+                    playBtn.classList.remove('playing');
+                } else {
+                    this.play();
+                    playBtn.textContent = 'Pause';
+                    playBtn.classList.add('playing');
+                }
+            });
+
+            volumeSlider.addEventListener('input', (e) => {
+                this.volume = e.target.value / 100;
+                if (this.audio) this.audio.volume = this.volume;
+            });
+
+            stationSelect.addEventListener('change', (e) => {
+                this.currentStation = parseInt(e.target.value);
+                if (this.isPlaying) {
+                    this.stop();
+                    this.play();
+                    playBtn.textContent = 'Pause';
+                    playBtn.classList.add('playing');
+                }
+            });
+        },
+
+        play() {
+            if (this.isPlaying) return;
+
+            const station = this.stations[this.currentStation];
+            const statusEl = document.getElementById('music-status');
+
+            if (statusEl) statusEl.textContent = 'Connecting...';
+
+            this.audio = new Audio(station.url);
+            this.audio.volume = this.volume;
+            this.audio.crossOrigin = 'anonymous';
+
+            this.audio.addEventListener('playing', () => {
+                this.isPlaying = true;
+                if (statusEl) statusEl.textContent = `Playing: ${station.name}`;
+                this.startVisualizer();
+            });
+
+            this.audio.addEventListener('error', () => {
+                if (statusEl) statusEl.textContent = 'Error - Try another station';
+                this.stop();
+                const playBtn = document.getElementById('music-play-btn');
+                if (playBtn) {
+                    playBtn.textContent = 'Play';
+                    playBtn.classList.remove('playing');
+                }
+            });
+
+            this.audio.addEventListener('waiting', () => {
+                if (statusEl) statusEl.textContent = 'Buffering...';
+            });
+
+            this.audio.play().catch(() => {
+                if (statusEl) statusEl.textContent = 'Error - Try another station';
+            });
+        },
+
+        startVisualizer() {
+            const bars = document.querySelectorAll('#music-visualizer .visualizer-bar');
+            if (!bars.length) return;
+
+            this.visualizerInterval = setInterval(() => {
+                bars.forEach(bar => {
+                    bar.style.height = this.isPlaying ? `${Math.random() * 35 + 5}px` : '4px';
+                });
+            }, 100);
+        },
+
+        stop() {
+            this.isPlaying = false;
+            if (this.visualizerInterval) {
+                clearInterval(this.visualizerInterval);
+                this.visualizerInterval = null;
+            }
+            if (this.audio) {
+                this.audio.pause();
+                this.audio.src = '';
+                this.audio = null;
+            }
+            const bars = document.querySelectorAll('#music-visualizer .visualizer-bar');
+            bars.forEach(bar => bar.style.height = '4px');
+
+            const statusEl = document.getElementById('music-status');
+            if (statusEl) statusEl.textContent = 'Select station & press Play';
+        }
+    };
+
+    // === GAMES APP ===
+    const GamesApp = {
+        gameLoop: null,
+        keyHandler: null,
+        resizeObserver: null,
+
+        open() {
+            const content = `<div class="games-menu" id="games-content"></div>`;
+            WindowManager.createWindow('games', 'Mini Games', 350, 400, content);
+            this.showMenu();
+        },
+
+        showMenu() {
+            this.cleanup();
+            const container = document.getElementById('games-content');
+            if (!container) return;
+
+            container.className = 'games-menu';
+            container.innerHTML = `
+                <div class="game-option" data-game="snake">
+                    <div class="game-option-title">🐍 Snake</div>
+                    <div class="game-option-desc">Use arrow keys to move</div>
+                </div>
+                <div class="game-option" data-game="pong">
+                    <div class="game-option-title">🏓 Pong</div>
+                    <div class="game-option-desc">W/S keys to move paddle</div>
+                </div>
+            `;
+
+            container.querySelectorAll('.game-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    if (opt.dataset.game === 'snake') this.startSnake();
+                    else if (opt.dataset.game === 'pong') this.startPong();
+                });
+            });
+        },
+
+        startSnake() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="snake-score">0</span></div>
+                <canvas id="snake-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('snake-canvas');
+            const ctx = canvas.getContext('2d');
+            const tileCount = 15;
+
+            // Resize canvas to fit container
+            const resizeCanvas = () => {
+                const scoreHeight = 30;
+                const buttonHeight = 45;
+                const padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                const size = Math.min(availableWidth, availableHeight);
+                canvas.width = Math.max(150, size);
+                canvas.height = Math.max(150, size);
+            };
+            resizeCanvas();
+
+            // Use ResizeObserver for responsive canvas
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            let snake = [{x: 7, y: 7}];
+            let food = {x: 10, y: 10};
+            let dx = 0, dy = 0;
+            let score = 0;
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
+                else if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
+                else if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
+                else if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
+            };
+
+            document.addEventListener('keydown', handleKey);
+            this.keyHandler = handleKey;
+
+            const gameLoop = () => {
+                const gridSize = canvas.width / tileCount;
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+                if (head.x < 0) head.x = tileCount - 1;
+                if (head.x >= tileCount) head.x = 0;
+                if (head.y < 0) head.y = tileCount - 1;
+                if (head.y >= tileCount) head.y = 0;
+
+                if (snake.some(s => s.x === head.x && s.y === head.y) && (dx !== 0 || dy !== 0)) {
+                    alert(`Game Over! Score: ${score}`);
+                    this.showMenu();
+                    return;
+                }
+
+                snake.unshift(head);
+
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    document.getElementById('snake-score').textContent = score;
+                    food = {x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount)};
+                } else {
+                    snake.pop();
+                }
+
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--green');
+                snake.forEach(s => ctx.fillRect(s.x * gridSize + 1, s.y * gridSize + 1, gridSize - 2, gridSize - 2));
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+            };
+
+            this.gameLoop = setInterval(gameLoop, 150);
+
+            document.getElementById('game-back').addEventListener('click', () => {
+                this.showMenu();
+            });
+        },
+
+        startPong() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="pong-score">0</span></div>
+                <canvas id="pong-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('pong-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Resize canvas to fit container
+            const resizeCanvas = () => {
+                const scoreHeight = 30;
+                const buttonHeight = 45;
+                const padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                canvas.width = Math.max(200, availableWidth);
+                canvas.height = Math.max(150, availableHeight);
+            };
+            resizeCanvas();
+
+            // Use ResizeObserver for responsive canvas
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            let paddleY = 70;
+            let ballX, ballY, ballDX = 3, ballDY = 2;
+            let score = 0;
+
+            const resetBall = () => {
+                ballX = canvas.width / 2;
+                ballY = canvas.height / 2;
+            };
+            resetBall();
+
+            const handleKey = (e) => {
+                const step = canvas.height / 10;
+                if (e.key === 'w' || e.key === 'W') paddleY = Math.max(0, paddleY - step);
+                if (e.key === 's' || e.key === 'S') paddleY = Math.min(canvas.height - 40, paddleY + step);
+            };
+
+            document.addEventListener('keydown', handleKey);
+            this.keyHandler = handleKey;
+
+            const gameLoop = () => {
+                ballX += ballDX;
+                ballY += ballDY;
+
+                if (ballY <= 0 || ballY >= canvas.height - 5) ballDY = -ballDY;
+                if (ballX >= canvas.width - 5) ballDX = -ballDX;
+
+                if (ballX <= 15 && ballY >= paddleY && ballY <= paddleY + 40) {
+                    ballDX = -ballDX;
+                    score++;
+                    document.getElementById('pong-score').textContent = score;
+                }
+
+                if (ballX <= 0) {
+                    alert(`Game Over! Score: ${score}`);
+                    this.showMenu();
+                    return;
+                }
+
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.fillRect(5, paddleY, 8, 40);
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
+                ctx.fill();
+            };
+
+            this.gameLoop = setInterval(gameLoop, 30);
+
+            document.getElementById('game-back').addEventListener('click', () => {
+                this.showMenu();
+            });
+        },
+
+        cleanup() {
+            if (this.gameLoop) {
+                clearInterval(this.gameLoop);
+                this.gameLoop = null;
+            }
+            if (this.keyHandler) {
+                document.removeEventListener('keydown', this.keyHandler);
+                this.keyHandler = null;
+            }
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+                this.resizeObserver = null;
+            }
+        }
+    };
+
+    // === DESKTOP ICONS HANDLER ===
+    document.querySelectorAll('.desktop-icon').forEach(icon => {
+        icon.addEventListener('click', () => {
+            const app = icon.dataset.app;
+            if (app === 'themes') ThemePickerApp.open();
+            else if (app === 'player') ASCIIPlayerApp.open();
+            else if (app === 'music') MusicApp.open();
+            else if (app === 'games') GamesApp.open();
+        });
+    });
+
     // === DRAG FUNCTIONALITY ===
     if (terminal && terminalHeader) {
         const dragState = {
@@ -821,6 +1574,38 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
             const quote = await QuoteAPI.fetch();
             return QuoteAPI.format(quote);
         },
+
+        // === Desktop Commands ===
+        desktop: `
+  <span class="highlight">Desktop Apps:</span>
+
+  <span class="title-blue">Applications:</span>
+  <span class="output-command">open themes</span>     - Seletor visual de temas
+  <span class="output-command">open player</span>     - Player de animações ASCII
+  <span class="output-command">open music</span>      - Player de música lo-fi
+  <span class="output-command">open games</span>      - Mini jogos (Snake, Pong)
+
+  <span class="comment">Você também pode clicar duas vezes nos ícones à esquerda!</span>`,
+
+        'open themes': function() {
+            ThemePickerApp.open();
+            return '<span class="detail-green">Abrindo Theme Picker...</span>';
+        },
+
+        'open player': function() {
+            ASCIIPlayerApp.open();
+            return '<span class="detail-green">Abrindo ASCII Video Player...</span>';
+        },
+
+        'open music': function() {
+            MusicApp.open();
+            return '<span class="detail-green">Abrindo Music Player...</span>';
+        },
+
+        'open games': function() {
+            GamesApp.open();
+            return '<span class="detail-green">Abrindo Mini Games...</span>';
+        },
     };
 
     // === COMMAND ALIASES ===
@@ -868,6 +1653,9 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         'easter': 'extras',
         'easteregg': 'extras',
         'fun': 'extras',
+        // Desktop aliases
+        'apps': 'desktop',
+        'aplicativos': 'desktop',
     };
 
     // === TAB COMPLETION ===

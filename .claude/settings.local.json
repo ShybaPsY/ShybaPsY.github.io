@@ -3,7 +3,9 @@
     "allow": [
       "Bash(start index.html)",
       "Bash(git add:*)",
-      "Bash(dir /b)"
+      "Bash(dir /b)",
+      "WebSearch",
+      "WebFetch(domain:de1.api.radio-browser.info)"
     ],
     "deny": [],
     "ask": []
