@@ -430,6 +430,7 @@ body.resizing-terminal * {
     z-index: 0;
     padding: 20px;
     pointer-events: none;
+    display: block;
 }
 
 .desktop-icons {
@@ -438,6 +439,9 @@ body.resizing-terminal * {
     gap: 16px;
     width: fit-content;
     pointer-events: auto;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .desktop-icon {
@@ -450,6 +454,10 @@ body.resizing-terminal * {
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
     user-select: none;
+    background-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .desktop-icon:hover {
@@ -464,6 +472,9 @@ body.resizing-terminal * {
 .icon-image {
     font-size: 36px;
     line-height: 1;
+    background: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .icon-label {
@@ -472,6 +483,9 @@ body.resizing-terminal * {
     text-align: center;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
     white-space: nowrap;
+    background: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* === APP WINDOWS === */
