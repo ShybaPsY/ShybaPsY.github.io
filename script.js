@@ -771,6 +771,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('pong-canvas');
             const ctx = canvas.getContext('2d');
 
+            const winScore = 5;
+
+            // Responsive sizing functions
+            const getPaddleHeight = () => canvas.height * 0.15;
+            const getPaddleWidth = () => Math.max(8, canvas.width * 0.02);
+            const getBallRadius = () => Math.max(5, Math.min(canvas.width, canvas.height) * 0.015);
+            const getPlayerSpeed = () => canvas.height * 0.015;
+            const getBaseSpeed = () => Math.min(canvas.width, canvas.height) * 0.012;
+
+            // Store positions as ratios (0-1) for resize handling
+            let playerYRatio = 0.5;
+            let aiYRatio = 0.5;
+            let ballXRatio = 0.5;
+            let ballYRatio = 0.5;
+            let ballDXRatio = 0, ballDYRatio = 0;
+            let playerScore = 0;
+            let aiScore = 0;
+            let gameOver = false;
+            let speedMultiplier = 1;
+            let aiSpeedMultiplier = 0.7;
+
+            // Track which keys are pressed for smooth movement
+            const keysPressed = { up: false, down: false };
+
             const resizeCanvas = () => {
                 const scoreHeight = 30;
                 const buttonHeight = 45;
@@ -787,26 +811,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.resizeObserver.observe(container);
             }
 
-            const paddleHeight = 60;
-            const paddleWidth = 10;
-            const ballRadius = 6;
-            const winScore = 5;
-
-            let playerY = canvas.height / 2 - paddleHeight / 2;
-            let aiY = canvas.height / 2 - paddleHeight / 2;
-            let ballX, ballY, ballDX, ballDY;
-            let playerScore = 0;
-            let aiScore = 0;
-            let gameOver = false;
-            let ballSpeed = 4;
-            let aiSpeed = 3;
-
             const resetBall = (towardsPlayer = Math.random() > 0.5) => {
-                ballX = canvas.width / 2;
-                ballY = canvas.height / 2;
+                ballXRatio = 0.5;
+                ballYRatio = 0.5;
                 const angle = (Math.random() - 0.5) * Math.PI / 2;
-                ballDX = Math.cos(angle) * ballSpeed * (towardsPlayer ? -1 : 1);
-                ballDY = Math.sin(angle) * ballSpeed;
+                ballDXRatio = Math.cos(angle) * 0.015 * (towardsPlayer ? -1 : 1);
+                ballDYRatio = Math.sin(angle) * 0.015;
+                speedMultiplier = 1;
             };
             resetBall();
 
@@ -831,65 +842,110 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + 60);
             };
 
-            const handleKey = (e) => {
+            const handleKeyDown = (e) => {
                 if (gameOver) return;
-                const step = canvas.height / 8;
                 if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
-                    playerY = Math.max(0, playerY - step);
+                    keysPressed.up = true;
+                    e.preventDefault();
                 }
                 if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
-                    playerY = Math.min(canvas.height - paddleHeight, playerY + step);
+                    keysPressed.down = true;
+                    e.preventDefault();
                 }
             };
 
-            document.addEventListener('keydown', handleKey);
-            this.keyHandler = handleKey;
+            const handleKeyUp = (e) => {
+                if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
+                    keysPressed.up = false;
+                }
+                if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+                    keysPressed.down = false;
+                }
+            };
+
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            this.keyHandler = handleKeyDown;
+            this.keyUpHandler = handleKeyUp;
 
             const gameLoop = () => {
                 if (gameOver) return;
 
-                // Move ball
-                ballX += ballDX;
-                ballY += ballDY;
+                // Get responsive sizes
+                const paddleHeight = getPaddleHeight();
+                const paddleWidth = getPaddleWidth();
+                const ballRadius = getBallRadius();
+                const playerSpeed = getPlayerSpeed();
+                const aiSpeed = playerSpeed * aiSpeedMultiplier;
+
+                // Get actual positions from ratios
+                let playerY = playerYRatio * (canvas.height - paddleHeight);
+                let aiY = aiYRatio * (canvas.height - paddleHeight);
+                let ballX = ballXRatio * canvas.width;
+                let ballY = ballYRatio * canvas.height;
+
+                // Smooth player paddle movement
+                if (keysPressed.up) {
+                    playerY = Math.max(0, playerY - playerSpeed);
+                }
+                if (keysPressed.down) {
+                    playerY = Math.min(canvas.height - paddleHeight, playerY + playerSpeed);
+                }
+                playerYRatio = playerY / (canvas.height - paddleHeight);
+
+                // Move ball (using ratios for consistent speed across sizes)
+                ballX += ballDXRatio * canvas.width * speedMultiplier;
+                ballY += ballDYRatio * canvas.height * speedMultiplier;
 
                 // Ball collision with top/bottom walls
-                if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
-                    ballDY = -ballDY;
-                    ballY = ballY - ballRadius <= 0 ? ballRadius : canvas.height - ballRadius;
+                if (ballY - ballRadius <= 0) {
+                    ballDYRatio = Math.abs(ballDYRatio);
+                    ballY = ballRadius;
+                }
+                if (ballY + ballRadius >= canvas.height) {
+                    ballDYRatio = -Math.abs(ballDYRatio);
+                    ballY = canvas.height - ballRadius;
                 }
 
                 // AI movement (follows ball with some delay)
                 const aiCenter = aiY + paddleHeight / 2;
-                const aiTarget = ballY;
-                if (aiCenter < aiTarget - 10) {
+                const deadZone = paddleHeight * 0.2;
+                if (aiCenter < ballY - deadZone) {
                     aiY = Math.min(canvas.height - paddleHeight, aiY + aiSpeed);
-                } else if (aiCenter > aiTarget + 10) {
+                } else if (aiCenter > ballY + deadZone) {
                     aiY = Math.max(0, aiY - aiSpeed);
                 }
+                aiYRatio = aiY / (canvas.height - paddleHeight);
 
                 // Player paddle collision
                 if (ballX - ballRadius <= paddleWidth + 5 &&
                     ballY >= playerY && ballY <= playerY + paddleHeight &&
-                    ballDX < 0) {
+                    ballDXRatio < 0) {
                     const hitPos = (ballY - playerY) / paddleHeight;
                     const angle = (hitPos - 0.5) * Math.PI / 3;
-                    ballSpeed = Math.min(8, ballSpeed + 0.2);
-                    ballDX = Math.cos(angle) * ballSpeed;
-                    ballDY = Math.sin(angle) * ballSpeed;
+                    const speed = 0.015;
+                    ballDXRatio = Math.cos(angle) * speed;
+                    ballDYRatio = Math.sin(angle) * speed;
+                    speedMultiplier = Math.min(2, speedMultiplier + 0.08);
                     ballX = paddleWidth + 5 + ballRadius;
                 }
 
                 // AI paddle collision
                 if (ballX + ballRadius >= canvas.width - paddleWidth - 5 &&
                     ballY >= aiY && ballY <= aiY + paddleHeight &&
-                    ballDX > 0) {
+                    ballDXRatio > 0) {
                     const hitPos = (ballY - aiY) / paddleHeight;
                     const angle = (hitPos - 0.5) * Math.PI / 3;
-                    ballSpeed = Math.min(8, ballSpeed + 0.2);
-                    ballDX = -Math.cos(angle) * ballSpeed;
-                    ballDY = Math.sin(angle) * ballSpeed;
+                    const speed = 0.015;
+                    ballDXRatio = -Math.cos(angle) * speed;
+                    ballDYRatio = Math.sin(angle) * speed;
+                    speedMultiplier = Math.min(2, speedMultiplier + 0.08);
                     ballX = canvas.width - paddleWidth - 5 - ballRadius;
                 }
+
+                // Update ball ratios
+                ballXRatio = ballX / canvas.width;
+                ballYRatio = ballY / canvas.height;
 
                 // Scoring
                 if (ballX - ballRadius <= 0) {
@@ -899,7 +955,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         showEndScreen(false);
                         return;
                     }
-                    ballSpeed = 4;
                     resetBall(true);
                 }
 
@@ -910,8 +965,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         showEndScreen(true);
                         return;
                     }
-                    ballSpeed = 4;
-                    aiSpeed = Math.min(5, aiSpeed + 0.3);
+                    aiSpeedMultiplier = Math.min(0.95, aiSpeedMultiplier + 0.05);
                     resetBall(false);
                 }
 
@@ -920,7 +974,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 // Draw center line
-                ctx.setLineDash([10, 10]);
+                ctx.setLineDash([canvas.height * 0.03, canvas.height * 0.03]);
+                ctx.lineWidth = Math.max(2, canvas.width * 0.004);
                 ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
                 ctx.beginPath();
                 ctx.moveTo(canvas.width / 2, 0);
@@ -928,16 +983,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Draw player paddle (left)
+                // Draw player paddle (left) with rounded corners
+                const cornerRadius = Math.min(paddleWidth / 2, 6);
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cyan');
-                ctx.fillRect(5, playerY, paddleWidth, paddleHeight);
+                ctx.beginPath();
+                ctx.roundRect(5, playerY, paddleWidth, paddleHeight, cornerRadius);
+                ctx.fill();
 
-                // Draw AI paddle (right)
+                // Draw AI paddle (right) with rounded corners
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
-                ctx.fillRect(canvas.width - paddleWidth - 5, aiY, paddleWidth, paddleHeight);
+                ctx.beginPath();
+                ctx.roundRect(canvas.width - paddleWidth - 5, aiY, paddleWidth, paddleHeight, cornerRadius);
+                ctx.fill();
 
                 // Draw ball with glow effect
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = ballRadius * 2;
                 ctx.shadowColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
                 ctx.beginPath();
@@ -946,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.shadowBlur = 0;
             };
 
-            this.gameLoop = setInterval(gameLoop, 30);
+            this.gameLoop = setInterval(gameLoop, 16); // ~60fps for smoother movement
 
             document.getElementById('game-back').addEventListener('click', () => {
                 this.showMenu();
@@ -961,6 +1021,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.keyHandler) {
                 document.removeEventListener('keydown', this.keyHandler);
                 this.keyHandler = null;
+            }
+            if (this.keyUpHandler) {
+                document.removeEventListener('keyup', this.keyUpHandler);
+                this.keyUpHandler = null;
             }
             if (this.resizeObserver) {
                 this.resizeObserver.disconnect();
