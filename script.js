@@ -815,8 +815,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ballXRatio = 0.5;
                 ballYRatio = 0.5;
                 const angle = (Math.random() - 0.5) * Math.PI / 2;
-                ballDXRatio = Math.cos(angle) * 0.015 * (towardsPlayer ? -1 : 1);
-                ballDYRatio = Math.sin(angle) * 0.015;
+                const initialSpeed = 0.008; // Slower start
+                ballDXRatio = Math.cos(angle) * initialSpeed * (towardsPlayer ? -1 : 1);
+                ballDYRatio = Math.sin(angle) * initialSpeed;
                 speedMultiplier = 1;
             };
             resetBall();
@@ -923,10 +924,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ballDXRatio < 0) {
                     const hitPos = (ballY - playerY) / paddleHeight;
                     const angle = (hitPos - 0.5) * Math.PI / 3;
-                    const speed = 0.015;
-                    ballDXRatio = Math.cos(angle) * speed;
-                    ballDYRatio = Math.sin(angle) * speed;
-                    speedMultiplier = Math.min(2, speedMultiplier + 0.08);
+                    const baseSpeed = 0.008;
+                    ballDXRatio = Math.cos(angle) * baseSpeed;
+                    ballDYRatio = Math.sin(angle) * baseSpeed;
+                    speedMultiplier = Math.min(2.5, speedMultiplier + 0.12);
                     ballX = paddleWidth + 5 + ballRadius;
                 }
 
@@ -936,10 +937,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ballDXRatio > 0) {
                     const hitPos = (ballY - aiY) / paddleHeight;
                     const angle = (hitPos - 0.5) * Math.PI / 3;
-                    const speed = 0.015;
-                    ballDXRatio = -Math.cos(angle) * speed;
-                    ballDYRatio = Math.sin(angle) * speed;
-                    speedMultiplier = Math.min(2, speedMultiplier + 0.08);
+                    const baseSpeed = 0.008;
+                    ballDXRatio = -Math.cos(angle) * baseSpeed;
+                    ballDYRatio = Math.sin(angle) * baseSpeed;
+                    speedMultiplier = Math.min(2.5, speedMultiplier + 0.12);
                     ballX = canvas.width - paddleWidth - 5 - ballRadius;
                 }
 
