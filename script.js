@@ -592,11 +592,11 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = `
                 <div class="game-option" data-game="snake">
                     <div class="game-option-title">🐍 Snake</div>
-                    <div class="game-option-desc">Use arrow keys to move</div>
+                    <div class="game-option-desc">Arrow keys to move • Fill the grid to win!</div>
                 </div>
                 <div class="game-option" data-game="pong">
-                    <div class="game-option-title">🏓 Pong</div>
-                    <div class="game-option-desc">W/S keys to move paddle</div>
+                    <div class="game-option-title">🏓 Pong vs AI</div>
+                    <div class="game-option-desc">W/S or Arrow keys • First to 5 wins!</div>
                 </div>
             `;
 
@@ -620,8 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('snake-canvas');
             const ctx = canvas.getContext('2d');
             const tileCount = 15;
+            const maxScore = tileCount * tileCount - 1;
 
-            // Resize canvas to fit container
             const resizeCanvas = () => {
                 const scoreHeight = 30;
                 const buttonHeight = 45;
@@ -634,7 +634,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             resizeCanvas();
 
-            // Use ResizeObserver for responsive canvas
             if (window.ResizeObserver) {
                 this.resizeObserver = new ResizeObserver(resizeCanvas);
                 this.resizeObserver.observe(container);
@@ -642,31 +641,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let snake = [{x: 7, y: 7}];
             let food = {x: 10, y: 10};
-            let dx = 0, dy = 0;
+            let direction = {dx: 0, dy: 0};
+            let nextDirection = {dx: 0, dy: 0};
             let score = 0;
+            let gameOver = false;
+
+            const spawnFood = () => {
+                const emptyCells = [];
+                for (let x = 0; x < tileCount; x++) {
+                    for (let y = 0; y < tileCount; y++) {
+                        if (!snake.some(s => s.x === x && s.y === y)) {
+                            emptyCells.push({x, y});
+                        }
+                    }
+                }
+                if (emptyCells.length > 0) {
+                    food = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                }
+            };
+
+            const showEndScreen = (won) => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+
+                const gridSize = canvas.width / tileCount;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = won ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${gridSize * 1.5}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(won ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${gridSize}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
+
+                ctx.font = `${gridSize * 0.7}px 'Fira Code', monospace`;
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + 50);
+            };
 
             const handleKey = (e) => {
-                if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
-                else if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
-                else if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
-                else if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
+                if (gameOver) return;
+                if (e.key === 'ArrowUp' && direction.dy !== 1) { nextDirection = {dx: 0, dy: -1}; }
+                else if (e.key === 'ArrowDown' && direction.dy !== -1) { nextDirection = {dx: 0, dy: 1}; }
+                else if (e.key === 'ArrowLeft' && direction.dx !== 1) { nextDirection = {dx: -1, dy: 0}; }
+                else if (e.key === 'ArrowRight' && direction.dx !== -1) { nextDirection = {dx: 1, dy: 0}; }
             };
 
             document.addEventListener('keydown', handleKey);
             this.keyHandler = handleKey;
 
             const gameLoop = () => {
-                const gridSize = canvas.width / tileCount;
-                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                if (gameOver) return;
 
+                // Apply queued direction
+                direction = {...nextDirection};
+
+                const gridSize = canvas.width / tileCount;
+                const head = {x: snake[0].x + direction.dx, y: snake[0].y + direction.dy};
+
+                // Wrap around
                 if (head.x < 0) head.x = tileCount - 1;
                 if (head.x >= tileCount) head.x = 0;
                 if (head.y < 0) head.y = tileCount - 1;
                 if (head.y >= tileCount) head.y = 0;
 
-                if (snake.some(s => s.x === head.x && s.y === head.y) && (dx !== 0 || dy !== 0)) {
-                    alert(`Game Over! Score: ${score}`);
-                    this.showMenu();
+                // Check collision with self (only if moving)
+                if (snake.some(s => s.x === head.x && s.y === head.y) && (direction.dx !== 0 || direction.dy !== 0)) {
+                    showEndScreen(false);
                     return;
                 }
 
@@ -675,22 +719,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (head.x === food.x && head.y === food.y) {
                     score++;
                     document.getElementById('snake-score').textContent = score;
-                    food = {x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount)};
+
+                    // Check win condition
+                    if (score >= maxScore) {
+                        showEndScreen(true);
+                        return;
+                    }
+                    spawnFood();
                 } else {
                     snake.pop();
                 }
 
+                // Draw background
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--green');
-                snake.forEach(s => ctx.fillRect(s.x * gridSize + 1, s.y * gridSize + 1, gridSize - 2, gridSize - 2));
+                // Draw snake with gradient (head is brighter)
+                const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green').trim();
+                snake.forEach((s, i) => {
+                    const brightness = 1 - (i / snake.length) * 0.5;
+                    ctx.fillStyle = i === 0 ? getComputedStyle(document.documentElement).getPropertyValue('--cyan') : greenColor;
+                    ctx.globalAlpha = brightness;
+                    ctx.fillRect(s.x * gridSize + 1, s.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                });
+                ctx.globalAlpha = 1;
 
+                // Draw food with pulsing effect
+                const pulse = Math.sin(Date.now() / 200) * 0.2 + 0.8;
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
-                ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                const foodSize = (gridSize - 2) * pulse;
+                const foodOffset = (gridSize - 2 - foodSize) / 2;
+                ctx.fillRect(food.x * gridSize + 1 + foodOffset, food.y * gridSize + 1 + foodOffset, foodSize, foodSize);
             };
 
-            this.gameLoop = setInterval(gameLoop, 150);
+            this.gameLoop = setInterval(gameLoop, 120);
 
             document.getElementById('game-back').addEventListener('click', () => {
                 this.showMenu();
@@ -701,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('games-content');
             container.className = 'game-canvas-container';
             container.innerHTML = `
-                <div class="game-score">Score: <span id="pong-score">0</span></div>
+                <div class="game-score"><span id="player-score">0</span> - <span id="ai-score">0</span></div>
                 <canvas id="pong-canvas" class="game-canvas"></canvas>
                 <button class="game-back-btn" id="game-back">Back</button>
             `;
@@ -709,7 +771,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('pong-canvas');
             const ctx = canvas.getContext('2d');
 
-            // Resize canvas to fit container
             const resizeCanvas = () => {
                 const scoreHeight = 30;
                 const buttonHeight = 45;
@@ -721,58 +782,168 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             resizeCanvas();
 
-            // Use ResizeObserver for responsive canvas
             if (window.ResizeObserver) {
                 this.resizeObserver = new ResizeObserver(resizeCanvas);
                 this.resizeObserver.observe(container);
             }
 
-            let paddleY = 70;
-            let ballX, ballY, ballDX = 3, ballDY = 2;
-            let score = 0;
+            const paddleHeight = 60;
+            const paddleWidth = 10;
+            const ballRadius = 6;
+            const winScore = 5;
 
-            const resetBall = () => {
+            let playerY = canvas.height / 2 - paddleHeight / 2;
+            let aiY = canvas.height / 2 - paddleHeight / 2;
+            let ballX, ballY, ballDX, ballDY;
+            let playerScore = 0;
+            let aiScore = 0;
+            let gameOver = false;
+            let ballSpeed = 4;
+            let aiSpeed = 3;
+
+            const resetBall = (towardsPlayer = Math.random() > 0.5) => {
                 ballX = canvas.width / 2;
                 ballY = canvas.height / 2;
+                const angle = (Math.random() - 0.5) * Math.PI / 2;
+                ballDX = Math.cos(angle) * ballSpeed * (towardsPlayer ? -1 : 1);
+                ballDY = Math.sin(angle) * ballSpeed;
             };
             resetBall();
 
+            const showEndScreen = (playerWon) => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = playerWon ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${canvas.height / 8}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(playerWon ? 'YOU WIN!' : 'YOU LOSE', canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${canvas.height / 12}px 'Fira Code', monospace`;
+                ctx.fillText(`${playerScore} - ${aiScore}`, canvas.width / 2, canvas.height / 2 + 25);
+
+                ctx.font = `${canvas.height / 15}px 'Fira Code', monospace`;
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + 60);
+            };
+
             const handleKey = (e) => {
-                const step = canvas.height / 10;
-                if (e.key === 'w' || e.key === 'W') paddleY = Math.max(0, paddleY - step);
-                if (e.key === 's' || e.key === 'S') paddleY = Math.min(canvas.height - 40, paddleY + step);
+                if (gameOver) return;
+                const step = canvas.height / 8;
+                if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
+                    playerY = Math.max(0, playerY - step);
+                }
+                if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+                    playerY = Math.min(canvas.height - paddleHeight, playerY + step);
+                }
             };
 
             document.addEventListener('keydown', handleKey);
             this.keyHandler = handleKey;
 
             const gameLoop = () => {
+                if (gameOver) return;
+
+                // Move ball
                 ballX += ballDX;
                 ballY += ballDY;
 
-                if (ballY <= 0 || ballY >= canvas.height - 5) ballDY = -ballDY;
-                if (ballX >= canvas.width - 5) ballDX = -ballDX;
-
-                if (ballX <= 15 && ballY >= paddleY && ballY <= paddleY + 40) {
-                    ballDX = -ballDX;
-                    score++;
-                    document.getElementById('pong-score').textContent = score;
+                // Ball collision with top/bottom walls
+                if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
+                    ballDY = -ballDY;
+                    ballY = ballY - ballRadius <= 0 ? ballRadius : canvas.height - ballRadius;
                 }
 
-                if (ballX <= 0) {
-                    alert(`Game Over! Score: ${score}`);
-                    this.showMenu();
-                    return;
+                // AI movement (follows ball with some delay)
+                const aiCenter = aiY + paddleHeight / 2;
+                const aiTarget = ballY;
+                if (aiCenter < aiTarget - 10) {
+                    aiY = Math.min(canvas.height - paddleHeight, aiY + aiSpeed);
+                } else if (aiCenter > aiTarget + 10) {
+                    aiY = Math.max(0, aiY - aiSpeed);
                 }
 
+                // Player paddle collision
+                if (ballX - ballRadius <= paddleWidth + 5 &&
+                    ballY >= playerY && ballY <= playerY + paddleHeight &&
+                    ballDX < 0) {
+                    const hitPos = (ballY - playerY) / paddleHeight;
+                    const angle = (hitPos - 0.5) * Math.PI / 3;
+                    ballSpeed = Math.min(8, ballSpeed + 0.2);
+                    ballDX = Math.cos(angle) * ballSpeed;
+                    ballDY = Math.sin(angle) * ballSpeed;
+                    ballX = paddleWidth + 5 + ballRadius;
+                }
+
+                // AI paddle collision
+                if (ballX + ballRadius >= canvas.width - paddleWidth - 5 &&
+                    ballY >= aiY && ballY <= aiY + paddleHeight &&
+                    ballDX > 0) {
+                    const hitPos = (ballY - aiY) / paddleHeight;
+                    const angle = (hitPos - 0.5) * Math.PI / 3;
+                    ballSpeed = Math.min(8, ballSpeed + 0.2);
+                    ballDX = -Math.cos(angle) * ballSpeed;
+                    ballDY = Math.sin(angle) * ballSpeed;
+                    ballX = canvas.width - paddleWidth - 5 - ballRadius;
+                }
+
+                // Scoring
+                if (ballX - ballRadius <= 0) {
+                    aiScore++;
+                    document.getElementById('ai-score').textContent = aiScore;
+                    if (aiScore >= winScore) {
+                        showEndScreen(false);
+                        return;
+                    }
+                    ballSpeed = 4;
+                    resetBall(true);
+                }
+
+                if (ballX + ballRadius >= canvas.width) {
+                    playerScore++;
+                    document.getElementById('player-score').textContent = playerScore;
+                    if (playerScore >= winScore) {
+                        showEndScreen(true);
+                        return;
+                    }
+                    ballSpeed = 4;
+                    aiSpeed = Math.min(5, aiSpeed + 0.3);
+                    resetBall(false);
+                }
+
+                // Draw background
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
-                ctx.fillRect(5, paddleY, 8, 40);
+                // Draw center line
+                ctx.setLineDash([10, 10]);
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
                 ctx.beginPath();
-                ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
+                ctx.moveTo(canvas.width / 2, 0);
+                ctx.lineTo(canvas.width / 2, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw player paddle (left)
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+                ctx.fillRect(5, playerY, paddleWidth, paddleHeight);
+
+                // Draw AI paddle (right)
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.fillRect(canvas.width - paddleWidth - 5, aiY, paddleWidth, paddleHeight);
+
+                // Draw ball with glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.shadowBlur = 0;
             };
 
             this.gameLoop = setInterval(gameLoop, 30);
