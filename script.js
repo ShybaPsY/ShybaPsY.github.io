@@ -442,9 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
         stations: [
             { name: 'Lofi Girl', url: 'https://boxradio-edge-00.streamafrica.net/lofi' },
             { name: 'Chillofi Radio', url: 'https://azc.rdstream-5677.dez.ovh/listen/chillofi/radio.mp3' },
-            { name: 'FLUX FM ChillHop', url: 'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/' },
-            { name: 'bigFM LoFi Focus', url: 'https://audiotainment-sw.streamabc.net/atsw-lofifocus-mp3-128-3757575' },
-            { name: 'Lofi 24/7', url: 'http://usa9.fastcast4u.com/proxy/jamz?mp=/1' }
+            { name: 'Hunter.FM Lo-Fi', url: 'https://live.hunter.fm/lofi_normal' },
+            { name: 'ISEKOI Chill Zone', url: 'https://public.isekoi-radio.com/listen/chill/radio.mp3' },
+            { name: 'Nightwave Plaza', url: 'https://radio.plaza.one/mp3' }
         ],
 
         open() {
