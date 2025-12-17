@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         open() {
             const content = `<div class="games-menu" id="games-content"></div>`;
-            WindowManager.createWindow('games', 'Mini Games', 350, 400, content);
+            WindowManager.createWindow('games', 'Mini Games', 420, 480, content);
             this.showMenu();
         },
 
@@ -592,18 +592,49 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = `
                 <div class="game-option" data-game="snake">
                     <div class="game-option-title">🐍 Snake</div>
-                    <div class="game-option-desc">Arrow keys to move • Fill the grid to win!</div>
+                    <div class="game-option-desc">Arrow keys • Fill the grid!</div>
                 </div>
                 <div class="game-option" data-game="pong">
-                    <div class="game-option-title">🏓 Pong vs AI</div>
-                    <div class="game-option-desc">W/S or Arrow keys • First to 5 wins!</div>
+                    <div class="game-option-title">🏓 Pong</div>
+                    <div class="game-option-desc">W/S keys • First to 5!</div>
+                </div>
+                <div class="game-option" data-game="tetris">
+                    <div class="game-option-title">🧱 Tetris</div>
+                    <div class="game-option-desc">Arrow keys • Clear lines!</div>
+                </div>
+                <div class="game-option" data-game="breakout">
+                    <div class="game-option-title">🧱 Breakout</div>
+                    <div class="game-option-desc">Mouse/Arrow • Break bricks!</div>
+                </div>
+                <div class="game-option" data-game="invaders">
+                    <div class="game-option-title">👾 Invaders</div>
+                    <div class="game-option-desc">Arrow + Space • Shoot!</div>
+                </div>
+                <div class="game-option" data-game="asteroids">
+                    <div class="game-option-title">🚀 Asteroids</div>
+                    <div class="game-option-desc">Arrows + Space • Survive!</div>
+                </div>
+                <div class="game-option" data-game="dino">
+                    <div class="game-option-title">🦖 Dino Run</div>
+                    <div class="game-option-desc">Space to jump!</div>
+                </div>
+                <div class="game-option" data-game="2048">
+                    <div class="game-option-title">🔢 2048</div>
+                    <div class="game-option-desc">Arrow keys • Merge tiles!</div>
                 </div>
             `;
 
             container.querySelectorAll('.game-option').forEach(opt => {
                 opt.addEventListener('click', () => {
-                    if (opt.dataset.game === 'snake') this.startSnake();
-                    else if (opt.dataset.game === 'pong') this.startPong();
+                    const game = opt.dataset.game;
+                    if (game === 'snake') this.startSnake();
+                    else if (game === 'pong') this.startPong();
+                    else if (game === 'tetris') this.startTetris();
+                    else if (game === 'breakout') this.startBreakout();
+                    else if (game === 'invaders') this.startInvaders();
+                    else if (game === 'asteroids') this.startAsteroids();
+                    else if (game === 'dino') this.startDino();
+                    else if (game === '2048') this.start2048();
                 });
             });
         },
@@ -671,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fillStyle = won ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
                 ctx.font = `bold ${gridSize * 1.5}px 'Fira Code', monospace`;
                 ctx.textAlign = 'center';
-                ctx.fillText(won ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillText(won ? 'YOU WIN!' : 'YOU LOSE', canvas.width / 2, canvas.height / 2 - 20);
 
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
                 ctx.font = `${gridSize}px 'Fira Code', monospace`;
@@ -1012,6 +1043,910 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('game-back').addEventListener('click', () => {
                 this.showMenu();
             });
+        },
+
+        startTetris() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="tetris-score">0</span></div>
+                <canvas id="tetris-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('tetris-canvas');
+            const ctx = canvas.getContext('2d');
+            const COLS = 10, ROWS = 20;
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                const cellSize = Math.min(availableWidth / COLS, availableHeight / ROWS);
+                canvas.width = cellSize * COLS;
+                canvas.height = cellSize * ROWS;
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            const PIECES = [
+                [[1,1,1,1]], // I
+                [[1,1],[1,1]], // O
+                [[0,1,0],[1,1,1]], // T
+                [[1,0,0],[1,1,1]], // L
+                [[0,0,1],[1,1,1]], // J
+                [[0,1,1],[1,1,0]], // S
+                [[1,1,0],[0,1,1]]  // Z
+            ];
+            const COLORS = ['#00f5ff', '#ffeb3b', '#e040fb', '#ff9800', '#2196f3', '#4caf50', '#f44336'];
+
+            let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            let score = 0, gameOver = false;
+            let piece, pieceX, pieceY, pieceColor;
+
+            const newPiece = () => {
+                const idx = Math.floor(Math.random() * PIECES.length);
+                piece = PIECES[idx].map(r => [...r]);
+                pieceColor = COLORS[idx];
+                pieceX = Math.floor(COLS / 2) - Math.floor(piece[0].length / 2);
+                pieceY = 0;
+                if (collides()) { gameOver = true; showEnd(); }
+            };
+
+            const collides = (px = pieceX, py = pieceY, p = piece) => {
+                for (let y = 0; y < p.length; y++) {
+                    for (let x = 0; x < p[y].length; x++) {
+                        if (p[y][x] && (px + x < 0 || px + x >= COLS || py + y >= ROWS || (py + y >= 0 && board[py + y][px + x]))) return true;
+                    }
+                }
+                return false;
+            };
+
+            const merge = () => {
+                for (let y = 0; y < piece.length; y++) {
+                    for (let x = 0; x < piece[y].length; x++) {
+                        if (piece[y][x] && pieceY + y >= 0) board[pieceY + y][pieceX + x] = pieceColor;
+                    }
+                }
+            };
+
+            const clearLines = () => {
+                let lines = 0;
+                for (let y = ROWS - 1; y >= 0; y--) {
+                    if (board[y].every(c => c)) {
+                        board.splice(y, 1);
+                        board.unshift(Array(COLS).fill(0));
+                        lines++; y++;
+                    }
+                }
+                if (lines) score += [0, 100, 300, 500, 800][lines];
+                document.getElementById('tetris-score').textContent = score;
+            };
+
+            const rotate = () => {
+                const rotated = piece[0].map((_, i) => piece.map(r => r[i]).reverse());
+                if (!collides(pieceX, pieceY, rotated)) piece = rotated;
+            };
+
+            const showEnd = () => {
+                clearInterval(this.gameLoop);
+                const size = Math.min(canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${size * 0.1}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + size * 0.15);
+            };
+
+            const handleKey = (e) => {
+                if (gameOver) return;
+                if (e.key === 'ArrowLeft' && !collides(pieceX - 1, pieceY)) pieceX--;
+                else if (e.key === 'ArrowRight' && !collides(pieceX + 1, pieceY)) pieceX++;
+                else if (e.key === 'ArrowDown' && !collides(pieceX, pieceY + 1)) pieceY++;
+                else if (e.key === 'ArrowUp') rotate();
+                e.preventDefault();
+            };
+            document.addEventListener('keydown', handleKey);
+            this.keyHandler = handleKey;
+
+            newPiece();
+            let dropCounter = 0;
+            const gameLoop = () => {
+                if (gameOver) return;
+                dropCounter++;
+                if (dropCounter > 30) {
+                    dropCounter = 0;
+                    if (!collides(pieceX, pieceY + 1)) pieceY++;
+                    else { merge(); clearLines(); newPiece(); if (gameOver) return; }
+                }
+
+                const cellW = canvas.width / COLS, cellH = canvas.height / ROWS;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw board
+                for (let y = 0; y < ROWS; y++) {
+                    for (let x = 0; x < COLS; x++) {
+                        if (board[y][x]) {
+                            ctx.fillStyle = board[y][x];
+                            ctx.fillRect(x * cellW + 1, y * cellH + 1, cellW - 2, cellH - 2);
+                        }
+                    }
+                }
+
+                // Draw current piece
+                ctx.fillStyle = pieceColor;
+                for (let y = 0; y < piece.length; y++) {
+                    for (let x = 0; x < piece[y].length; x++) {
+                        if (piece[y][x]) ctx.fillRect((pieceX + x) * cellW + 1, (pieceY + y) * cellH + 1, cellW - 2, cellH - 2);
+                    }
+                }
+
+                // Grid lines
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                for (let x = 0; x <= COLS; x++) { ctx.beginPath(); ctx.moveTo(x * cellW, 0); ctx.lineTo(x * cellW, canvas.height); ctx.stroke(); }
+                for (let y = 0; y <= ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * cellH); ctx.lineTo(canvas.width, y * cellH); ctx.stroke(); }
+            };
+
+            this.gameLoop = setInterval(gameLoop, 16);
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        startBreakout() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="breakout-score">0</span></div>
+                <canvas id="breakout-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('breakout-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                canvas.width = Math.max(200, availableWidth);
+                canvas.height = Math.max(150, availableHeight);
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            const BRICK_ROWS = 5, BRICK_COLS = 8;
+            let paddleX = 0.5, ballX = 0.5, ballY = 0.8, ballDX = 0.01, ballDY = -0.012;
+            let score = 0, lives = 3, gameOver = false;
+            let bricks = [];
+
+            const initBricks = () => {
+                bricks = [];
+                const colors = ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#2196f3'];
+                for (let r = 0; r < BRICK_ROWS; r++) {
+                    for (let c = 0; c < BRICK_COLS; c++) {
+                        bricks.push({ x: c / BRICK_COLS + 0.01, y: r * 0.05 + 0.05, w: 1 / BRICK_COLS - 0.02, h: 0.04, color: colors[r], alive: true });
+                    }
+                }
+            };
+            initBricks();
+
+            const keysPressed = { left: false, right: false };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = true;
+                if (e.key === 'ArrowRight') keysPressed.right = true;
+                e.preventDefault();
+            };
+            const handleKeyUp = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = false;
+                if (e.key === 'ArrowRight') keysPressed.right = false;
+            };
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            this.keyHandler = handleKeyDown;
+            this.keyUpHandler = handleKeyUp;
+
+            const showEnd = (won) => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+                const size = Math.min(canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = won ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(won ? 'YOU WIN!' : 'YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + size * 0.15);
+            };
+
+            const gameLoop = () => {
+                if (gameOver) return;
+
+                const paddleW = 0.15, paddleH = 0.02, ballR = 0.012;
+                const speed = 0.02;
+
+                if (keysPressed.left) paddleX = Math.max(paddleW / 2, paddleX - speed);
+                if (keysPressed.right) paddleX = Math.min(1 - paddleW / 2, paddleX + speed);
+
+                ballX += ballDX;
+                ballY += ballDY;
+
+                if (ballX < ballR || ballX > 1 - ballR) ballDX = -ballDX;
+                if (ballY < ballR) ballDY = -ballDY;
+
+                // Paddle collision
+                if (ballY > 0.95 - ballR && ballX > paddleX - paddleW / 2 && ballX < paddleX + paddleW / 2) {
+                    ballDY = -Math.abs(ballDY);
+                    ballDX = (ballX - paddleX) / (paddleW / 2) * 0.015;
+                }
+
+                // Ball out
+                if (ballY > 1) {
+                    lives--;
+                    if (lives <= 0) { gameOver = true; showEnd(false); return; }
+                    ballX = 0.5; ballY = 0.8; ballDX = 0.01; ballDY = -0.012;
+                }
+
+                // Brick collision
+                bricks.forEach(b => {
+                    if (b.alive && ballX > b.x && ballX < b.x + b.w && ballY > b.y && ballY < b.y + b.h) {
+                        b.alive = false;
+                        ballDY = -ballDY;
+                        score += 10;
+                        document.getElementById('breakout-score').textContent = score;
+                    }
+                });
+
+                if (bricks.every(b => !b.alive)) { gameOver = true; showEnd(true); return; }
+
+                // Draw
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Bricks
+                bricks.forEach(b => {
+                    if (b.alive) {
+                        ctx.fillStyle = b.color;
+                        ctx.fillRect(b.x * canvas.width, b.y * canvas.height, b.w * canvas.width, b.h * canvas.height);
+                    }
+                });
+
+                // Paddle
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+                ctx.fillRect((paddleX - paddleW / 2) * canvas.width, 0.95 * canvas.height, paddleW * canvas.width, paddleH * canvas.height);
+
+                // Ball
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+                ctx.beginPath();
+                ctx.arc(ballX * canvas.width, ballY * canvas.height, ballR * Math.min(canvas.width, canvas.height), 0, Math.PI * 2);
+                ctx.fill();
+
+                // Lives
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${canvas.height * 0.04}px 'Fira Code', monospace`;
+                ctx.textAlign = 'left';
+                ctx.fillText(`Lives: ${lives}`, 10, canvas.height - 10);
+            };
+
+            this.gameLoop = setInterval(gameLoop, 16);
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        startInvaders() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="invaders-score">0</span></div>
+                <canvas id="invaders-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('invaders-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                canvas.width = Math.max(200, container.clientWidth - padding);
+                canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            let playerX = 0.5, score = 0, gameOver = false;
+            let bullets = [], enemyBullets = [];
+            let enemies = [], enemyDir = 1, enemySpeed = 0.002;
+            const keysPressed = { left: false, right: false, space: false };
+            let canShoot = true;
+
+            const initEnemies = () => {
+                enemies = [];
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 8; c++) {
+                        enemies.push({ x: 0.1 + c * 0.1, y: 0.1 + r * 0.08, alive: true });
+                    }
+                }
+            };
+            initEnemies();
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = true;
+                if (e.key === 'ArrowRight') keysPressed.right = true;
+                if (e.key === ' ') { keysPressed.space = true; e.preventDefault(); }
+            };
+            const handleKeyUp = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = false;
+                if (e.key === 'ArrowRight') keysPressed.right = false;
+                if (e.key === ' ') keysPressed.space = false;
+            };
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            this.keyHandler = handleKeyDown;
+            this.keyUpHandler = handleKeyUp;
+
+            const showEnd = (won) => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+                const size = Math.min(canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = won ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(won ? 'YOU WIN!' : 'YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + size * 0.15);
+            };
+
+            const gameLoop = () => {
+                if (gameOver) return;
+
+                if (keysPressed.left) playerX = Math.max(0.05, playerX - 0.015);
+                if (keysPressed.right) playerX = Math.min(0.95, playerX + 0.015);
+                if (keysPressed.space && canShoot) {
+                    bullets.push({ x: playerX, y: 0.88 });
+                    canShoot = false;
+                    setTimeout(() => canShoot = true, 300);
+                }
+
+                // Move bullets
+                bullets = bullets.filter(b => { b.y -= 0.02; return b.y > 0; });
+                enemyBullets = enemyBullets.filter(b => { b.y += 0.01; return b.y < 1; });
+
+                // Move enemies
+                let moveDown = false;
+                enemies.forEach(e => { if (e.alive) { e.x += enemyDir * enemySpeed; if (e.x < 0.05 || e.x > 0.95) moveDown = true; } });
+                if (moveDown) {
+                    enemyDir *= -1;
+                    enemies.forEach(e => { if (e.alive) e.y += 0.05; });
+                }
+
+                // Enemy shooting
+                if (Math.random() < 0.02) {
+                    const alive = enemies.filter(e => e.alive);
+                    if (alive.length) {
+                        const shooter = alive[Math.floor(Math.random() * alive.length)];
+                        enemyBullets.push({ x: shooter.x, y: shooter.y });
+                    }
+                }
+
+                // Collision detection
+                bullets.forEach(b => {
+                    enemies.forEach(e => {
+                        if (e.alive && Math.abs(b.x - e.x) < 0.04 && Math.abs(b.y - e.y) < 0.04) {
+                            e.alive = false; b.y = -1; score += 10;
+                            document.getElementById('invaders-score').textContent = score;
+                        }
+                    });
+                });
+
+                for (const b of enemyBullets) {
+                    if (Math.abs(b.x - playerX) < 0.05 && b.y > 0.85) { showEnd(false); return; }
+                }
+
+                if (enemies.some(e => e.alive && e.y > 0.85)) { showEnd(false); return; }
+                if (enemies.every(e => !e.alive)) { showEnd(true); return; }
+
+                // Draw
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Player
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+                ctx.beginPath();
+                ctx.moveTo(playerX * canvas.width, 0.92 * canvas.height);
+                ctx.lineTo((playerX - 0.03) * canvas.width, 0.98 * canvas.height);
+                ctx.lineTo((playerX + 0.03) * canvas.width, 0.98 * canvas.height);
+                ctx.fill();
+
+                // Enemies
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--green');
+                enemies.forEach(e => {
+                    if (e.alive) ctx.fillRect((e.x - 0.03) * canvas.width, e.y * canvas.height, 0.06 * canvas.width, 0.05 * canvas.height);
+                });
+
+                // Bullets
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+                bullets.forEach(b => ctx.fillRect(b.x * canvas.width - 2, b.y * canvas.height, 4, 10));
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                enemyBullets.forEach(b => ctx.fillRect(b.x * canvas.width - 2, b.y * canvas.height, 4, 10));
+            };
+
+            this.gameLoop = setInterval(gameLoop, 16);
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        startAsteroids() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="asteroids-score">0</span></div>
+                <canvas id="asteroids-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('asteroids-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                canvas.width = Math.max(200, container.clientWidth - padding);
+                canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            let ship = { x: 0.5, y: 0.5, angle: -Math.PI / 2, dx: 0, dy: 0 };
+            let bullets = [], asteroids = [], score = 0, gameOver = false, lives = 3;
+            const keysPressed = { left: false, right: false, up: false, space: false };
+            let canShoot = true;
+
+            const spawnAsteroids = (count) => {
+                for (let i = 0; i < count; i++) {
+                    asteroids.push({
+                        x: Math.random(), y: Math.random(),
+                        dx: (Math.random() - 0.5) * 0.008,
+                        dy: (Math.random() - 0.5) * 0.008,
+                        size: 0.06 + Math.random() * 0.04
+                    });
+                }
+            };
+            spawnAsteroids(5);
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = true;
+                if (e.key === 'ArrowRight') keysPressed.right = true;
+                if (e.key === 'ArrowUp') keysPressed.up = true;
+                if (e.key === ' ') { keysPressed.space = true; e.preventDefault(); }
+            };
+            const handleKeyUp = (e) => {
+                if (e.key === 'ArrowLeft') keysPressed.left = false;
+                if (e.key === 'ArrowRight') keysPressed.right = false;
+                if (e.key === 'ArrowUp') keysPressed.up = false;
+                if (e.key === ' ') keysPressed.space = false;
+            };
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            this.keyHandler = handleKeyDown;
+            this.keyUpHandler = handleKeyUp;
+
+            const showEnd = () => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+                const size = Math.min(canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.05);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + size * 0.15);
+            };
+
+            const gameLoop = () => {
+                if (gameOver) return;
+
+                if (keysPressed.left) ship.angle -= 0.08;
+                if (keysPressed.right) ship.angle += 0.08;
+                if (keysPressed.up) {
+                    ship.dx += Math.cos(ship.angle) * 0.0005;
+                    ship.dy += Math.sin(ship.angle) * 0.0005;
+                }
+                if (keysPressed.space && canShoot) {
+                    bullets.push({ x: ship.x, y: ship.y, dx: Math.cos(ship.angle) * 0.02, dy: Math.sin(ship.angle) * 0.02, life: 50 });
+                    canShoot = false;
+                    setTimeout(() => canShoot = true, 200);
+                }
+
+                ship.x += ship.dx; ship.y += ship.dy;
+                ship.dx *= 0.99; ship.dy *= 0.99;
+                if (ship.x < 0) ship.x = 1; if (ship.x > 1) ship.x = 0;
+                if (ship.y < 0) ship.y = 1; if (ship.y > 1) ship.y = 0;
+
+                bullets = bullets.filter(b => { b.x += b.dx; b.y += b.dy; b.life--; return b.life > 0 && b.x > 0 && b.x < 1 && b.y > 0 && b.y < 1; });
+
+                asteroids.forEach(a => {
+                    a.x += a.dx; a.y += a.dy;
+                    if (a.x < 0) a.x = 1; if (a.x > 1) a.x = 0;
+                    if (a.y < 0) a.y = 1; if (a.y > 1) a.y = 0;
+                });
+
+                // Bullet-asteroid collision
+                bullets.forEach(b => {
+                    asteroids.forEach((a, i) => {
+                        if (Math.hypot(b.x - a.x, b.y - a.y) < a.size) {
+                            b.life = 0;
+                            if (a.size > 0.04) {
+                                asteroids.push({ x: a.x, y: a.y, dx: (Math.random() - 0.5) * 0.01, dy: (Math.random() - 0.5) * 0.01, size: a.size / 2 });
+                                asteroids.push({ x: a.x, y: a.y, dx: (Math.random() - 0.5) * 0.01, dy: (Math.random() - 0.5) * 0.01, size: a.size / 2 });
+                            }
+                            asteroids.splice(i, 1);
+                            score += 20;
+                            document.getElementById('asteroids-score').textContent = score;
+                        }
+                    });
+                });
+
+                // Ship-asteroid collision
+                for (const a of asteroids) {
+                    if (Math.hypot(ship.x - a.x, ship.y - a.y) < a.size) {
+                        lives--;
+                        ship.x = 0.5; ship.y = 0.5; ship.dx = 0; ship.dy = 0;
+                        if (lives <= 0) { showEnd(); return; }
+                        break;
+                    }
+                }
+
+                if (asteroids.length === 0) spawnAsteroids(5 + Math.floor(score / 200));
+
+                // Draw
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Ship
+                ctx.save();
+                ctx.translate(ship.x * canvas.width, ship.y * canvas.height);
+                ctx.rotate(ship.angle);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+                ctx.beginPath();
+                ctx.moveTo(15, 0);
+                ctx.lineTo(-10, -8);
+                ctx.lineTo(-10, 8);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
+                // Bullets
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+                bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x * canvas.width, b.y * canvas.height, 3, 0, Math.PI * 2); ctx.fill(); });
+
+                // Asteroids
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.lineWidth = 2;
+                asteroids.forEach(a => { ctx.beginPath(); ctx.arc(a.x * canvas.width, a.y * canvas.height, a.size * Math.min(canvas.width, canvas.height), 0, Math.PI * 2); ctx.stroke(); });
+
+                // Lives
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${canvas.height * 0.04}px 'Fira Code', monospace`;
+                ctx.textAlign = 'left';
+                ctx.fillText(`Lives: ${lives}`, 10, canvas.height - 10);
+            };
+
+            this.gameLoop = setInterval(gameLoop, 16);
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        startDino() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="dino-score">0</span></div>
+                <canvas id="dino-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('dino-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                canvas.width = Math.max(200, container.clientWidth - padding);
+                canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            const groundY = () => canvas.height * 0.8;
+            const dinoSize = () => canvas.height * 0.12;
+
+            let dinoY = 0, velocityY = 0, isJumping = false;
+            let obstacles = [], score = 0, gameOver = false, speed = 5;
+
+            const handleKey = (e) => {
+                if ((e.key === ' ' || e.key === 'ArrowUp') && !isJumping && !gameOver) {
+                    velocityY = -canvas.height * 0.035;
+                    isJumping = true;
+                    e.preventDefault();
+                }
+                if (gameOver && e.key === ' ') {
+                    dinoY = 0; velocityY = 0; isJumping = false;
+                    obstacles = []; score = 0; gameOver = false; speed = 5;
+                }
+            };
+            document.addEventListener('keydown', handleKey);
+            this.keyHandler = handleKey;
+
+            const showEnd = () => {
+                gameOver = true;
+                const size = Math.min(canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.08);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                ctx.fillText(`Score: ${Math.floor(score / 10)}`, canvas.width / 2, canvas.height / 2 + size * 0.02);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                ctx.fillText('SPACE to restart or Back to return', canvas.width / 2, canvas.height / 2 + size * 0.12);
+            };
+
+            const gameLoop = () => {
+                if (gameOver) return;
+
+                // Physics
+                velocityY += canvas.height * 0.002; // gravity
+                dinoY += velocityY;
+                if (dinoY >= 0) { dinoY = 0; isJumping = false; velocityY = 0; }
+
+                // Spawn obstacles
+                if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width * 0.6) {
+                    if (Math.random() < 0.02) {
+                        const h = canvas.height * (0.08 + Math.random() * 0.08);
+                        obstacles.push({ x: canvas.width, w: canvas.width * 0.05, h: h });
+                    }
+                }
+
+                // Move obstacles
+                obstacles = obstacles.filter(o => {
+                    o.x -= speed;
+                    return o.x > -o.w;
+                });
+
+                // Collision
+                const dino = { x: canvas.width * 0.1, y: groundY() + dinoY - dinoSize(), w: dinoSize() * 0.6, h: dinoSize() };
+                for (const o of obstacles) {
+                    if (dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y + dino.h > groundY() - o.h) {
+                        showEnd();
+                        return;
+                    }
+                }
+
+                // Score
+                score++;
+                if (score % 100 === 0) speed += 0.5;
+                document.getElementById('dino-score').textContent = Math.floor(score / 10);
+
+                // Draw
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Ground
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                ctx.fillRect(0, groundY(), canvas.width, 2);
+
+                // Dino
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--green');
+                ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+
+                // Obstacles
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                obstacles.forEach(o => ctx.fillRect(o.x, groundY() - o.h, o.w, o.h));
+            };
+
+            this.gameLoop = setInterval(gameLoop, 16);
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        start2048() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="2048-score">0</span></div>
+                <canvas id="2048-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('2048-canvas');
+            const ctx = canvas.getContext('2d');
+            const SIZE = 4;
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30, buttonHeight = 45, padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                const size = Math.min(availableWidth, availableHeight);
+                canvas.width = size;
+                canvas.height = size;
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            let grid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
+            let score = 0, gameOver = false, won = false;
+
+            const colors = {
+                0: '#1a1a2e', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563',
+                32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61',
+                512: '#edc850', 1024: '#edc53f', 2048: '#edc22e'
+            };
+
+            const addTile = () => {
+                const empty = [];
+                for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (grid[r][c] === 0) empty.push([r, c]);
+                if (empty.length) {
+                    const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+                    grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+                }
+            };
+
+            const slide = (row) => {
+                let arr = row.filter(x => x);
+                for (let i = 0; i < arr.length - 1; i++) {
+                    if (arr[i] === arr[i + 1]) {
+                        arr[i] *= 2;
+                        score += arr[i];
+                        if (arr[i] === 2048) won = true;
+                        arr.splice(i + 1, 1);
+                    }
+                }
+                while (arr.length < SIZE) arr.push(0);
+                return arr;
+            };
+
+            const move = (dir) => {
+                let moved = false;
+                const oldGrid = JSON.stringify(grid);
+
+                if (dir === 'left') {
+                    for (let r = 0; r < SIZE; r++) grid[r] = slide(grid[r]);
+                } else if (dir === 'right') {
+                    for (let r = 0; r < SIZE; r++) grid[r] = slide(grid[r].reverse()).reverse();
+                } else if (dir === 'up') {
+                    for (let c = 0; c < SIZE; c++) {
+                        let col = grid.map(row => row[c]);
+                        col = slide(col);
+                        for (let r = 0; r < SIZE; r++) grid[r][c] = col[r];
+                    }
+                } else if (dir === 'down') {
+                    for (let c = 0; c < SIZE; c++) {
+                        let col = grid.map(row => row[c]).reverse();
+                        col = slide(col).reverse();
+                        for (let r = 0; r < SIZE; r++) grid[r][c] = col[r];
+                    }
+                }
+
+                if (JSON.stringify(grid) !== oldGrid) { addTile(); moved = true; }
+                document.getElementById('2048-score').textContent = score;
+                checkGameOver();
+                draw();
+            };
+
+            const checkGameOver = () => {
+                for (let r = 0; r < SIZE; r++) {
+                    for (let c = 0; c < SIZE; c++) {
+                        if (grid[r][c] === 0) return;
+                        if (c < SIZE - 1 && grid[r][c] === grid[r][c + 1]) return;
+                        if (r < SIZE - 1 && grid[r][c] === grid[r + 1][c]) return;
+                    }
+                }
+                gameOver = true;
+            };
+
+            const draw = () => {
+                const cellSize = canvas.width / SIZE;
+                const gap = cellSize * 0.05;
+
+                ctx.fillStyle = '#0a0a15';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let r = 0; r < SIZE; r++) {
+                    for (let c = 0; c < SIZE; c++) {
+                        const val = grid[r][c];
+                        ctx.fillStyle = colors[val] || '#3c3a32';
+                        ctx.fillRect(c * cellSize + gap, r * cellSize + gap, cellSize - gap * 2, cellSize - gap * 2);
+
+                        if (val) {
+                            ctx.fillStyle = val <= 4 ? '#776e65' : '#f9f6f2';
+                            ctx.font = `bold ${cellSize * 0.35}px 'Fira Code', monospace`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(val, c * cellSize + cellSize / 2, r * cellSize + cellSize / 2);
+                        }
+                    }
+                }
+
+                if (won || gameOver) {
+                    const size = canvas.width;
+                    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = won ? getComputedStyle(document.documentElement).getPropertyValue('--green') : getComputedStyle(document.documentElement).getPropertyValue('--red');
+                    ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(won ? 'YOU WIN!' : 'YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.08);
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                    ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
+                    ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.02);
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--comment');
+                    ctx.font = `${size * 0.04}px 'Fira Code', monospace`;
+                    ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + size * 0.12);
+                }
+            };
+
+            const handleKey = (e) => {
+                if (gameOver || won) return;
+                if (e.key === 'ArrowLeft') move('left');
+                else if (e.key === 'ArrowRight') move('right');
+                else if (e.key === 'ArrowUp') move('up');
+                else if (e.key === 'ArrowDown') move('down');
+                e.preventDefault();
+            };
+            document.addEventListener('keydown', handleKey);
+            this.keyHandler = handleKey;
+
+            addTile();
+            addTile();
+            draw();
+
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
         },
 
         cleanup() {

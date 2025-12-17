@@ -790,25 +790,29 @@ body.resizing-terminal * {
 /* === GAMES APP === */
 
 .games-menu {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    flex: 1;
     overflow: hidden;
+    height: 100%;
+    align-content: stretch;
 }
 
 .game-option {
-    padding: 14px;
+    padding: 12px;
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--comment);
     border-radius: 8px;
     cursor: pointer;
     transition: border-color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .game-option:hover {
     border-color: var(--green);
-    transform: translateX(4px);
+    transform: scale(1.02);
 }
 
 .game-option-title {
