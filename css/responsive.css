@@ -1,0 +1,144 @@
+/* ================================================
+   RESPONSIVE STYLES
+   ================================================ */
+
+@media (max-width: 600px) {
+    #terminal {
+        height: 95vh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    .ascii-art {
+        font-size: 0.5em;
+    }
+
+    /* Taskbar adjustments for mobile */
+    #taskbar {
+        height: 36px;
+        padding: 0 4px;
+        gap: 4px;
+    }
+
+    #taskbar-start {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .taskbar-window-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    #taskbar-clock {
+        font-size: 10px;
+        min-width: 40px;
+    }
+
+    /* Desktop icons adjustments */
+    .desktop-icons {
+        gap: 10px;
+        top: 10px;
+        left: 10px;
+    }
+
+    .desktop-icon {
+        padding: 8px 10px;
+    }
+
+    .icon-image {
+        font-size: 28px;
+    }
+
+    .icon-image svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .icon-label {
+        font-size: 9px;
+    }
+
+    /* App windows adjustments */
+    .app-window {
+        min-width: 260px;
+        min-height: 160px;
+    }
+
+    .app-window-title {
+        font-size: 11px;
+    }
+
+    /* Games menu adjustments */
+    .games-menu {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .game-option {
+        padding: 10px;
+    }
+
+    .game-option-title {
+        font-size: 14px;
+    }
+
+    /* Theme picker adjustments */
+    .theme-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Gallery adjustments */
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Boot overlay adjustments */
+    #boot-content {
+        font-size: 12px;
+        padding: 15px;
+    }
+
+    .boot-progress {
+        width: 250px;
+        height: 16px;
+    }
+
+    /* Achievement toast adjustments */
+    .achievement-toast {
+        bottom: 50px;
+        right: 10px;
+        left: 10px;
+        padding: 10px 12px;
+    }
+
+    .achievement-icon {
+        font-size: 24px;
+    }
+
+    .achievement-name {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .ascii-art {
+        font-size: 0.4em;
+    }
+
+    #terminal-body {
+        padding: 0.5rem;
+    }
+
+    .prompt {
+        font-size: 0.9em;
+    }
+
+    #command-input {
+        font-size: 0.9em;
+    }
+}

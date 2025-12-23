@@ -1,0 +1,228 @@
+/* ================================================
+   TERMINAL STYLES
+   ================================================ */
+
+#terminal {
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    max-height: 600px;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+}
+
+#terminal-header {
+    background-color: var(--comment);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--background);
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+}
+
+#terminal-header.dragging {
+    cursor: grabbing;
+}
+
+body.dragging-terminal {
+    user-select: none;
+}
+
+#terminal-header .buttons {
+    display: flex;
+    gap: 8px;
+}
+
+#terminal-header .button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.button.red { background-color: #ff5f56; }
+.button.yellow { background-color: #ffbd2e; }
+.button.green { background-color: #27c93f; }
+
+#terminal-body {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    word-wrap: break-word;
+    position: relative;
+}
+
+#terminal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#terminal-body::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+#terminal-body::-webkit-scrollbar-thumb {
+    background-color: var(--comment);
+    border-radius: 4px;
+}
+
+#terminal-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--foreground);
+}
+
+/* Input Styles */
+.line {
+    line-height: 1.5;
+}
+
+.prompt-line {
+    display: flex;
+    align-items: center;
+}
+
+.prompt {
+    color: var(--green);
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+#command-input {
+    background: transparent;
+    border: none;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 1em;
+    flex-grow: 1;
+    width: 100%;
+    outline: none;
+    caret-color: transparent;
+    padding: 0;
+}
+
+#command-input:disabled {
+    background-color: transparent;
+}
+
+.input-container {
+    position: relative;
+    flex: 1;
+}
+
+.input-mirror {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font: inherit;
+    pointer-events: none;
+    padding: 0;
+}
+
+.cursor {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 1.2em;
+    background-color: var(--foreground);
+    animation: blink 1s step-end infinite;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cursor-hidden {
+    opacity: 0;
+}
+
+@keyframes blink {
+    from, to { background-color: transparent; }
+    50% { background-color: var(--foreground); }
+}
+
+/* Resize Handles */
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+}
+
+.resize-handle-n {
+    top: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: n-resize;
+}
+
+.resize-handle-s {
+    bottom: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: s-resize;
+}
+
+.resize-handle-e {
+    right: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: e-resize;
+}
+
+.resize-handle-w {
+    left: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: w-resize;
+}
+
+.resize-handle-ne {
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: ne-resize;
+}
+
+.resize-handle-nw {
+    top: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;
+}
+
+.resize-handle-se {
+    bottom: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: se-resize;
+}
+
+.resize-handle-sw {
+    bottom: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;
+}
+
+body.resizing-terminal {
+    user-select: none;
+}
+
+body.resizing-terminal * {
+    cursor: inherit !important;
+}

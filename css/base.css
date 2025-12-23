@@ -1,0 +1,82 @@
+/* ================================================
+   BASE STYLES - Global defaults
+   ================================================ */
+
+/* Theme transition */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+}
+
+/* Text Styles */
+a {
+    color: var(--cyan);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.output-command {
+    color: var(--magenta);
+}
+
+.output-text {
+    white-space: pre-wrap;
+}
+
+.highlight {
+    color: var(--yellow);
+    font-weight: bold;
+}
+
+.title-blue {
+    color: var(--blue);
+}
+
+.detail-green {
+    color: var(--green);
+}
+
+.detail-cyan {
+    color: var(--cyan);
+}
+
+.comment {
+    color: var(--comment);
+}
+
+.error {
+    color: var(--red);
+}
+
+.ascii-art {
+    color: var(--green);
+    font-weight: bold;
+    font-size: 0.8em;
+    line-height: 1.2;
+    white-space: pre;
+}

@@ -15,26 +15,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+    <!-- Boot Sequence Overlay -->
+    <div id="boot-overlay">
+        <div id="boot-content"></div>
+    </div>
+
+    <!-- Particle Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu"></div>
+
     <!-- Desktop Layer -->
     <div id="desktop">
         <div class="desktop-icons">
             <div class="desktop-icon" data-app="themes">
-                <div class="icon-image">🎨</div>
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a10 10 0 0 1 0 20"/>
+                        <circle cx="12" cy="12" r="4" fill="var(--magenta)"/>
+                        <circle cx="12" cy="5" r="2" fill="var(--red)"/>
+                        <circle cx="18" cy="10" r="2" fill="var(--yellow)"/>
+                        <circle cx="16" cy="17" r="2" fill="var(--green)"/>
+                        <circle cx="8" cy="17" r="2" fill="var(--cyan)"/>
+                        <circle cx="6" cy="10" r="2" fill="var(--blue)"/>
+                    </svg>
+                </div>
                 <span class="icon-label">Themes</span>
             </div>
             <div class="desktop-icon" data-app="player">
-                <div class="icon-image">🎬</div>
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--cyan)" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8"/>
+                        <path d="M12 17v4"/>
+                        <text x="12" y="12" text-anchor="middle" font-size="6" fill="var(--green)" stroke="none">ASCII</text>
+                    </svg>
+                </div>
                 <span class="icon-label">ASCII Player</span>
             </div>
             <div class="desktop-icon" data-app="music">
-                <div class="icon-image">🎵</div>
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--magenta)" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"/>
+                        <circle cx="6" cy="18" r="3" fill="var(--magenta)"/>
+                        <circle cx="18" cy="16" r="3" fill="var(--magenta)"/>
+                    </svg>
+                </div>
                 <span class="icon-label">Music</span>
             </div>
             <div class="desktop-icon" data-app="games">
-                <div class="icon-image">🎮</div>
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--green)" stroke-width="2">
+                        <rect x="2" y="6" width="20" height="12" rx="3"/>
+                        <circle cx="8" cy="12" r="2" fill="var(--yellow)"/>
+                        <circle cx="16" cy="10" r="1.5" fill="var(--red)"/>
+                        <circle cx="18" cy="12" r="1.5" fill="var(--blue)"/>
+                        <circle cx="16" cy="14" r="1.5" fill="var(--green)"/>
+                        <circle cx="14" cy="12" r="1.5" fill="var(--yellow)"/>
+                    </svg>
+                </div>
                 <span class="icon-label">Games</span>
             </div>
         </div>
@@ -42,6 +86,33 @@
 
     <!-- App Windows Container -->
     <div id="app-windows"></div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+        <div id="taskbar-start" title="Focus Terminal">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>Terminal</span>
+        </div>
+        <div id="taskbar-divider"></div>
+        <div id="taskbar-windows"></div>
+        <div id="taskbar-tray">
+            <div class="tray-icon" id="taskbar-crt" title="Toggle CRT Effect">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+            </div>
+            <div class="tray-divider"></div>
+            <div id="taskbar-clock">
+                <span id="clock-time"></span>
+                <span id="clock-date"></span>
+            </div>
+        </div>
+    </div>
 
     <div id="terminal">
         <!-- Resize Handles -->
@@ -75,7 +146,7 @@
         </div>
     </div>
 
-    <!-- Main Script -->
-    <script src="script.js"></script>
+    <!-- Main Script (ES6 Module) -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

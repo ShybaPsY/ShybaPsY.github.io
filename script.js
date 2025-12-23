@@ -42,6 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             this.current = themeName;
+
+            // Track achievement
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.trackTheme(themeName);
+            }
+
             return `Theme changed to: <span class="highlight">${theme.name}</span>`;
         },
 
@@ -85,8 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
             windowEl.innerHTML = `
                 ${resizeHandles}
                 <div class="app-window-header">
+                    <div class="app-window-buttons">
+                        <div class="app-window-btn red" data-action="close"></div>
+                        <div class="app-window-btn yellow" data-action="minimize"></div>
+                        <div class="app-window-btn green" data-action="maximize"></div>
+                    </div>
                     <span class="app-window-title">${title}</span>
-                    <div class="app-window-close"></div>
                 </div>
                 <div class="app-window-body">${content}</div>
             `;
@@ -95,8 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
             this.setupWindowDrag(windowEl);
             if (resizable) this.setupWindowResize(windowEl);
 
-            windowEl.querySelector('.app-window-close').addEventListener('click', () => {
+            // Button handlers
+            windowEl.querySelector('.app-window-btn.red').addEventListener('click', (e) => {
+                e.stopPropagation();
                 this.closeWindow(appId);
+            });
+            windowEl.querySelector('.app-window-btn.yellow').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.minimizeWindow(appId);
+            });
+            windowEl.querySelector('.app-window-btn.green').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.maximizeWindow(appId);
             });
 
             windowEl.addEventListener('mousedown', () => {
@@ -105,6 +125,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.windows[appId] = windowEl;
             this.focusWindow(appId);
+
+            // Add to taskbar
+            if (typeof Taskbar !== 'undefined') {
+                Taskbar.addWindow(appId, title);
+            }
+
             return windowEl;
         },
 
@@ -197,8 +223,75 @@ document.addEventListener('DOMContentLoaded', () => {
             if (appId === 'player') ASCIIPlayerApp.stop();
             if (appId === 'games') GamesApp.cleanup();
 
-            windowEl.remove();
-            delete this.windows[appId];
+            // Animate close
+            windowEl.classList.add('closing');
+            setTimeout(() => {
+                windowEl.remove();
+                delete this.windows[appId];
+
+                // Remove from taskbar
+                if (typeof Taskbar !== 'undefined') {
+                    Taskbar.removeWindow(appId);
+                }
+            }, 200);
+        },
+
+        minimizeWindow(appId) {
+            const windowEl = this.windows[appId];
+            if (!windowEl || windowEl.classList.contains('minimized')) return;
+
+            windowEl.classList.add('minimizing');
+            setTimeout(() => {
+                windowEl.classList.remove('minimizing');
+                windowEl.classList.add('minimized');
+
+                if (typeof Taskbar !== 'undefined') {
+                    Taskbar.updateWindow(appId, true);
+                }
+            }, 300);
+        },
+
+        restoreWindow(appId) {
+            const windowEl = this.windows[appId];
+            if (!windowEl || !windowEl.classList.contains('minimized')) return;
+
+            windowEl.classList.remove('minimized');
+            windowEl.classList.add('restoring');
+            setTimeout(() => {
+                windowEl.classList.remove('restoring');
+            }, 300);
+
+            this.focusWindow(appId);
+
+            if (typeof Taskbar !== 'undefined') {
+                Taskbar.updateWindow(appId, false);
+            }
+        },
+
+        maximizeWindow(appId) {
+            const windowEl = this.windows[appId];
+            if (!windowEl) return;
+
+            if (windowEl.classList.contains('maximized')) {
+                // Restore to previous size
+                windowEl.style.width = windowEl.dataset.prevWidth || '400px';
+                windowEl.style.height = windowEl.dataset.prevHeight || '300px';
+                windowEl.style.left = windowEl.dataset.prevLeft || '150px';
+                windowEl.style.top = windowEl.dataset.prevTop || '80px';
+                windowEl.classList.remove('maximized');
+            } else {
+                // Save current position and maximize
+                windowEl.dataset.prevWidth = windowEl.style.width;
+                windowEl.dataset.prevHeight = windowEl.style.height;
+                windowEl.dataset.prevLeft = windowEl.style.left;
+                windowEl.dataset.prevTop = windowEl.style.top;
+
+                windowEl.style.width = '100%';
+                windowEl.style.height = 'calc(100% - 40px)'; // Account for taskbar
+                windowEl.style.left = '0';
+                windowEl.style.top = '0';
+                windowEl.classList.add('maximized');
+            }
         }
     };
 
@@ -240,6 +333,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.classList.add('active');
                 });
             });
+
+            // Track app usage
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.trackApp('themes');
+            }
         }
     };
 
@@ -394,6 +492,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 this.resizeObserver.observe(display);
             }
+
+            // Track app usage
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.trackApp('player');
+            }
         },
 
         play(animName) {
@@ -502,6 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     playBtn.classList.add('playing');
                 }
             });
+
+            // Track app usage
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.trackApp('music');
+            }
         },
 
         play() {
@@ -519,6 +627,11 @@ document.addEventListener('DOMContentLoaded', () => {
             this.audio.addEventListener('playing', () => {
                 this.isPlaying = true;
                 if (statusEl) statusEl.textContent = `Playing: ${station.name}`;
+
+                // Track music lover achievement
+                if (typeof AchievementManager !== 'undefined') {
+                    AchievementManager.check('music_lover');
+                }
                 this.startVisualizer();
             });
 
@@ -581,6 +694,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const content = `<div class="games-menu" id="games-content"></div>`;
             WindowManager.createWindow('games', 'Mini Games', 420, 480, content);
             this.showMenu();
+
+            // Track app usage
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.trackApp('games');
+            }
         },
 
         showMenu() {
@@ -622,6 +740,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="game-option-title">🔢 2048</div>
                     <div class="game-option-desc">Arrow keys • Merge tiles!</div>
                 </div>
+                <div class="game-option" data-game="flappy">
+                    <div class="game-option-title">🐦 Flappy Bird</div>
+                    <div class="game-option-desc">Space/Click • Fly!</div>
+                </div>
+                <div class="game-option" data-game="minesweeper">
+                    <div class="game-option-title">💣 Minesweeper</div>
+                    <div class="game-option-desc">Click • Find mines!</div>
+                </div>
+                <div class="game-option" data-game="memory">
+                    <div class="game-option-title">🃏 Memory</div>
+                    <div class="game-option-desc">Click • Match pairs!</div>
+                </div>
             `;
 
             container.querySelectorAll('.game-option').forEach(opt => {
@@ -635,6 +765,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (game === 'asteroids') this.startAsteroids();
                     else if (game === 'dino') this.startDino();
                     else if (game === '2048') this.start2048();
+                    else if (game === 'flappy') this.startFlappy();
+                    else if (game === 'minesweeper') this.startMinesweeper();
+                    else if (game === 'memory') this.startMemory();
+
+                    // Track achievement
+                    if (typeof AchievementManager !== 'undefined') {
+                        AchievementManager.check('gamer');
+                    }
                 });
             });
         },
@@ -1949,6 +2087,430 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('game-back').addEventListener('click', () => this.showMenu());
         },
 
+        startFlappy() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+            container.innerHTML = `
+                <div class="game-score">Score: <span id="flappy-score">0</span></div>
+                <canvas id="flappy-canvas" class="game-canvas"></canvas>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const canvas = document.getElementById('flappy-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const resizeCanvas = () => {
+                const scoreHeight = 30;
+                const buttonHeight = 45;
+                const padding = 20;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+                canvas.width = Math.max(200, Math.min(availableWidth, 400));
+                canvas.height = Math.max(300, Math.min(availableHeight, 500));
+            };
+            resizeCanvas();
+
+            if (window.ResizeObserver) {
+                this.resizeObserver = new ResizeObserver(resizeCanvas);
+                this.resizeObserver.observe(container);
+            }
+
+            const bird = { x: 50, y: 150, velocity: 0, size: 20 };
+            const gravity = 0.5;
+            const jumpForce = -8;
+            const pipes = [];
+            const pipeWidth = 50;
+            const pipeGap = 120;
+            let score = 0;
+            let gameOver = false;
+            let started = false;
+
+            const jump = () => {
+                if (gameOver) return;
+                if (!started) started = true;
+                bird.velocity = jumpForce;
+            };
+
+            const handleKey = (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    jump();
+                }
+            };
+
+            const handleClick = () => jump();
+
+            document.addEventListener('keydown', handleKey);
+            canvas.addEventListener('click', handleClick);
+            this.keyHandler = handleKey;
+
+            const spawnPipe = () => {
+                const minHeight = 50;
+                const maxHeight = canvas.height - pipeGap - minHeight;
+                const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+                pipes.push({
+                    x: canvas.width,
+                    topHeight: topHeight,
+                    passed: false
+                });
+            };
+
+            const showEndScreen = () => {
+                gameOver = true;
+                clearInterval(this.gameLoop);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--red');
+                ctx.font = 'bold 24px "Fira Code", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                ctx.font = '16px "Fira Code", monospace';
+                ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
+            };
+
+            const update = () => {
+                if (gameOver || !started) return;
+
+                bird.velocity += gravity;
+                bird.y += bird.velocity;
+
+                // Check boundaries
+                if (bird.y < 0 || bird.y + bird.size > canvas.height) {
+                    showEndScreen();
+                    return;
+                }
+
+                // Move pipes
+                for (let i = pipes.length - 1; i >= 0; i--) {
+                    pipes[i].x -= 3;
+
+                    // Check collision
+                    if (bird.x + bird.size > pipes[i].x && bird.x < pipes[i].x + pipeWidth) {
+                        if (bird.y < pipes[i].topHeight || bird.y + bird.size > pipes[i].topHeight + pipeGap) {
+                            showEndScreen();
+                            return;
+                        }
+                    }
+
+                    // Score
+                    if (!pipes[i].passed && pipes[i].x + pipeWidth < bird.x) {
+                        pipes[i].passed = true;
+                        score++;
+                        document.getElementById('flappy-score').textContent = score;
+                    }
+
+                    // Remove off-screen pipes
+                    if (pipes[i].x + pipeWidth < 0) {
+                        pipes.splice(i, 1);
+                    }
+                }
+            };
+
+            const draw = () => {
+                const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
+                const pipeColor = getComputedStyle(document.documentElement).getPropertyValue('--green');
+                const birdColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
+
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw pipes
+                ctx.fillStyle = pipeColor;
+                pipes.forEach(pipe => {
+                    ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                    ctx.fillRect(pipe.x, pipe.topHeight + pipeGap, pipeWidth, canvas.height);
+                });
+
+                // Draw bird
+                ctx.fillStyle = birdColor;
+                ctx.beginPath();
+                ctx.arc(bird.x + bird.size/2, bird.y + bird.size/2, bird.size/2, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (!started && !gameOver) {
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--foreground');
+                    ctx.font = '14px "Fira Code", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Press SPACE or Click to start', canvas.width / 2, canvas.height / 2);
+                }
+            };
+
+            let frameCount = 0;
+            this.gameLoop = setInterval(() => {
+                update();
+                draw();
+                frameCount++;
+                if (started && !gameOver && frameCount % 90 === 0) {
+                    spawnPipe();
+                }
+            }, 1000 / 60);
+
+            document.getElementById('game-back').addEventListener('click', () => {
+                canvas.removeEventListener('click', handleClick);
+                this.showMenu();
+            });
+        },
+
+        startMinesweeper() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+
+            const gridSize = 8;
+            const mineCount = 10;
+
+            container.innerHTML = `
+                <div class="game-score">Mines: <span id="mine-count">${mineCount}</span></div>
+                <div id="minesweeper-grid" style="display: grid; grid-template-columns: repeat(${gridSize}, 30px); gap: 2px; justify-content: center;"></div>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            const grid = [];
+            const revealed = [];
+            const flagged = [];
+            let gameOver = false;
+            let won = false;
+
+            // Initialize grid
+            for (let i = 0; i < gridSize; i++) {
+                grid[i] = [];
+                revealed[i] = [];
+                flagged[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    grid[i][j] = 0;
+                    revealed[i][j] = false;
+                    flagged[i][j] = false;
+                }
+            }
+
+            // Place mines
+            let minesPlaced = 0;
+            while (minesPlaced < mineCount) {
+                const x = Math.floor(Math.random() * gridSize);
+                const y = Math.floor(Math.random() * gridSize);
+                if (grid[x][y] !== -1) {
+                    grid[x][y] = -1;
+                    minesPlaced++;
+                }
+            }
+
+            // Calculate numbers
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (grid[i][j] === -1) continue;
+                    let count = 0;
+                    for (let di = -1; di <= 1; di++) {
+                        for (let dj = -1; dj <= 1; dj++) {
+                            const ni = i + di, nj = j + dj;
+                            if (ni >= 0 && ni < gridSize && nj >= 0 && nj < gridSize && grid[ni][nj] === -1) {
+                                count++;
+                            }
+                        }
+                    }
+                    grid[i][j] = count;
+                }
+            }
+
+            const numberColors = ['', 'blue', 'green', 'red', 'darkblue', 'darkred', 'cyan', 'black', 'gray'];
+
+            const revealCell = (x, y) => {
+                if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+                if (revealed[x][y] || flagged[x][y]) return;
+
+                revealed[x][y] = true;
+
+                if (grid[x][y] === 0) {
+                    for (let di = -1; di <= 1; di++) {
+                        for (let dj = -1; dj <= 1; dj++) {
+                            revealCell(x + di, y + dj);
+                        }
+                    }
+                }
+            };
+
+            const checkWin = () => {
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if (grid[i][j] !== -1 && !revealed[i][j]) return false;
+                    }
+                }
+                return true;
+            };
+
+            const renderGrid = () => {
+                const gridEl = document.getElementById('minesweeper-grid');
+                gridEl.innerHTML = '';
+
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        const cell = document.createElement('div');
+                        cell.style.cssText = `
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 14px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            border-radius: 4px;
+                            user-select: none;
+                        `;
+
+                        if (revealed[i][j]) {
+                            cell.style.backgroundColor = 'var(--background)';
+                            cell.style.border = '1px solid var(--comment)';
+                            if (grid[i][j] === -1) {
+                                cell.textContent = '💣';
+                            } else if (grid[i][j] > 0) {
+                                cell.textContent = grid[i][j];
+                                cell.style.color = `var(--${numberColors[grid[i][j]] || 'foreground'})`;
+                            }
+                        } else {
+                            cell.style.backgroundColor = 'var(--comment)';
+                            cell.style.border = '1px solid var(--foreground)';
+                            if (flagged[i][j]) {
+                                cell.textContent = '🚩';
+                            }
+                        }
+
+                        const x = i, y = j;
+                        cell.addEventListener('click', () => {
+                            if (gameOver || won) return;
+                            if (flagged[x][y]) return;
+
+                            if (grid[x][y] === -1) {
+                                // Game over
+                                gameOver = true;
+                                for (let a = 0; a < gridSize; a++) {
+                                    for (let b = 0; b < gridSize; b++) {
+                                        if (grid[a][b] === -1) revealed[a][b] = true;
+                                    }
+                                }
+                                renderGrid();
+                                document.getElementById('mine-count').textContent = 'LOST!';
+                            } else {
+                                revealCell(x, y);
+                                renderGrid();
+                                if (checkWin()) {
+                                    won = true;
+                                    document.getElementById('mine-count').textContent = 'WON!';
+                                }
+                            }
+                        });
+
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            if (gameOver || won || revealed[x][y]) return;
+                            flagged[x][y] = !flagged[x][y];
+                            renderGrid();
+                        });
+
+                        gridEl.appendChild(cell);
+                    }
+                }
+            };
+
+            renderGrid();
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
+        startMemory() {
+            const container = document.getElementById('games-content');
+            container.className = 'game-canvas-container';
+
+            const symbols = ['🍎', '🍊', '🍋', '🍇', '🍉', '🍓', '🥝', '🍒'];
+            const pairs = [...symbols, ...symbols];
+            const shuffled = pairs.sort(() => Math.random() - 0.5);
+
+            container.innerHTML = `
+                <div class="game-score">Moves: <span id="memory-moves">0</span></div>
+                <div id="memory-grid" style="display: grid; grid-template-columns: repeat(4, 60px); gap: 8px; justify-content: center;"></div>
+                <button class="game-back-btn" id="game-back">Back</button>
+            `;
+
+            let flipped = [];
+            let matched = [];
+            let moves = 0;
+            let canFlip = true;
+
+            const renderGrid = () => {
+                const gridEl = document.getElementById('memory-grid');
+                gridEl.innerHTML = '';
+
+                shuffled.forEach((symbol, index) => {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                        width: 60px;
+                        height: 60px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 28px;
+                        cursor: pointer;
+                        border-radius: 8px;
+                        transition: transform 0.3s ease;
+                        user-select: none;
+                    `;
+
+                    const isFlipped = flipped.includes(index) || matched.includes(index);
+
+                    if (isFlipped) {
+                        card.style.backgroundColor = 'var(--background)';
+                        card.style.border = '2px solid var(--green)';
+                        card.textContent = symbol;
+                    } else {
+                        card.style.backgroundColor = 'var(--comment)';
+                        card.style.border = '2px solid var(--foreground)';
+                        card.textContent = '?';
+                    }
+
+                    if (matched.includes(index)) {
+                        card.style.opacity = '0.6';
+                    }
+
+                    card.addEventListener('click', () => {
+                        if (!canFlip || flipped.includes(index) || matched.includes(index)) return;
+
+                        flipped.push(index);
+                        renderGrid();
+
+                        if (flipped.length === 2) {
+                            canFlip = false;
+                            moves++;
+                            document.getElementById('memory-moves').textContent = moves;
+
+                            const [first, second] = flipped;
+                            if (shuffled[first] === shuffled[second]) {
+                                matched.push(first, second);
+                                flipped = [];
+                                canFlip = true;
+                                renderGrid();
+
+                                if (matched.length === shuffled.length) {
+                                    document.getElementById('memory-moves').textContent = `${moves} - WIN!`;
+                                }
+                            } else {
+                                setTimeout(() => {
+                                    flipped = [];
+                                    canFlip = true;
+                                    renderGrid();
+                                }, 1000);
+                            }
+                        }
+                    });
+
+                    gridEl.appendChild(card);
+                });
+            };
+
+            renderGrid();
+            document.getElementById('game-back').addEventListener('click', () => this.showMenu());
+        },
+
         cleanup() {
             if (this.gameLoop) {
                 clearInterval(this.gameLoop);
@@ -2486,6 +3048,8 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="output-command">clear</span>          - Limpa a tela.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
   <span class="output-command">quote</span>          - Exibe uma citação inspiradora sobre programação.
+  <span class="output-command">conquistas</span>     - Lista suas conquistas desbloqueadas.
+  <span class="output-command">crt</span>            - Ativa/desativa efeito CRT no monitor.
   <span class="output-command">extras</span>         - Comandos extras e exploração.`,
 
         sobre: `
@@ -2659,7 +3223,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   Usuário não está no arquivo sudoers. Este incidente será reportado. ;)`,
 
-        coffee: `
+        coffee: function() {
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.check('coffee_lover');
+            }
+            return `
   <span class="detail-cyan">
       ( (
        ) )
@@ -2670,9 +3238,13 @@ document.addEventListener('DOMContentLoaded', () => {
   </span>
   <span class="highlight">☕ Pegando um café...</span>
 
-  <span class="comment">Programador sem café = erro de compilação!</span>`,
+  <span class="comment">Programador sem café = erro de compilação!</span>`;
+        },
 
         hack: async function() {
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.check('hacker');
+            }
             const lines = [
                 '<span class="detail-green">[✓] Inicializando sequência de hack...</span>',
                 '<span class="comment">Conectando ao mainframe...</span>',
@@ -2726,14 +3298,19 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="comment">Você digitou 'sl' em vez de 'ls'!</span>
   <span class="highlight">🚂 Choo choo!</span>`,
 
-        secret: `
+        secret: function() {
+            if (typeof AchievementManager !== 'undefined') {
+                AchievementManager.check('curious');
+            }
+            return `
   <span class="highlight">🎉 Você encontrou um comando secreto!</span>
 
   <span class="comment">Para ver todos os easter eggs e comandos de exploração, digite:</span>
 
   <span class="output-command">extras</span>
 
-  <span class="comment">Continue explorando para achar mais surpresas! 🔍</span>`,
+  <span class="comment">Continue explorando para achar mais surpresas! 🔍</span>`;
+        },
 
         // === API Commands ===
         github: async function() {
@@ -2776,6 +3353,21 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         'open games': function() {
             GamesApp.open();
             return '<span class="detail-green">Abrindo Mini Games...</span>';
+        },
+
+        conquistas: function() {
+            return AchievementManager.listAchievements();
+        },
+
+        crt: function() {
+            document.body.classList.toggle('crt-enabled');
+            const crtBtn = document.getElementById('taskbar-crt');
+            if (crtBtn) crtBtn.classList.toggle('active');
+            const enabled = document.body.classList.contains('crt-enabled');
+            localStorage.setItem('crt-enabled', enabled);
+            return enabled
+                ? '<span class="detail-green">Efeito CRT ativado!</span> Aproveite a nostalgia.'
+                : '<span class="comment">Efeito CRT desativado.</span>';
         },
     };
 
@@ -2827,6 +3419,10 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         // Desktop aliases
         'apps': 'desktop',
         'aplicativos': 'desktop',
+        // Achievements aliases
+        'achievements': 'conquistas',
+        'badges': 'conquistas',
+        'trofeus': 'conquistas',
     };
 
     // === TAB COMPLETION ===
@@ -3114,6 +3710,11 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         historyIndex = commandHistory.length;
         commandInput.value = '';
 
+        // Track first command achievement
+        if (command && typeof AchievementManager !== 'undefined') {
+            AchievementManager.check('first_command');
+        }
+
         // Resolve alias if exists
         if (aliases[normalizedCommand]) {
             normalizedCommand = aliases[normalizedCommand];
@@ -3128,6 +3729,11 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
                 ? "<span class=\"highlight\">Efeito Matrix ativado.</span> Digite '<span class=\"output-command\">clear</span>' para desativar."
                 : "<span class=\"comment\">Efeito Matrix já está ativo. Use '<span class=\"output-command\">clear</span>' para desativar.</span>";
             output.appendChild(infoLine);
+
+            // Track matrix achievement
+            if (matrixStarted && typeof AchievementManager !== 'undefined') {
+                AchievementManager.check('matrix_fan');
+            }
 
             commandInput.disabled = false;
             commandInput.focus();
@@ -3240,6 +3846,390 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         }
     });
 
+    // === BOOT SEQUENCE ===
+    const BootSequence = {
+        overlay: document.getElementById('boot-overlay'),
+        content: document.getElementById('boot-content'),
+
+        async run() {
+            const lines = [
+                'GABRIEL_OS BIOS v1.0',
+                'Copyright (C) 2024 Gabriel Mendes Lopes',
+                '',
+                'Detecting hardware...',
+                '  CPU: JavaScript V8 Engine @ ∞MHz',
+                '  RAM: 16384 KB OK',
+                '  GPU: CSS3/Canvas Renderer',
+                '',
+                'Loading modules...',
+            ];
+
+            for (const line of lines) {
+                this.content.innerHTML += line + '\n';
+                await this.delay(50);
+            }
+
+            const modules = [
+                'ThemeManager',
+                'WindowManager',
+                'GamesApp',
+                'MusicApp',
+                'ParticleSystem',
+                'AchievementEngine'
+            ];
+
+            for (const mod of modules) {
+                this.content.innerHTML += `  [OK] ${mod}\n`;
+                await this.delay(80);
+            }
+
+            this.content.innerHTML += '\nStarting gabriel_os...\n';
+            await this.delay(300);
+
+            this.content.innerHTML += '\n<div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>';
+
+            const progressBar = document.getElementById('boot-progress');
+            for (let i = 0; i <= 100; i += 5) {
+                progressBar.style.width = i + '%';
+                await this.delay(30);
+            }
+
+            await this.delay(200);
+            this.overlay.classList.add('fade-out');
+            await this.delay(500);
+            this.overlay.classList.add('hidden');
+        },
+
+        delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    };
+
+    // === TASKBAR ===
+    const Taskbar = {
+        clockInterval: null,
+
+        init() {
+            this.updateClock();
+            this.clockInterval = setInterval(() => this.updateClock(), 1000);
+
+            // CRT toggle button
+            const crtBtn = document.getElementById('taskbar-crt');
+            if (crtBtn) {
+                const crtEnabled = localStorage.getItem('crt-enabled') === 'true';
+                if (crtEnabled) {
+                    document.body.classList.add('crt-enabled');
+                    crtBtn.classList.add('active');
+                }
+
+                crtBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('crt-enabled');
+                    crtBtn.classList.toggle('active');
+                    localStorage.setItem('crt-enabled', document.body.classList.contains('crt-enabled'));
+                });
+            }
+
+            // Start button opens terminal focus
+            const startBtn = document.getElementById('taskbar-start');
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    commandInput.focus();
+                    terminal.style.zIndex = ++WindowManager.highestZIndex;
+                });
+            }
+        },
+
+        updateClock() {
+            const clock = document.getElementById('taskbar-clock');
+            if (clock) {
+                const now = new Date();
+                clock.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+        },
+
+        addWindow(appId, title) {
+            const container = document.getElementById('taskbar-windows');
+            if (!container) return;
+
+            const btn = document.createElement('button');
+            btn.className = 'taskbar-window-btn active';
+            btn.dataset.app = appId;
+            btn.textContent = title;
+            btn.addEventListener('click', () => this.handleWindowClick(appId));
+            container.appendChild(btn);
+        },
+
+        removeWindow(appId) {
+            const btn = document.querySelector(`.taskbar-window-btn[data-app="${appId}"]`);
+            if (btn) btn.remove();
+        },
+
+        updateWindow(appId, isMinimized) {
+            const btn = document.querySelector(`.taskbar-window-btn[data-app="${appId}"]`);
+            if (btn) {
+                btn.classList.toggle('minimized', isMinimized);
+                btn.classList.toggle('active', !isMinimized);
+            }
+        },
+
+        handleWindowClick(appId) {
+            const win = WindowManager.windows[appId];
+            if (!win) return;
+
+            if (win.classList.contains('minimized')) {
+                WindowManager.restoreWindow(appId);
+            } else {
+                WindowManager.focusWindow(appId);
+            }
+        }
+    };
+
+    // === PARTICLE BACKGROUND ===
+    const ParticleBackground = {
+        canvas: null,
+        ctx: null,
+        particles: [],
+        animationId: null,
+
+        init() {
+            this.canvas = document.getElementById('particle-canvas');
+            if (!this.canvas) return;
+
+            this.ctx = this.canvas.getContext('2d');
+            this.resize();
+            this.createParticles(40);
+            this.animate();
+
+            window.addEventListener('resize', () => this.resize());
+        },
+
+        resize() {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+        },
+
+        createParticles(count) {
+            this.particles = [];
+            for (let i = 0; i < count; i++) {
+                this.particles.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    size: Math.random() * 2 + 1,
+                    opacity: Math.random() * 0.5 + 0.2
+                });
+            }
+        },
+
+        animate() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            const color = getComputedStyle(document.documentElement).getPropertyValue('--comment').trim() || '#565f89';
+
+            this.particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) p.x = this.canvas.width;
+                if (p.x > this.canvas.width) p.x = 0;
+                if (p.y < 0) p.y = this.canvas.height;
+                if (p.y > this.canvas.height) p.y = 0;
+
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                this.ctx.fillStyle = color;
+                this.ctx.globalAlpha = p.opacity;
+                this.ctx.fill();
+            });
+
+            this.ctx.globalAlpha = 1;
+            this.animationId = requestAnimationFrame(() => this.animate());
+        }
+    };
+
+    // === CONTEXT MENU ===
+    const ContextMenu = {
+        element: null,
+
+        init() {
+            this.element = document.getElementById('context-menu');
+            if (!this.element) return;
+
+            document.addEventListener('contextmenu', (e) => this.show(e));
+            document.addEventListener('click', () => this.hide());
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') this.hide();
+            });
+        },
+
+        show(e) {
+            // Only show on desktop area
+            const isDesktop = e.target.id === 'desktop' ||
+                             e.target.closest('#desktop') ||
+                             e.target.id === 'particle-canvas';
+
+            if (!isDesktop) return;
+
+            e.preventDefault();
+
+            const options = [
+                { label: '🎨 Abrir Themes', action: () => ThemePickerApp.open() },
+                { label: '🎮 Abrir Games', action: () => GamesApp.open() },
+                { label: '🎵 Abrir Music', action: () => MusicApp.open() },
+                { label: '🎬 Abrir ASCII Player', action: () => ASCIIPlayerApp.open() },
+                { separator: true },
+                { label: '📺 Alternar CRT', action: () => {
+                    document.body.classList.toggle('crt-enabled');
+                    const crtBtn = document.getElementById('taskbar-crt');
+                    if (crtBtn) crtBtn.classList.toggle('active');
+                    localStorage.setItem('crt-enabled', document.body.classList.contains('crt-enabled'));
+                }},
+                { separator: true },
+                { label: 'ℹ️ Sobre', action: () => executeCommand('sobre') }
+            ];
+
+            this.element.innerHTML = options.map(opt =>
+                opt.separator
+                    ? '<div class="context-separator"></div>'
+                    : `<div class="context-item">${opt.label}</div>`
+            ).join('');
+
+            let left = e.clientX;
+            let top = e.clientY;
+
+            // Prevent overflow
+            this.element.classList.add('visible');
+            const rect = this.element.getBoundingClientRect();
+            if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 10;
+            if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 10;
+
+            this.element.style.left = `${left}px`;
+            this.element.style.top = `${top}px`;
+
+            this.element.querySelectorAll('.context-item').forEach((item, i) => {
+                const opt = options.filter(o => !o.separator)[i];
+                if (opt) {
+                    item.addEventListener('click', () => {
+                        opt.action();
+                        this.hide();
+                    });
+                }
+            });
+        },
+
+        hide() {
+            if (this.element) this.element.classList.remove('visible');
+        }
+    };
+
+    // === KEYBOARD SHORTCUTS ===
+    const KeyboardShortcuts = {
+        shortcuts: {
+            'Alt+1': () => ThemePickerApp.open(),
+            'Alt+2': () => ASCIIPlayerApp.open(),
+            'Alt+3': () => MusicApp.open(),
+            'Alt+4': () => GamesApp.open()
+        },
+
+        init() {
+            document.addEventListener('keydown', (e) => {
+                if (e.target === commandInput) return; // Don't interfere with terminal
+
+                const key = `${e.altKey ? 'Alt+' : ''}${e.key}`;
+
+                if (this.shortcuts[key]) {
+                    e.preventDefault();
+                    this.shortcuts[key]();
+                }
+
+                // Escape closes topmost window
+                if (e.key === 'Escape') {
+                    const windows = Object.entries(WindowManager.windows);
+                    if (windows.length > 0) {
+                        const [appId] = windows.sort((a, b) =>
+                            parseInt(b[1].style.zIndex) - parseInt(a[1].style.zIndex)
+                        )[0];
+                        WindowManager.closeWindow(appId);
+                    }
+                }
+            });
+        }
+    };
+
+    // === ACHIEVEMENT MANAGER ===
+    const AchievementManager = {
+        achievements: {
+            'first_command': { name: 'Primeiro Passo', desc: 'Execute seu primeiro comando', icon: '🎯' },
+            'theme_master': { name: 'Estilista', desc: 'Experimente 3 temas diferentes', icon: '🎨' },
+            'matrix_fan': { name: 'Neo', desc: 'Ative o efeito Matrix', icon: '💊' },
+            'coffee_lover': { name: 'Cafeínado', desc: 'Pegue um café virtual', icon: '☕' },
+            'gamer': { name: 'Gamer', desc: 'Jogue um mini-game', icon: '🎮' },
+            'music_lover': { name: 'Melômano', desc: 'Ouça música lofi', icon: '🎵' },
+            'hacker': { name: 'Hacker', desc: 'Execute o comando hack', icon: '💻' },
+            'curious': { name: 'Curioso', desc: 'Encontre um easter egg', icon: '🥚' },
+            'explorer': { name: 'Explorador', desc: 'Use todos os apps', icon: '🧭' }
+        },
+
+        unlocked: new Set(JSON.parse(localStorage.getItem('achievements') || '[]')),
+        themesUsed: new Set(JSON.parse(localStorage.getItem('themes-used') || '[]')),
+        appsUsed: new Set(JSON.parse(localStorage.getItem('apps-used') || '[]')),
+
+        check(id) {
+            if (this.unlocked.has(id)) return false;
+
+            this.unlocked.add(id);
+            localStorage.setItem('achievements', JSON.stringify([...this.unlocked]));
+            this.showToast(id);
+            return true;
+        },
+
+        trackTheme(themeName) {
+            this.themesUsed.add(themeName);
+            localStorage.setItem('themes-used', JSON.stringify([...this.themesUsed]));
+            if (this.themesUsed.size >= 3) {
+                this.check('theme_master');
+            }
+        },
+
+        trackApp(appName) {
+            this.appsUsed.add(appName);
+            localStorage.setItem('apps-used', JSON.stringify([...this.appsUsed]));
+            if (this.appsUsed.size >= 4) {
+                this.check('explorer');
+            }
+        },
+
+        showToast(id) {
+            const ach = this.achievements[id];
+            if (!ach) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'achievement-toast';
+            toast.innerHTML = `
+                <span class="achievement-icon">${ach.icon}</span>
+                <div>
+                    <div class="achievement-title">Conquista Desbloqueada!</div>
+                    <div class="achievement-name">${ach.name}</div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        },
+
+        listAchievements() {
+            let output = '<span class="highlight">Conquistas:</span>\n\n';
+            for (const [id, ach] of Object.entries(this.achievements)) {
+                const status = this.unlocked.has(id)
+                    ? '<span class="detail-green">✓</span>'
+                    : '<span class="comment">○</span>';
+                output += `${status} ${ach.icon} <span class="output-command">${ach.name}</span>\n   ${ach.desc}\n\n`;
+            }
+            output += `<span class="comment">Desbloqueadas: ${this.unlocked.size}/${Object.keys(this.achievements).length}</span>`;
+            return output;
+        }
+    };
+
     // === INITIALIZATION ===
     async function init() {
         commandInput.disabled = true;
@@ -3255,5 +4245,20 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         setCursorLock(false);
     }
 
-    init();
+    // === STARTUP ===
+    async function startup() {
+        // Run boot sequence first
+        await BootSequence.run();
+
+        // Initialize all systems
+        Taskbar.init();
+        ParticleBackground.init();
+        ContextMenu.init();
+        KeyboardShortcuts.init();
+
+        // Start main terminal
+        await init();
+    }
+
+    startup();
 });

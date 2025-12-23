@@ -1,0 +1,15 @@
+/* ================================================
+   MAIN CSS - Imports all stylesheets
+   Terminal Portfolio - Gabriel Mendes Lopes
+   ================================================ */
+
+@import url('variables.css');
+@import url('base.css');
+@import url('terminal.css');
+@import url('windows.css');
+@import url('desktop.css');
+@import url('taskbar.css');
+@import url('apps.css');
+@import url('games.css');
+@import url('effects.css');
+@import url('responsive.css');

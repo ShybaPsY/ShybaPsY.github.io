@@ -475,6 +475,16 @@ body.resizing-terminal * {
     background: none;
     -webkit-user-select: none;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--foreground);
+}
+
+.icon-image svg {
+    width: 36px;
+    height: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .icon-label {
@@ -866,6 +876,486 @@ body.resizing-terminal * {
 
 .game-back-btn:hover {
     background-color: var(--blue);
+}
+
+/* === BOOT SEQUENCE === */
+
+#boot-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: 'Fira Code', monospace;
+    transition: opacity 0.5s ease;
+}
+
+#boot-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#boot-overlay.hidden {
+    display: none;
+}
+
+#boot-content {
+    color: #00ff00;
+    font-size: 14px;
+    white-space: pre-wrap;
+    text-align: left;
+    max-width: 600px;
+    padding: 20px;
+    line-height: 1.4;
+}
+
+.boot-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background-color: #00ff00;
+    animation: boot-blink 0.5s step-end infinite;
+    vertical-align: middle;
+}
+
+@keyframes boot-blink {
+    50% { opacity: 0; }
+}
+
+.boot-progress {
+    width: 300px;
+    height: 20px;
+    border: 1px solid #00ff00;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.boot-progress-bar {
+    height: 100%;
+    background-color: #00ff00;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/* === CRT EFFECT === */
+
+body.crt-enabled {
+    overflow: hidden;
+}
+
+body.crt-enabled::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 99998;
+}
+
+body.crt-enabled::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+    pointer-events: none;
+    z-index: 99997;
+}
+
+body.crt-enabled #terminal,
+body.crt-enabled .app-window {
+    box-shadow: 0 0 20px rgba(var(--glow-rgb, 122, 162, 247), 0.3);
+}
+
+/* === PARTICLE BACKGROUND === */
+
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* === WINDOW ANIMATIONS === */
+
+@keyframes windowOpen {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes windowClose {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes windowMinimize {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.3) translateY(100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes windowRestore {
+    0% {
+        transform: scale(0.3) translateY(100vh);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.app-window {
+    animation: windowOpen 0.25s ease-out;
+}
+
+.app-window.closing {
+    animation: windowClose 0.2s ease-in forwards;
+}
+
+.app-window.minimizing {
+    animation: windowMinimize 0.3s ease-in forwards;
+}
+
+.app-window.restoring {
+    animation: windowRestore 0.3s ease-out forwards;
+}
+
+.app-window.minimized {
+    display: none !important;
+}
+
+.app-window.maximized {
+    border-radius: 0;
+}
+
+/* === TASKBAR === */
+
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: var(--background);
+    border-top: 1px solid var(--comment);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 8px;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#taskbar-start {
+    padding: 6px 12px;
+    background-color: var(--comment);
+    color: var(--background);
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#taskbar-start:hover {
+    background-color: var(--blue);
+}
+
+#taskbar-windows {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+#taskbar-windows::-webkit-scrollbar {
+    height: 4px;
+}
+
+#taskbar-windows::-webkit-scrollbar-thumb {
+    background: var(--comment);
+    border-radius: 2px;
+}
+
+.taskbar-window-btn {
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--foreground);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.taskbar-window-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.taskbar-window-btn.active {
+    border-color: var(--green);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.taskbar-window-btn.minimized {
+    opacity: 0.6;
+}
+
+#taskbar-tray {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 8px;
+    border-left: 1px solid var(--comment);
+}
+
+.taskbar-icon {
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.taskbar-icon:hover {
+    opacity: 1;
+}
+
+.taskbar-icon.active {
+    opacity: 1;
+}
+
+#taskbar-clock {
+    font-size: 12px;
+    color: var(--foreground);
+    min-width: 45px;
+    text-align: right;
+}
+
+/* === CONTEXT MENU === */
+
+.context-menu {
+    position: fixed;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 6px;
+    padding: 4px 0;
+    min-width: 160px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 99999;
+    display: none;
+}
+
+.context-menu.visible {
+    display: block;
+}
+
+.context-item {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.context-item:hover {
+    background-color: var(--comment);
+}
+
+.context-separator {
+    height: 1px;
+    background-color: var(--comment);
+    margin: 4px 0;
+}
+
+/* === WINDOW BUTTONS (Minimize/Maximize) === */
+
+.app-window-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.app-window-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.app-window-btn:hover {
+    transform: scale(1.3);
+    filter: brightness(1.2);
+}
+
+.app-window-btn.red { background-color: #ff5f56; }
+.app-window-btn.yellow { background-color: #ffbd2e; }
+.app-window-btn.green { background-color: #27c93f; }
+
+/* === ACHIEVEMENT TOAST === */
+
+.achievement-toast {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: var(--background);
+    border: 2px solid var(--yellow);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 99999;
+    animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 3.7s forwards;
+}
+
+@keyframes toastIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.achievement-icon {
+    font-size: 28px;
+}
+
+.achievement-title {
+    font-size: 10px;
+    color: var(--comment);
+    text-transform: uppercase;
+}
+
+.achievement-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--yellow);
+}
+
+/* === PHOTO GALLERY === */
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.gallery-item {
+    aspect-ratio: 16/9;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--comment);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+    border-color: var(--green);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-item span {
+    padding: 6px;
+    font-size: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+
+.gallery-viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.gallery-viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.gallery-viewer-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--foreground);
 }
 
 /* === RESPONSIVE === */

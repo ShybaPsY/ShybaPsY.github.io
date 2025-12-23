@@ -1,0 +1,124 @@
+/* ================================================
+   APP WINDOWS STYLES
+   ================================================ */
+
+#app-windows {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.app-window {
+    position: absolute;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    min-width: 280px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+.app-window-header {
+    background-color: var(--comment);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: grab;
+    user-select: none;
+}
+
+.app-window-header.dragging {
+    cursor: grabbing;
+}
+
+.app-window-title {
+    color: var(--background);
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.app-window-close {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ff5f56;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.app-window-close:hover {
+    transform: scale(1.3);
+    filter: brightness(1.2);
+}
+
+.app-window-body {
+    flex: 1;
+    padding: 16px;
+    overflow: hidden;
+    color: var(--foreground);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Window Buttons (Minimize/Maximize) */
+.app-window-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.app-window-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.app-window-btn:hover {
+    transform: scale(1.3);
+    filter: brightness(1.2);
+}
+
+.app-window-btn.red { background-color: #ff5f56; }
+.app-window-btn.yellow { background-color: #ffbd2e; }
+.app-window-btn.green { background-color: #27c93f; }
+
+/* App Window Resize Handles */
+.app-resize-handle {
+    position: absolute;
+    z-index: 10;
+}
+
+.app-resize-e {
+    right: -4px;
+    top: 30px;
+    bottom: 8px;
+    width: 8px;
+    cursor: e-resize;
+}
+
+.app-resize-s {
+    bottom: -4px;
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: s-resize;
+}
+
+.app-resize-se {
+    bottom: -4px;
+    right: -4px;
+    width: 14px;
+    height: 14px;
+    cursor: se-resize;
+}

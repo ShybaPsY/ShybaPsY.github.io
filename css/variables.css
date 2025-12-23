@@ -1,0 +1,115 @@
+/* ================================================
+   THEME DEFINITIONS - Color Variables
+   ================================================ */
+
+/* Tokyo Night (Default) */
+:root {
+    --background: #1a1b26;
+    --background-rgb: 26, 27, 38;
+    --foreground: #a9b1d6;
+    --comment: #565f89;
+    --green: #9ece6a;
+    --green-rgb: 158, 206, 106;
+    --yellow: #e0af68;
+    --blue: #7aa2f7;
+    --magenta: #bb9af7;
+    --cyan: #7dcfff;
+    --cyan-rgb: 125, 207, 255;
+    --red: #f7768e;
+}
+
+/* Dracula */
+[data-theme="dracula"] {
+    --background: #282a36;
+    --background-rgb: 40, 42, 54;
+    --foreground: #f8f8f2;
+    --comment: #6272a4;
+    --green: #50fa7b;
+    --green-rgb: 80, 250, 123;
+    --yellow: #f1fa8c;
+    --blue: #bd93f9;
+    --magenta: #ff79c6;
+    --cyan: #8be9fd;
+    --cyan-rgb: 139, 233, 253;
+    --red: #ff5555;
+}
+
+/* Gruvbox */
+[data-theme="gruvbox"] {
+    --background: #282828;
+    --background-rgb: 40, 40, 40;
+    --foreground: #ebdbb2;
+    --comment: #928374;
+    --green: #b8bb26;
+    --green-rgb: 184, 187, 38;
+    --yellow: #fabd2f;
+    --blue: #83a598;
+    --magenta: #d3869b;
+    --cyan: #8ec07c;
+    --cyan-rgb: 142, 192, 124;
+    --red: #fb4934;
+}
+
+/* Nord */
+[data-theme="nord"] {
+    --background: #2e3440;
+    --background-rgb: 46, 52, 64;
+    --foreground: #d8dee9;
+    --comment: #4c566a;
+    --green: #a3be8c;
+    --green-rgb: 163, 190, 140;
+    --yellow: #ebcb8b;
+    --blue: #81a1c1;
+    --magenta: #b48ead;
+    --cyan: #88c0d0;
+    --cyan-rgb: 136, 192, 208;
+    --red: #bf616a;
+}
+
+/* Cyberpunk */
+[data-theme="cyberpunk"] {
+    --background: #0a0e14;
+    --background-rgb: 10, 14, 20;
+    --foreground: #b3b1ad;
+    --comment: #626a73;
+    --green: #91b362;
+    --green-rgb: 145, 179, 98;
+    --yellow: #f9af4f;
+    --blue: #53bdfa;
+    --magenta: #f07178;
+    --cyan: #95e6cb;
+    --cyan-rgb: 149, 230, 203;
+    --red: #ea6c73;
+}
+
+/* Matrix */
+[data-theme="matrix"] {
+    --background: #0d0d0d;
+    --background-rgb: 13, 13, 13;
+    --foreground: #00ff00;
+    --comment: #008800;
+    --green: #00ff00;
+    --green-rgb: 0, 255, 0;
+    --yellow: #33ff33;
+    --blue: #00cc00;
+    --magenta: #00ff66;
+    --cyan: #66ff66;
+    --cyan-rgb: 102, 255, 102;
+    --red: #ff0000;
+}
+
+/* Catppuccin Mocha */
+[data-theme="catppuccin"] {
+    --background: #1e1e2e;
+    --background-rgb: 30, 30, 46;
+    --foreground: #cdd6f4;
+    --comment: #6c7086;
+    --green: #a6e3a1;
+    --green-rgb: 166, 227, 161;
+    --yellow: #f9e2af;
+    --blue: #89b4fa;
+    --magenta: #f5c2e7;
+    --cyan: #94e2d5;
+    --cyan-rgb: 148, 226, 213;
+    --red: #f38ba8;
+}
