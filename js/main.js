@@ -42,7 +42,6 @@ import { QuoteAPI } from './api/quote-api.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const terminal = document.getElementById('terminal');
     const terminalHeader = document.getElementById('terminal-header');
-    const pageBody = document.getElementById('page-body');
     const commandInput = document.getElementById('command-input');
 
     // Initialize apps with their dependencies
@@ -100,97 +99,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     // TERMINAL DRAG FUNCTIONALITY
     // ================================================
     if (terminal && terminalHeader) {
-        const dragState = {
-            isDragging: false,
-            offsetX: 0,
-            offsetY: 0
-        };
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
 
-        const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
-        const getEventPosition = (event) => {
-            if (event.touches && event.touches.length > 0) {
-                const touch = event.touches[0];
-                return { x: touch.clientX, y: touch.clientY };
+        const startDragging = (e) => {
+            // Don't drag if clicking on buttons
+            if (e.target.closest('.button') || e.target.closest('.buttons')) {
+                return;
             }
-            if (event.changedTouches && event.changedTouches.length > 0) {
-                const touch = event.changedTouches[0];
-                return { x: touch.clientX, y: touch.clientY };
+
+            // Only left mouse button
+            if (e.type === 'mousedown' && e.button !== 0) return;
+
+            isDragging = true;
+            const rect = terminal.getBoundingClientRect();
+
+            if (e.touches) {
+                offsetX = e.touches[0].clientX - rect.left;
+                offsetY = e.touches[0].clientY - rect.top;
+            } else {
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
             }
-            if (typeof event.clientX === 'number' && typeof event.clientY === 'number') {
-                return { x: event.clientX, y: event.clientY };
-            }
-            return null;
-        };
-
-        const setTerminalPosition = (left, top) => {
-            const bodyRect = pageBody.getBoundingClientRect();
-            const maxLeft = Math.max(bodyRect.width - terminal.offsetWidth, 0);
-            const maxTop = Math.max(bodyRect.height - terminal.offsetHeight, 0);
-            const boundedLeft = clamp(left, 0, maxLeft);
-            const boundedTop = clamp(top, 0, maxTop);
-
-            terminal.style.left = `${boundedLeft}px`;
-            terminal.style.top = `${boundedTop}px`;
-        };
-
-        const ensureTerminalWithinViewport = () => {
-            const parsedLeft = parseFloat(terminal.style.left);
-            const parsedTop = parseFloat(terminal.style.top);
-            const currentLeft = Number.isFinite(parsedLeft) ? parsedLeft : terminal.offsetLeft;
-            const currentTop = Number.isFinite(parsedTop) ? parsedTop : terminal.offsetTop;
-            setTerminalPosition(currentLeft, currentTop);
-        };
-
-        const centerTerminal = () => {
-            const bodyRect = pageBody.getBoundingClientRect();
-            const centeredLeft = (bodyRect.width - terminal.offsetWidth) / 2;
-            const centeredTop = (bodyRect.height - terminal.offsetHeight) / 2;
-            setTerminalPosition(centeredLeft, centeredTop);
-        };
-
-        const startDragging = (event) => {
-            if (event.type === 'mousedown' && event.button !== 0) return;
-
-            const position = getEventPosition(event);
-            if (!position) return;
-
-            const terminalRect = terminal.getBoundingClientRect();
-            dragState.isDragging = true;
-            dragState.offsetX = position.x - terminalRect.left;
-            dragState.offsetY = position.y - terminalRect.top;
 
             terminalHeader.classList.add('dragging');
-            pageBody.classList.add('dragging-terminal');
+            document.body.classList.add('dragging-terminal');
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
 
-            if (event.type === 'touchstart') {
-                event.preventDefault();
+            if (e.type === 'touchstart') {
+                e.preventDefault();
             }
         };
 
-        const handleDragging = (event) => {
-            if (!dragState.isDragging) return;
+        const handleDragging = (e) => {
+            if (!isDragging) return;
 
-            const position = getEventPosition(event);
-            if (!position) return;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
 
-            const bodyRect = pageBody.getBoundingClientRect();
-            const nextLeft = position.x - dragState.offsetX - bodyRect.left;
-            const nextTop = position.y - dragState.offsetY - bodyRect.top;
+            let newLeft = clientX - offsetX;
+            let newTop = clientY - offsetY;
 
-            setTerminalPosition(nextLeft, nextTop);
+            // Constrain to viewport
+            const maxLeft = window.innerWidth - terminal.offsetWidth;
+            const maxTop = window.innerHeight - terminal.offsetHeight - 48; // Account for taskbar
 
-            if (event.type === 'touchmove') {
-                event.preventDefault();
+            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+            newTop = Math.max(0, Math.min(newTop, maxTop));
+
+            terminal.style.left = `${newLeft}px`;
+            terminal.style.top = `${newTop}px`;
+
+            if (e.type === 'touchmove') {
+                e.preventDefault();
             }
         };
 
         const stopDragging = () => {
-            if (!dragState.isDragging) return;
-
-            dragState.isDragging = false;
+            if (!isDragging) return;
+            isDragging = false;
             terminalHeader.classList.remove('dragging');
-            pageBody.classList.remove('dragging-terminal');
+            document.body.classList.remove('dragging-terminal');
         };
 
         terminalHeader.addEventListener('mousedown', startDragging);
@@ -202,12 +178,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('touchcancel', stopDragging);
         window.addEventListener('blur', stopDragging);
 
+        // Bring terminal to front when clicked anywhere on it
+        terminal.addEventListener('mousedown', () => {
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
+        });
+
+        // Center terminal on load
+        const centerTerminal = () => {
+            const left = (window.innerWidth - terminal.offsetWidth) / 2;
+            const top = (window.innerHeight - terminal.offsetHeight - 48) / 2;
+            terminal.style.left = `${Math.max(0, left)}px`;
+            terminal.style.top = `${Math.max(0, top)}px`;
+        };
+
+        // Keep terminal in viewport on resize
         window.addEventListener('resize', () => {
-            if (!dragState.isDragging) {
-                ensureTerminalWithinViewport();
+            if (!isDragging) {
+                const rect = terminal.getBoundingClientRect();
+                const maxLeft = window.innerWidth - terminal.offsetWidth;
+                const maxTop = window.innerHeight - terminal.offsetHeight - 48;
+
+                if (rect.left > maxLeft || rect.top > maxTop) {
+                    terminal.style.left = `${Math.max(0, Math.min(rect.left, maxLeft))}px`;
+                    terminal.style.top = `${Math.max(0, Math.min(rect.top, maxTop))}px`;
+                }
             }
         });
 
+        // Initialize terminal position
         requestAnimationFrame(() => {
             terminal.style.position = 'absolute';
             terminal.style.margin = '0';
@@ -269,8 +267,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             resizeState.startLeft = parseFloat(terminal.style.left) || 0;
             resizeState.startTop = parseFloat(terminal.style.top) || 0;
 
-            pageBody.classList.add('resizing-terminal');
-            pageBody.style.cursor = window.getComputedStyle(handle).cursor;
+            document.body.classList.add('resizing-terminal');
+            document.body.style.cursor = window.getComputedStyle(handle).cursor;
         };
 
         const handleResize = (event) => {
@@ -326,8 +324,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             resizeState.isResizing = false;
             resizeState.direction = null;
-            pageBody.classList.remove('resizing-terminal');
-            pageBody.style.cursor = '';
+            document.body.classList.remove('resizing-terminal');
+            document.body.style.cursor = '';
         };
 
         resizeHandles.forEach(handle => {
@@ -340,6 +338,199 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('mouseup', stopResize);
         document.addEventListener('touchend', stopResize);
         document.addEventListener('touchcancel', stopResize);
+    }
+
+    // ================================================
+    // TERMINAL WINDOW CONTROLS (Minimize, Maximize, Close)
+    // ================================================
+    const TerminalControls = {
+        isMinimized: false,
+        isMaximized: false,
+        isClosed: false,
+        prevState: null,
+
+        init() {
+            const closeBtn = terminal.querySelector('.button.red');
+            const minimizeBtn = terminal.querySelector('.button.yellow');
+            const maximizeBtn = terminal.querySelector('.button.green');
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.close();
+                });
+            }
+
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.minimize();
+                });
+            }
+
+            if (maximizeBtn) {
+                maximizeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleMaximize();
+                });
+            }
+
+            // Add terminal to taskbar on init
+            Taskbar.addWindow('terminal', 'Terminal');
+        },
+
+        close() {
+            if (this.isClosed) return;
+
+            this.isClosed = true;
+            this.isMinimized = false;
+            terminal.classList.add('minimizing');
+
+            setTimeout(() => {
+                terminal.classList.remove('minimizing');
+                terminal.classList.add('minimized');
+                Taskbar.removeWindow('terminal');
+            }, 300);
+        },
+
+        open() {
+            if (!this.isClosed) {
+                this.focus();
+                return;
+            }
+
+            this.isClosed = false;
+            this.isMinimized = false;
+            terminal.classList.remove('minimized');
+            terminal.classList.add('restoring');
+
+            setTimeout(() => {
+                terminal.classList.remove('restoring');
+            }, 300);
+
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
+            Taskbar.addWindow('terminal', 'Terminal');
+
+            // Reset terminal content
+            Terminal.reset();
+        },
+
+        minimize() {
+            if (this.isMinimized || this.isClosed) return;
+
+            this.isMinimized = true;
+            terminal.classList.add('minimizing');
+
+            setTimeout(() => {
+                terminal.classList.remove('minimizing');
+                terminal.classList.add('minimized');
+                Taskbar.updateWindow('terminal', true);
+            }, 300);
+        },
+
+        restore() {
+            if (!this.isMinimized) return;
+
+            this.isMinimized = false;
+            terminal.classList.remove('minimized');
+            terminal.classList.add('restoring');
+
+            setTimeout(() => {
+                terminal.classList.remove('restoring');
+            }, 300);
+
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
+            Taskbar.updateWindow('terminal', false);
+            commandInput.focus();
+        },
+
+        toggleMaximize() {
+            const TASKBAR_HEIGHT = 48;
+
+            if (this.isMaximized) {
+                // Restore previous size
+                terminal.classList.add('maximizing');
+                if (this.prevState) {
+                    terminal.style.width = this.prevState.width;
+                    terminal.style.height = this.prevState.height;
+                    terminal.style.left = this.prevState.left;
+                    terminal.style.top = this.prevState.top;
+                }
+                terminal.classList.remove('maximized');
+                this.isMaximized = false;
+
+                setTimeout(() => {
+                    terminal.classList.remove('maximizing');
+                }, 250);
+            } else {
+                // Save current state
+                this.prevState = {
+                    width: terminal.style.width || `${terminal.offsetWidth}px`,
+                    height: terminal.style.height || `${terminal.offsetHeight}px`,
+                    left: terminal.style.left || `${terminal.offsetLeft}px`,
+                    top: terminal.style.top || `${terminal.offsetTop}px`
+                };
+
+                // Maximize
+                terminal.classList.add('maximizing');
+                terminal.style.width = '100vw';
+                terminal.style.height = `calc(100vh - ${TASKBAR_HEIGHT}px)`;
+                terminal.style.left = '0';
+                terminal.style.top = '0';
+                terminal.classList.add('maximized');
+                this.isMaximized = true;
+
+                setTimeout(() => {
+                    terminal.classList.remove('maximizing');
+                }, 250);
+            }
+        },
+
+        focus() {
+            if (this.isClosed) {
+                this.open();
+            } else if (this.isMinimized) {
+                this.restore();
+            } else {
+                terminal.style.zIndex = ++WindowManager.highestZIndex;
+                commandInput.focus();
+            }
+        }
+    };
+
+    // Initialize terminal controls
+    TerminalControls.init();
+
+    // Listen for terminal-closed event from exit command
+    window.addEventListener('terminal-closed', () => {
+        TerminalControls.close();
+    });
+
+    // Listen for open-terminal event from context menu
+    window.addEventListener('open-terminal', () => {
+        TerminalControls.open();
+    });
+
+    // Update taskbar to handle terminal clicks
+    const originalHandleWindowClick = Taskbar.handleWindowClick.bind(Taskbar);
+    Taskbar.handleWindowClick = function(appId) {
+        if (appId === 'terminal') {
+            TerminalControls.focus();
+        } else {
+            originalHandleWindowClick(appId);
+        }
+    };
+
+    // Update start button to open terminal
+    const startBtn = document.getElementById('taskbar-start');
+    if (startBtn) {
+        // Remove old listener by cloning
+        const newStartBtn = startBtn.cloneNode(true);
+        startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+
+        newStartBtn.addEventListener('click', () => {
+            TerminalControls.open();
+        });
     }
 
     // ================================================

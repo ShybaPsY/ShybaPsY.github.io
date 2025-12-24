@@ -23,6 +23,9 @@ export const DesktopIcons = {
 
     openApp(appName) {
         switch(appName) {
+            case 'terminal':
+                window.dispatchEvent(new CustomEvent('open-terminal'));
+                break;
             case 'themes':
                 this.apps.ThemePickerApp?.open();
                 break;

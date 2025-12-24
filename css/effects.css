@@ -199,8 +199,45 @@ body.crt-enabled .app-window {
     display: none !important;
 }
 
+/* Maximized Window State */
 .app-window.maximized {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.app-window.maximized .app-window-header {
     border-radius: 0;
+}
+
+.app-window.maximized .app-resize-handle {
+    display: none;
+}
+
+/* Maximize/Restore Animation */
+.app-window {
+    transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease,
+                border-radius 0.25s ease, box-shadow 0.25s ease;
+}
+
+.app-window.maximizing {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes windowMaximize {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.app-window.maximized {
+    animation: windowMaximize 0.25s ease-out;
 }
 
 /* === CONTEXT MENU === */

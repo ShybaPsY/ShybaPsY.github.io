@@ -32,6 +32,16 @@
     <!-- Desktop Layer -->
     <div id="desktop">
         <div class="desktop-icons">
+            <div class="desktop-icon" data-app="terminal">
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--green)" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="18" rx="2"/>
+                        <path d="M6 9l4 3-4 3"/>
+                        <path d="M12 15h6"/>
+                    </svg>
+                </div>
+                <span class="icon-label">Terminal</span>
+            </div>
             <div class="desktop-icon" data-app="themes">
                 <div class="icon-image">
                     <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
@@ -84,8 +94,40 @@
         </div>
     </div>
 
-    <!-- App Windows Container -->
-    <div id="app-windows"></div>
+    <!-- App Windows Container (includes terminal) -->
+    <div id="app-windows">
+        <div id="terminal">
+            <!-- Resize Handles -->
+            <div class="resize-handle resize-handle-n" data-resize="n"></div>
+            <div class="resize-handle resize-handle-s" data-resize="s"></div>
+            <div class="resize-handle resize-handle-e" data-resize="e"></div>
+            <div class="resize-handle resize-handle-w" data-resize="w"></div>
+            <div class="resize-handle resize-handle-ne" data-resize="ne"></div>
+            <div class="resize-handle resize-handle-nw" data-resize="nw"></div>
+            <div class="resize-handle resize-handle-se" data-resize="se"></div>
+            <div class="resize-handle resize-handle-sw" data-resize="sw"></div>
+
+            <div id="terminal-header">
+                <div class="buttons">
+                    <div class="button red" data-action="close" title="Close"></div>
+                    <div class="button yellow" data-action="minimize" title="Minimize"></div>
+                    <div class="button green" data-action="maximize" title="Maximize"></div>
+                </div>
+                <div class="terminal-title">gabriel_lopes@portfolio: ~</div>
+            </div>
+            <div id="terminal-body" onclick="document.getElementById('command-input').focus()">
+                <div id="output"></div>
+                <div class="prompt-line">
+                    <span class="prompt">$&gt;</span>
+                    <div class="input-container">
+                        <span id="input-mirror" class="input-mirror" aria-hidden="true"></span>
+                        <span id="cursor" class="cursor"></span>
+                        <input type="text" id="command-input" autocomplete="off" autofocus>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Taskbar -->
     <div id="taskbar">
@@ -110,38 +152,6 @@
             <div id="taskbar-clock">
                 <span id="clock-time"></span>
                 <span id="clock-date"></span>
-            </div>
-        </div>
-    </div>
-
-    <div id="terminal">
-        <!-- Resize Handles -->
-        <div class="resize-handle resize-handle-n" data-resize="n"></div>
-        <div class="resize-handle resize-handle-s" data-resize="s"></div>
-        <div class="resize-handle resize-handle-e" data-resize="e"></div>
-        <div class="resize-handle resize-handle-w" data-resize="w"></div>
-        <div class="resize-handle resize-handle-ne" data-resize="ne"></div>
-        <div class="resize-handle resize-handle-nw" data-resize="nw"></div>
-        <div class="resize-handle resize-handle-se" data-resize="se"></div>
-        <div class="resize-handle resize-handle-sw" data-resize="sw"></div>
-
-        <div id="terminal-header">
-            <div class="buttons">
-                <div class="button red"></div>
-                <div class="button yellow"></div>
-                <div class="button green"></div>
-            </div>
-            <div>gabriel_lopes@portfolio: ~</div>
-        </div>
-        <div id="terminal-body" onclick="document.getElementById('command-input').focus()">
-            <div id="output"></div>
-            <div class="prompt-line">
-                <span class="prompt">$&gt;</span>
-                <div class="input-container">
-                    <span id="input-mirror" class="input-mirror" aria-hidden="true"></span>
-                    <span id="cursor" class="cursor"></span>
-                    <input type="text" id="command-input" autocomplete="off" autofocus>
-                </div>
             </div>
         </div>
     </div>

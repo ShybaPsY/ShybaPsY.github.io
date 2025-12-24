@@ -291,6 +291,21 @@ export const Terminal = {
                 responseText += "<br><span class=\"comment\">Efeito Matrix desativado.</span>";
             }
         }
+        // Handle exit command
+        else if (normalizedCommand === 'exit') {
+            responseText = "<span class=\"comment\">Fechando terminal...</span>";
+            this.output.appendChild(responseLine);
+            responseLine.innerHTML = responseText;
+
+            setTimeout(() => {
+                // Dispatch event for TerminalControls to handle close
+                window.dispatchEvent(new CustomEvent('terminal-closed'));
+            }, 500);
+
+            this.commandInput.disabled = false;
+            this.setCursorLock(false);
+            return;
+        }
         // Handle themes command
         else if (normalizedCommand === 'themes') {
             responseText = this.ThemeManager.list();
@@ -335,6 +350,22 @@ export const Terminal = {
         this.commandInput.focus();
         this.setCursorLock(false);
         this.terminalBody.scrollTop = this.terminalBody.scrollHeight;
+    },
+
+    async reset() {
+        // Clear output
+        this.output.innerHTML = '';
+        this.commandInput.value = '';
+        this.commandHistory = [];
+        this.historyIndex = 0;
+
+        // Stop matrix if running
+        if (this.MatrixEffect?.isRunning) {
+            this.MatrixEffect.stop();
+        }
+
+        // Show welcome message
+        await this.showWelcome();
     },
 
     async showWelcome() {

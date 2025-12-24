@@ -29,6 +29,7 @@ export const ContextMenu = {
         e.preventDefault();
 
         const options = [
+            { label: '💻 Abrir Terminal', action: () => window.dispatchEvent(new CustomEvent('open-terminal')) },
             { label: '🎨 Abrir Themes', action: () => this.apps.ThemePickerApp?.open() },
             { label: '🎮 Abrir Games', action: () => this.apps.GamesApp?.open() },
             { label: '🎵 Abrir Music', action: () => this.apps.MusicApp?.open() },

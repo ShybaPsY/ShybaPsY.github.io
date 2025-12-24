@@ -4,7 +4,7 @@
 
 export const WindowManager = {
     windows: {},
-    highestZIndex: 10,
+    highestZIndex: 100,
     Taskbar: null, // Will be set during initialization
     appCleanupHandlers: {}, // Store cleanup handlers for apps
 
@@ -89,7 +89,10 @@ export const WindowManager = {
         let offsetX = 0, offsetY = 0;
 
         const startDrag = (e) => {
-            if (e.target.classList.contains('app-window-close')) return;
+            // Don't drag if clicking on buttons
+            if (e.target.closest('.app-window-btn') || e.target.closest('.app-window-buttons')) {
+                return;
+            }
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
@@ -222,25 +225,39 @@ export const WindowManager = {
         const windowEl = this.windows[appId];
         if (!windowEl) return;
 
+        const TASKBAR_HEIGHT = 48;
+
         if (windowEl.classList.contains('maximized')) {
             // Restore to previous size
+            windowEl.classList.add('maximizing');
             windowEl.style.width = windowEl.dataset.prevWidth || '400px';
             windowEl.style.height = windowEl.dataset.prevHeight || '300px';
             windowEl.style.left = windowEl.dataset.prevLeft || '150px';
             windowEl.style.top = windowEl.dataset.prevTop || '80px';
             windowEl.classList.remove('maximized');
+
+            setTimeout(() => {
+                windowEl.classList.remove('maximizing');
+            }, 250);
         } else {
             // Save current position and maximize
-            windowEl.dataset.prevWidth = windowEl.style.width;
-            windowEl.dataset.prevHeight = windowEl.style.height;
-            windowEl.dataset.prevLeft = windowEl.style.left;
-            windowEl.dataset.prevTop = windowEl.style.top;
+            windowEl.dataset.prevWidth = windowEl.style.width || `${windowEl.offsetWidth}px`;
+            windowEl.dataset.prevHeight = windowEl.style.height || `${windowEl.offsetHeight}px`;
+            windowEl.dataset.prevLeft = windowEl.style.left || `${windowEl.offsetLeft}px`;
+            windowEl.dataset.prevTop = windowEl.style.top || `${windowEl.offsetTop}px`;
 
-            windowEl.style.width = '100%';
-            windowEl.style.height = 'calc(100% - 40px)'; // Account for taskbar
+            windowEl.classList.add('maximizing');
+            windowEl.style.width = '100vw';
+            windowEl.style.height = `calc(100vh - ${TASKBAR_HEIGHT}px)`;
             windowEl.style.left = '0';
             windowEl.style.top = '0';
             windowEl.classList.add('maximized');
+
+            setTimeout(() => {
+                windowEl.classList.remove('maximizing');
+            }, 250);
         }
+
+        this.focusWindow(appId);
     }
 };

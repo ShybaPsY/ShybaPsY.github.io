@@ -54,7 +54,7 @@ export const MusicApp = {
             </div>
         `;
 
-        const windowEl = this.WindowManager.createWindow('music', 'Lofi Radio', 320, 250, content);
+        const windowEl = this.WindowManager.createWindow('music', 'Lofi Radio', 380, 300, content);
 
         const playBtn = windowEl.querySelector('#music-play-btn');
         const volumeSlider = windowEl.querySelector('#volume-slider');

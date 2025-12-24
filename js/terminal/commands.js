@@ -26,6 +26,7 @@ export function createCommands(dependencies) {
 
   <span class="title-blue">Utilities:</span>
   <span class="output-command">clear</span>          - Limpa a tela.
+  <span class="output-command">exit</span>           - Fecha o terminal.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
   <span class="output-command">quote</span>          - Exibe uma citação inspiradora sobre programação.
   <span class="output-command">conquistas</span>     - Lista suas conquistas desbloqueadas.
@@ -36,7 +37,7 @@ export function createCommands(dependencies) {
   <span class="highlight">Sobre Mim</span>
 
   Olá! Sou Gabriel Mendes Lopes, um <span class="title-blue">desenvolvedor fullstack</span> apaixonado por criar soluções eficientes, escaláveis e robustas.
-  Atualmente, estou no 5º termo do curso de <span class="title-blue">Sistemas de Informação na FIPP</span> (Faculdade de Informática de Presidente Prudente).
+  Atualmente, estou no 5º semestre do curso de <span class="title-blue">Sistemas de Informação na FIPP</span> (Faculdade de Informática de Presidente Prudente).
   Resido em Anhumas, SP.
 
   Sou Bolsista de Iniciação Tecnológica do CNPq na <a href="https://www.fct.unesp.br/" target="_blank">FCT Unesp</a>.
@@ -128,7 +129,6 @@ export function createCommands(dependencies) {
   <span class="output-command">neofetch</span>       - Informações do sistema (estilo Linux).
 
   <span class="title-blue">Easter Eggs:</span>
-  <span class="output-command">secret</span>         - Descubra comandos escondidos.
   <span class="output-command">coffee</span>         - Pegue um café virtual.
   <span class="output-command">sudo</span>           - Tente obter permissões de root.
   <span class="output-command">hack</span>           - Hackeie o mainframe (simulação).
@@ -277,20 +277,6 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   </span>
   <span class="comment">Você digitou 'sl' em vez de 'ls'!</span>
   <span class="highlight">🚂 Choo choo!</span>`,
-
-        secret: function() {
-            if (AchievementManager) {
-                AchievementManager.check('curious');
-            }
-            return `
-  <span class="highlight">🎉 Você encontrou um comando secreto!</span>
-
-  <span class="comment">Para ver todos os easter eggs e comandos de exploração, digite:</span>
-
-  <span class="output-command">extras</span>
-
-  <span class="comment">Continue explorando para achar mais surpresas! 🔍</span>`;
-        },
 
         github: async function() {
             const stats = await GitHubAPI.fetchStats();

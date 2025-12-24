@@ -20,7 +20,7 @@ export const TabCompletion = {
     getAllCommands() {
         const cmds = Object.keys(this.commands || {});
         const als = Object.keys(this.aliases || {});
-        const special = ['clear', 'matrix', 'theme', 'themes'];
+        const special = ['clear', 'exit', 'matrix', 'theme', 'themes'];
         return [...new Set([...cmds, ...als, ...special])].sort();
     },
 

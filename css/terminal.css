@@ -3,10 +3,10 @@
    ================================================ */
 
 #terminal {
-    width: 100%;
-    max-width: 800px;
-    height: 90vh;
-    max-height: 600px;
+    width: 800px;
+    max-width: calc(100vw - 40px);
+    height: 500px;
+    max-height: calc(100vh - 100px);
     background-color: var(--background);
     border: 1px solid var(--comment);
     border-radius: 8px;
@@ -16,8 +16,9 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
-    z-index: 2;
+    position: absolute;
+    z-index: 100;
+    pointer-events: auto;
 }
 
 #terminal-header {
@@ -54,6 +55,59 @@ body.dragging-terminal {
 .button.red { background-color: #ff5f56; }
 .button.yellow { background-color: #ffbd2e; }
 .button.green { background-color: #27c93f; }
+
+#terminal-header .button {
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+#terminal-header .button:hover {
+    transform: scale(1.15);
+    filter: brightness(1.1);
+}
+
+#terminal-header .button:active {
+    transform: scale(0.95);
+}
+
+/* Button icons on hover */
+#terminal-header .button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+#terminal-header .button:hover::after {
+    opacity: 1;
+}
+
+#terminal-header .button.red::after {
+    content: '×';
+    font-size: 10px;
+}
+
+#terminal-header .button.yellow::after {
+    content: '−';
+    font-size: 12px;
+    margin-top: -1px;
+}
+
+#terminal-header .button.green::after {
+    content: '+';
+    font-size: 10px;
+}
+
+.terminal-title {
+    font-size: 13px;
+}
 
 #terminal-body {
     flex-grow: 1;
@@ -225,4 +279,69 @@ body.resizing-terminal {
 
 body.resizing-terminal * {
     cursor: inherit !important;
+}
+
+/* Terminal Minimize/Maximize Animations */
+#terminal {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#terminal.minimizing {
+    animation: terminal-minimize 0.3s ease forwards;
+}
+
+#terminal.minimized {
+    opacity: 0;
+    transform: scale(0.8) translateY(100px);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+#terminal.restoring {
+    animation: terminal-restore 0.3s ease forwards;
+}
+
+/* Maximized Terminal State */
+#terminal.maximized {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: none;
+    max-height: none;
+}
+
+#terminal.maximized #terminal-header {
+    border-radius: 0;
+}
+
+#terminal.maximized .resize-handle {
+    display: none;
+}
+
+#terminal.maximizing {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@keyframes terminal-minimize {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateY(100px);
+    }
+}
+
+@keyframes terminal-restore {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(100px);
+        visibility: visible;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        visibility: visible;
+    }
 }

@@ -11,6 +11,17 @@ export const GamesApp = {
     keyHandler: null,
     keyUpHandler: null,
     resizeObserver: null,
+    resizeTimeout: null,
+
+    // Debounce helper to prevent flickering during resize
+    debounce(fn, delay = 50) {
+        return (...args) => {
+            if (this.resizeTimeout) cancelAnimationFrame(this.resizeTimeout);
+            this.resizeTimeout = requestAnimationFrame(() => {
+                fn.apply(this, args);
+            });
+        };
+    },
 
     init(WindowManager, AchievementManager) {
         this.WindowManager = WindowManager;
@@ -25,7 +36,7 @@ export const GamesApp = {
     open() {
         if (!this.WindowManager) return;
         const content = `<div class="games-menu" id="games-content"></div>`;
-        this.WindowManager.createWindow('games', 'Mini Games', 420, 480, content);
+        this.WindowManager.createWindow('games', 'Mini Games', 500, 550, content);
         this.showMenu();
 
         if (this.AchievementManager) {
@@ -132,13 +143,16 @@ export const GamesApp = {
             const availableWidth = container.clientWidth - padding;
             const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
             const size = Math.min(availableWidth, availableHeight);
-            canvas.width = Math.max(150, size);
-            canvas.height = Math.max(150, size);
+            if (size > 0) {
+                canvas.width = Math.max(150, size);
+                canvas.height = Math.max(150, size);
+            }
         };
         resizeCanvas();
 
         if (window.ResizeObserver) {
-            this.resizeObserver = new ResizeObserver(resizeCanvas);
+            const debouncedResize = this.debounce(resizeCanvas);
+            this.resizeObserver = new ResizeObserver(debouncedResize);
             this.resizeObserver.observe(container);
         }
 
@@ -273,13 +287,18 @@ export const GamesApp = {
 
         const resizeCanvas = () => {
             const scoreHeight = 30, buttonHeight = 45, padding = 20;
-            canvas.width = Math.max(200, container.clientWidth - padding);
-            canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            const w = container.clientWidth - padding;
+            const h = container.clientHeight - scoreHeight - buttonHeight - padding;
+            if (w > 0 && h > 0) {
+                canvas.width = Math.max(200, w);
+                canvas.height = Math.max(150, h);
+            }
         };
         resizeCanvas();
 
         if (window.ResizeObserver) {
-            this.resizeObserver = new ResizeObserver(resizeCanvas);
+            const debouncedResize = this.debounce(resizeCanvas);
+            this.resizeObserver = new ResizeObserver(debouncedResize);
             this.resizeObserver.observe(container);
         }
 
@@ -443,14 +462,17 @@ export const GamesApp = {
             const scoreHeight = 30, buttonHeight = 45, padding = 20;
             const availableWidth = container.clientWidth - padding;
             const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
-            const cellSize = Math.min(availableWidth / COLS, availableHeight / ROWS);
-            canvas.width = cellSize * COLS;
-            canvas.height = cellSize * ROWS;
+            if (availableWidth > 0 && availableHeight > 0) {
+                const cellSize = Math.min(availableWidth / COLS, availableHeight / ROWS);
+                canvas.width = cellSize * COLS;
+                canvas.height = cellSize * ROWS;
+            }
         };
         resizeCanvas();
 
         if (window.ResizeObserver) {
-            this.resizeObserver = new ResizeObserver(resizeCanvas);
+            const debouncedResize = this.debounce(resizeCanvas);
+            this.resizeObserver = new ResizeObserver(debouncedResize);
             this.resizeObserver.observe(container);
         }
 
@@ -577,13 +599,18 @@ export const GamesApp = {
 
         const resizeCanvas = () => {
             const scoreHeight = 30, buttonHeight = 45, padding = 20;
-            canvas.width = Math.max(200, container.clientWidth - padding);
-            canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            const w = container.clientWidth - padding;
+            const h = container.clientHeight - scoreHeight - buttonHeight - padding;
+            if (w > 0 && h > 0) {
+                canvas.width = Math.max(200, w);
+                canvas.height = Math.max(150, h);
+            }
         };
         resizeCanvas();
 
         if (window.ResizeObserver) {
-            this.resizeObserver = new ResizeObserver(resizeCanvas);
+            const debouncedResize = this.debounce(resizeCanvas);
+            this.resizeObserver = new ResizeObserver(debouncedResize);
             this.resizeObserver.observe(container);
         }
 
@@ -695,12 +722,16 @@ export const GamesApp = {
 
         const resizeCanvas = () => {
             const scoreHeight = 30, buttonHeight = 45, padding = 20;
-            canvas.width = Math.max(200, container.clientWidth - padding);
-            canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding);
+            const w = container.clientWidth - padding;
+            const h = container.clientHeight - scoreHeight - buttonHeight - padding;
+            if (w > 0 && h > 0) {
+                canvas.width = Math.max(200, w);
+                canvas.height = Math.max(150, h);
+            }
         };
         resizeCanvas();
 
-        if (window.ResizeObserver) { this.resizeObserver = new ResizeObserver(resizeCanvas); this.resizeObserver.observe(container); }
+        if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
 
         let playerX = 0.5, score = 0, gameOver = false;
         let bullets = [], enemyBullets = [], enemies = [], enemyDir = 1, enemySpeed = 0.002;
@@ -763,9 +794,9 @@ export const GamesApp = {
         container.innerHTML = `<div class="game-score">Score: <span id="asteroids-score">0</span></div><canvas id="asteroids-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
         const canvas = document.getElementById('asteroids-canvas');
         const ctx = canvas.getContext('2d');
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; canvas.width = Math.max(200, container.clientWidth - padding); canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding); };
+        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const w = container.clientWidth - padding; const h = container.clientHeight - scoreHeight - buttonHeight - padding; if (w > 0 && h > 0) { canvas.width = Math.max(200, w); canvas.height = Math.max(150, h); } };
         resizeCanvas();
-        if (window.ResizeObserver) { this.resizeObserver = new ResizeObserver(resizeCanvas); this.resizeObserver.observe(container); }
+        if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
         let ship = { x: 0.5, y: 0.5, angle: -Math.PI / 2, dx: 0, dy: 0 };
         let bullets = [], asteroids = [], score = 0, gameOver = false, lives = 3;
         const keysPressed = { left: false, right: false, up: false, space: false };
@@ -806,9 +837,9 @@ export const GamesApp = {
         container.innerHTML = `<div class="game-score">Score: <span id="dino-score">0</span></div><canvas id="dino-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
         const canvas = document.getElementById('dino-canvas');
         const ctx = canvas.getContext('2d');
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; canvas.width = Math.max(200, container.clientWidth - padding); canvas.height = Math.max(150, container.clientHeight - scoreHeight - buttonHeight - padding); };
+        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const w = container.clientWidth - padding; const h = container.clientHeight - scoreHeight - buttonHeight - padding; if (w > 0 && h > 0) { canvas.width = Math.max(200, w); canvas.height = Math.max(150, h); } };
         resizeCanvas();
-        if (window.ResizeObserver) { this.resizeObserver = new ResizeObserver(resizeCanvas); this.resizeObserver.observe(container); }
+        if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
         const groundY = () => canvas.height * 0.8;
         const dinoSize = () => canvas.height * 0.12;
         let dinoY = 0, velocityY = 0, isJumping = false, obstacles = [], score = 0, gameOver = false, speed = 5;
@@ -841,9 +872,9 @@ export const GamesApp = {
         const canvas = document.getElementById('2048-canvas');
         const ctx = canvas.getContext('2d');
         const SIZE = 4;
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const availableWidth = container.clientWidth - padding; const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding; const size = Math.min(availableWidth, availableHeight); canvas.width = size; canvas.height = size; };
+        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const availableWidth = container.clientWidth - padding; const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding; const size = Math.min(availableWidth, availableHeight); if (size > 0) { canvas.width = size; canvas.height = size; } };
         resizeCanvas();
-        if (window.ResizeObserver) { this.resizeObserver = new ResizeObserver(resizeCanvas); this.resizeObserver.observe(container); }
+        if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
         let grid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
         let score = 0, gameOver = false, won = false;
         const colors = { 0: '#1a1a2e', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e' };
@@ -865,9 +896,9 @@ export const GamesApp = {
         container.innerHTML = `<div class="game-score">Score: <span id="flappy-score">0</span></div><canvas id="flappy-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
         const canvas = document.getElementById('flappy-canvas');
         const ctx = canvas.getContext('2d');
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const availableWidth = container.clientWidth - padding; const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding; canvas.width = Math.max(200, Math.min(availableWidth, 400)); canvas.height = Math.max(300, Math.min(availableHeight, 500)); };
+        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const availableWidth = container.clientWidth - padding; const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding; if (availableWidth > 0 && availableHeight > 0) { canvas.width = Math.max(200, Math.min(availableWidth, 400)); canvas.height = Math.max(300, Math.min(availableHeight, 500)); } };
         resizeCanvas();
-        if (window.ResizeObserver) { this.resizeObserver = new ResizeObserver(resizeCanvas); this.resizeObserver.observe(container); }
+        if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
         const bird = { x: 50, y: 150, velocity: 0, size: 20 };
         const gravity = 0.5, jumpForce = -8, pipes = [], pipeWidth = 50, pipeGap = 120;
         let score = 0, gameOver = false, started = false;
@@ -923,5 +954,6 @@ export const GamesApp = {
         if (this.keyHandler) { document.removeEventListener('keydown', this.keyHandler); this.keyHandler = null; }
         if (this.keyUpHandler) { document.removeEventListener('keyup', this.keyUpHandler); this.keyUpHandler = null; }
         if (this.resizeObserver) { this.resizeObserver.disconnect(); this.resizeObserver = null; }
+        if (this.resizeTimeout) { cancelAnimationFrame(this.resizeTimeout); this.resizeTimeout = null; }
     }
 };
