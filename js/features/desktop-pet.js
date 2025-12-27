@@ -1,195 +1,214 @@
 // ================================================
-// DESKTOP PET MODULE (Pixel Art Style)
+// DESKTOP PET MODULE (GIF Animation Style)
+// Using assets from VS Code Pets extension
 // ================================================
 
 export const DesktopPet = {
-    canvas: null,
-    ctx: null,
     element: null,
-    petType: 'cat',
+    imgElement: null,
+    speechBubble: null,
+    petType: 'dog',
     state: 'idle',
     direction: 1,
     position: { x: 100 },
     velocity: 0,
     targetX: null,
-    frame: 0,
-    frameInterval: null,
     behaviorInterval: null,
     moveInterval: null,
+    tipInterval: null,
     isOnGround: true,
-    groundY: 0,
     jumpY: 0,
-    size: 32,
+    lastTipIndex: -1,
 
-    // Pixel art sprites (each frame is an array of [x, y, color] pixels)
+    // Base URL for VS Code Pets assets
+    baseUrl: 'https://raw.githubusercontent.com/tonybaloney/vscode-pets/main/media',
+
+    tips: [
+        "Os aplicativos são funcionais e clicáveis!",
+        "Clique com o botão direito na área de trabalho para mudar o papel de parede!",
+        "Arraste as janelas pela barra de título para movê-las!",
+        "Dê um duplo clique em mim para trocar de pet!",
+        "Use o terminal para comandos secretos!",
+        "O botão CRT na taskbar ativa o efeito retrô!",
+        "A calculadora tem modo científico, programador e cálculo!",
+        "Você pode minimizar as janelas clicando no ícone na taskbar!",
+        "Tente o comando 'matrix' no terminal!",
+        "O Notepad salva automaticamente no seu navegador!",
+        "Pressione ESC para fechar o Spotlight!",
+        "Os temas podem ser alterados no app Themes!",
+        "O Music Player toca rádios de verdade!",
+        "Redimensione as janelas arrastando as bordas!",
+        "O histórico da calculadora guarda seus cálculos!",
+        "Experimente o jogo da cobrinha no app Games!",
+        "Clique em mim para eu correr até você!",
+        "O ASCII Player converte vídeos em arte ASCII!",
+        "Use Ctrl+Espaço para abrir o Spotlight!",
+        "Olá! Sou seu pet virtual!"
+    ],
+
+    // Pet definitions with their sprite configurations
+    // Using assets from VS Code Pets (https://github.com/tonybaloney/vscode-pets)
     pets: {
-        cat: {
-            name: 'Cat',
-            color: '#ffaa00',
-            idle: [
-                // Frame 1 - sitting
-                [[4,0],[5,0],[8,0],[9,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[2,4],[3,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[4,7],[5,7],[8,7],[9,7]],
-                // Frame 2 - ear twitch
-                [[4,0],[5,0],[9,0],[10,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[2,4],[3,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[4,7],[5,7],[8,7],[9,7]]
-            ],
-            walk: [
-                // Walking frame 1
-                [[4,0],[5,0],[8,0],[9,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[2,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[3,6],[4,6],[9,6],[10,6],[3,7],[10,7]],
-                // Walking frame 2
-                [[4,0],[5,0],[8,0],[9,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[2,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[4,6],[5,6],[8,6],[9,6],[5,7],[8,7]]
-            ],
-            run: [
-                [[4,0],[5,0],[8,0],[9,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[12,3],[1,4],[2,4],[12,4],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5],[2,6],[3,6],[10,6],[11,6],[2,7],[11,7]],
-                [[4,0],[5,0],[8,0],[9,0],[4,1],[5,1],[8,1],[9,1],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[12,3],[1,4],[2,4],[12,4],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5],[4,6],[5,6],[8,6],[9,6],[5,7],[8,7]]
-            ],
-            sleep: [
-                [[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4],[2,5],[3,5],[11,5],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[11,6],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[10,7]],
-                [[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4],[2,5],[3,5],[11,5],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[11,6],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[10,7]]
-            ]
-        },
         dog: {
             name: 'Dog',
-            color: '#8B4513',
-            idle: [
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[3,4],[4,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[4,6],[5,6],[8,6],[9,6],[4,7],[5,7],[8,7],[9,7]],
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[3,4],[4,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[4,6],[5,6],[8,6],[9,6],[5,7],[8,7]]
-            ],
-            walk: [
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[3,4],[4,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[3,6],[4,6],[9,6],[10,6],[3,7],[10,7]],
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[3,4],[4,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[5,6],[6,6],[7,6],[8,6],[5,7],[8,7]]
-            ],
-            run: [
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[12,3],[2,4],[3,4],[4,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[3,6],[4,6],[9,6],[10,6],[3,7],[10,7]],
-                [[5,0],[6,0],[5,1],[6,1],[7,1],[8,1],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3],[12,3],[2,4],[3,4],[4,4],[11,4],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[5,6],[6,6],[7,6],[8,6],[6,7],[7,7]]
-            ],
-            sleep: [
-                [[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[3,5],[4,5],[10,5],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7]],
-                [[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[3,5],[4,5],[10,5],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],[10,6],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7]]
-            ]
+            folder: 'dog',
+            color: 'akita',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'walk_fast_8fps.gif',
+                sleep: 'lie_8fps.gif'
+            }
         },
-        duck: {
-            name: 'Duck',
-            color: '#FFD700',
-            idle: [
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[5,6],[6,6],[7,6],[8,6],[5,7],[6,7],[7,7],[8,7]],
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[5,6],[6,6],[7,6],[8,6],[6,7],[7,7]]
-            ],
-            walk: [
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[4,6],[5,6],[8,6],[9,6],[4,7],[9,7]],
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[5,6],[6,6],[7,6],[8,6],[5,7],[8,7]]
-            ],
-            run: [
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[4,6],[5,6],[8,6],[9,6],[4,7],[9,7]],
-                [[6,1],[7,1],[5,2],[6,2],[7,2],[8,2],[5,3],[6,3],[7,3],[8,3],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[5,6],[6,6],[7,6],[8,6],[6,7],[7,7]]
-            ],
-            sleep: [
-                [[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[5,6],[6,6],[7,6],[8,6]],
-                [[5,3],[6,3],[7,3],[8,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[5,6],[6,6],[7,6],[8,6]]
-            ]
+        chicken: {
+            name: 'Chicken',
+            folder: 'chicken',
+            color: 'white',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'walk_fast_8fps.gif',
+                sleep: 'idle_8fps.gif'
+            }
+        },
+        fox: {
+            name: 'Fox',
+            folder: 'fox',
+            color: 'red',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'run_8fps.gif',
+                sleep: 'lie_8fps.gif'
+            }
+        },
+        snake: {
+            name: 'Snake',
+            folder: 'snake',
+            color: 'green',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'walk_fast_8fps.gif',
+                sleep: 'idle_8fps.gif'
+            }
         },
         crab: {
             name: 'Crab',
-            color: '#FF6347',
-            idle: [
-                [[2,2],[3,2],[10,2],[11,2],[1,3],[2,3],[3,3],[10,3],[11,3],[12,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[3,6],[4,6],[5,6],[8,6],[9,6],[10,6],[3,7],[4,7],[9,7],[10,7]],
-                [[3,2],[4,2],[9,2],[10,2],[2,3],[3,3],[4,3],[9,3],[10,3],[11,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[3,6],[4,6],[5,6],[8,6],[9,6],[10,6],[3,7],[4,7],[9,7],[10,7]]
-            ],
-            walk: [
-                [[2,2],[3,2],[10,2],[11,2],[1,3],[2,3],[3,3],[10,3],[11,3],[12,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[2,6],[3,6],[10,6],[11,6],[2,7],[11,7]],
-                [[3,2],[4,2],[9,2],[10,2],[2,3],[3,3],[4,3],[9,3],[10,3],[11,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[4,6],[5,6],[8,6],[9,6],[4,7],[9,7]]
-            ],
-            run: [
-                [[1,2],[2,2],[11,2],[12,2],[0,3],[1,3],[2,3],[11,3],[12,3],[13,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[2,6],[3,6],[10,6],[11,6],[2,7],[11,7]],
-                [[2,2],[3,2],[10,2],[11,2],[1,3],[2,3],[3,3],[10,3],[11,3],[12,3],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[4,6],[5,6],[8,6],[9,6],[4,7],[9,7]]
-            ],
-            sleep: [
-                [[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[3,6],[4,6],[5,6],[8,6],[9,6],[10,6]],
-                [[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[3,6],[4,6],[5,6],[8,6],[9,6],[10,6]]
-            ]
+            folder: 'crab',
+            color: 'red',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'walk_fast_8fps.gif',
+                sleep: 'idle_8fps.gif'
+            }
+        },
+        duck: {
+            name: 'Duck',
+            folder: 'rubber-duck',
+            color: 'yellow',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'run_8fps.gif',
+                sleep: 'idle_8fps.gif'
+            }
+        },
+        turtle: {
+            name: 'Turtle',
+            folder: 'turtle',
+            color: 'green',
+            states: {
+                idle: 'idle_8fps.gif',
+                walk: 'walk_8fps.gif',
+                run: 'run_8fps.gif',
+                sleep: 'lie_8fps.gif'
+            }
         }
     },
 
     init() {
-        this.loadPreferences();
-        this.createDOM();
-        this.startAnimationLoop();
-        this.startBehaviorLoop();
-    },
-
-    loadPreferences() {
-        const saved = localStorage.getItem('desktop-pet-v3');
+        // Clear old invalid pet data
+        const saved = localStorage.getItem('desktop-pet-v4');
         if (saved) {
             try {
                 const data = JSON.parse(saved);
-                this.petType = data.type || 'cat';
-            } catch (e) {}
+                if (data.type && !this.pets[data.type]) {
+                    localStorage.removeItem('desktop-pet-v4');
+                }
+            } catch (e) {
+                localStorage.removeItem('desktop-pet-v4');
+            }
+        }
+
+        this.loadPreferences();
+        this.createDOM();
+        this.startBehaviorLoop();
+        this.startTipLoop();
+        this.startMoveLoop();
+    },
+
+    loadPreferences() {
+        const saved = localStorage.getItem('desktop-pet-v4');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.type && this.pets[data.type]) {
+                    this.petType = data.type;
+                } else {
+                    this.petType = 'dog';
+                }
+            } catch (e) {
+                this.petType = 'dog';
+            }
         }
         this.position.x = Math.random() * (window.innerWidth - 100) + 50;
     },
 
     savePreferences() {
-        localStorage.setItem('desktop-pet-v3', JSON.stringify({ type: this.petType }));
+        localStorage.setItem('desktop-pet-v4', JSON.stringify({ type: this.petType }));
+    },
+
+    getSpritePath(state) {
+        const pet = this.pets[this.petType];
+        const stateFile = pet.states[state] || pet.states.idle;
+        return `${this.baseUrl}/${pet.folder}/${pet.color}_${stateFile}`;
     },
 
     createDOM() {
         this.element = document.createElement('div');
         this.element.id = 'desktop-pet';
 
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = this.size * 2;
-        this.canvas.height = this.size * 2;
-        this.ctx = this.canvas.getContext('2d');
+        this.imgElement = document.createElement('img');
+        this.imgElement.className = 'pet-sprite';
+        this.imgElement.src = this.getSpritePath('idle');
+        this.imgElement.draggable = false;
 
         const menu = document.createElement('div');
         menu.className = 'pet-menu';
 
-        this.element.appendChild(this.canvas);
+        this.speechBubble = document.createElement('div');
+        this.speechBubble.className = 'pet-speech-bubble';
+
+        this.element.appendChild(this.imgElement);
         this.element.appendChild(menu);
+        this.element.appendChild(this.speechBubble);
 
         this.updatePosition();
-        this.draw();
         document.body.appendChild(this.element);
 
         this.element.addEventListener('click', (e) => this.handleClick(e));
         this.element.addEventListener('dblclick', (e) => this.showPetMenu(e));
     },
 
-    draw() {
-        const pet = this.pets[this.petType];
-        const frames = pet[this.state] || pet.idle;
-        const pixels = frames[this.frame % frames.length];
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        const pixelSize = 3;
-        const offsetX = this.direction === 1 ? 0 : this.canvas.width;
-        const scaleX = this.direction;
-
-        this.ctx.save();
-        this.ctx.translate(offsetX, 0);
-        this.ctx.scale(scaleX, 1);
-
-        this.ctx.fillStyle = pet.color;
-        pixels.forEach(([x, y]) => {
-            this.ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-        });
-
-        // Draw eyes (white with black pupils)
-        if (this.state !== 'sleep') {
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillRect(5 * pixelSize, 3 * pixelSize, pixelSize, pixelSize);
-            this.ctx.fillRect(8 * pixelSize, 3 * pixelSize, pixelSize, pixelSize);
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillRect(5 * pixelSize, 3 * pixelSize, 1, 1);
-            this.ctx.fillRect(8 * pixelSize, 3 * pixelSize, 1, 1);
-        } else {
-            // Closed eyes for sleep
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillRect(5 * pixelSize, 3 * pixelSize, pixelSize, 1);
-            this.ctx.fillRect(8 * pixelSize, 3 * pixelSize, pixelSize, 1);
+    updateSprite() {
+        const newSrc = this.getSpritePath(this.state);
+        if (this.imgElement.src !== newSrc) {
+            this.imgElement.src = newSrc;
         }
-
-        this.ctx.restore();
+        // Flip sprite based on direction
+        this.imgElement.style.transform = this.direction === -1 ? 'scaleX(-1)' : 'scaleX(1)';
     },
 
     updatePosition() {
@@ -197,12 +216,7 @@ export const DesktopPet = {
         this.element.style.bottom = `${48 + this.jumpY}px`;
     },
 
-    startAnimationLoop() {
-        this.frameInterval = setInterval(() => {
-            this.frame++;
-            this.draw();
-        }, 200);
-
+    startMoveLoop() {
         this.moveInterval = setInterval(() => {
             this.updateMovement();
         }, 50);
@@ -212,6 +226,37 @@ export const DesktopPet = {
         this.behaviorInterval = setInterval(() => {
             this.decideBehavior();
         }, 3000 + Math.random() * 4000);
+    },
+
+    startTipLoop() {
+        setTimeout(() => this.showTip(), 3000);
+
+        const scheduleNextTip = () => {
+            this.tipInterval = setTimeout(() => {
+                this.showTip();
+                scheduleNextTip();
+            }, 15000 + Math.random() * 10000);
+        };
+        scheduleNextTip();
+    },
+
+    showTip() {
+        if (!this.speechBubble || this.state === 'sleep') return;
+
+        let tipIndex;
+        do {
+            tipIndex = Math.floor(Math.random() * this.tips.length);
+        } while (tipIndex === this.lastTipIndex && this.tips.length > 1);
+
+        this.lastTipIndex = tipIndex;
+        const tip = this.tips[tipIndex];
+
+        this.speechBubble.textContent = tip;
+        this.speechBubble.classList.add('visible');
+
+        setTimeout(() => {
+            this.speechBubble.classList.remove('visible');
+        }, 5000 + Math.random() * 2000);
     },
 
     decideBehavior() {
@@ -247,6 +292,7 @@ export const DesktopPet = {
         this.velocity = 2;
         this.setState('walk');
         this.direction = x > this.position.x ? 1 : -1;
+        this.updateSprite();
     },
 
     runTo(x) {
@@ -254,6 +300,7 @@ export const DesktopPet = {
         this.velocity = 5;
         this.setState('run');
         this.direction = x > this.position.x ? 1 : -1;
+        this.updateSprite();
     },
 
     jump() {
@@ -293,13 +340,13 @@ export const DesktopPet = {
         this.position.x = Math.max(20, Math.min(window.innerWidth - 60, this.position.x));
 
         this.updatePosition();
+        this.updateSprite();
     },
 
     setState(state) {
         if (this.state !== state) {
             this.state = state;
-            this.frame = 0;
-            this.draw();
+            this.updateSprite();
         }
     },
 
@@ -342,14 +389,15 @@ export const DesktopPet = {
         if (!this.pets[type]) return;
         this.petType = type;
         this.setState('idle');
+        this.updateSprite();
         this.jump();
         this.savePreferences();
     },
 
     destroy() {
-        if (this.frameInterval) clearInterval(this.frameInterval);
         if (this.behaviorInterval) clearInterval(this.behaviorInterval);
         if (this.moveInterval) clearInterval(this.moveInterval);
+        if (this.tipInterval) clearTimeout(this.tipInterval);
         if (this.element) this.element.remove();
     }
 };

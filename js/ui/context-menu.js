@@ -39,7 +39,26 @@ export const ContextMenu = {
 
         e.preventDefault();
 
-        const wallpapers = WallpaperManager.getList();
+        const wallpaperCategories = WallpaperManager.getList();
+        const wallpaperSubmenu = [];
+
+        // Build categorized wallpaper submenu
+        Object.entries(wallpaperCategories).forEach(([type, category]) => {
+            if (category.items.length > 0) {
+                // Add category header
+                if (wallpaperSubmenu.length > 0) {
+                    wallpaperSubmenu.push({ label: '───────────', disabled: true });
+                }
+                wallpaperSubmenu.push({ label: category.name, disabled: true, header: true });
+                // Add items
+                category.items.forEach(w => {
+                    wallpaperSubmenu.push({
+                        label: (w.isActive ? '● ' : '○ ') + w.name,
+                        action: () => WallpaperManager.apply(w.id)
+                    });
+                });
+            }
+        });
 
         const options = [
             { label: '💻 Abrir Terminal', action: () => window.dispatchEvent(new CustomEvent('open-terminal')) },
@@ -52,10 +71,7 @@ export const ContextMenu = {
             { separator: true },
             {
                 label: '🖼️ Papel de Parede',
-                submenu: wallpapers.map(w => ({
-                    label: (w.isActive ? '● ' : '○ ') + w.name,
-                    action: () => WallpaperManager.apply(w.id)
-                }))
+                submenu: wallpaperSubmenu
             },
             { label: '📺 Alternar CRT', action: () => {
                 document.body.classList.toggle('crt-enabled');
@@ -119,29 +135,53 @@ export const ContextMenu = {
         const submenu = document.createElement('div');
         submenu.className = 'context-submenu';
 
-        submenu.innerHTML = items.map(item =>
-            `<div class="context-item">${item.label}</div>`
-        ).join('');
-
-        const parentRect = parentItem.getBoundingClientRect();
-        submenu.style.left = `${parentRect.right - 4}px`;
-        submenu.style.top = `${parentRect.top}px`;
+        submenu.innerHTML = items.map(item => {
+            if (item.disabled) {
+                const cls = item.header ? 'context-header' : 'context-separator-text';
+                return `<div class="context-item ${cls}">${item.label}</div>`;
+            }
+            return `<div class="context-item">${item.label}</div>`;
+        }).join('');
 
         document.body.appendChild(submenu);
 
+        const parentRect = parentItem.getBoundingClientRect();
         const submenuRect = submenu.getBoundingClientRect();
-        if (submenuRect.right > window.innerWidth) {
-            submenu.style.left = `${parentRect.left - submenuRect.width + 4}px`;
-        }
-        if (submenuRect.bottom > window.innerHeight) {
-            submenu.style.top = `${window.innerHeight - submenuRect.height - 10}px`;
+
+        // Calculate position
+        let left = parentRect.right - 4;
+        let top = parentRect.top;
+
+        // Check right edge
+        if (left + submenuRect.width > window.innerWidth - 10) {
+            left = parentRect.left - submenuRect.width + 4;
         }
 
+        // Check left edge (if flipped)
+        if (left < 10) {
+            left = 10;
+        }
+
+        // Check bottom edge
+        if (top + submenuRect.height > window.innerHeight - 10) {
+            top = window.innerHeight - submenuRect.height - 10;
+        }
+
+        // Check top edge
+        if (top < 10) {
+            top = 10;
+        }
+
+        submenu.style.left = `${left}px`;
+        submenu.style.top = `${top}px`;
+
         submenu.querySelectorAll('.context-item').forEach((el, i) => {
-            el.addEventListener('click', () => {
-                items[i].action();
-                this.hide();
-            });
+            if (!items[i].disabled && items[i].action) {
+                el.addEventListener('click', () => {
+                    items[i].action();
+                    this.hide();
+                });
+            }
         });
 
         submenu.addEventListener('mouseleave', () => {

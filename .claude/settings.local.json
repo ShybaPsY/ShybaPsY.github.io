@@ -8,7 +8,8 @@
       "WebFetch(domain:de1.api.radio-browser.info)",
       "Bash(tree:*)",
       "Bash(find:*)",
-      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\asdadadsd\")"
+      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\asdadadsd\")",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

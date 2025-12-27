@@ -141,7 +141,7 @@ body {
     -webkit-backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     z-index: 2;
 }
@@ -1208,6 +1208,69 @@ body.crt-enabled .app-window {
     height: 1px;
     background-color: var(--comment);
     margin: 4px 0;
+}
+
+.context-submenu {
+    position: fixed;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 6px;
+    padding: 4px 0;
+    min-width: 180px;
+    max-width: 250px;
+    max-height: min(400px, 60vh);
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 100000;
+}
+
+.context-submenu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.context-submenu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.context-submenu::-webkit-scrollbar-thumb {
+    background: var(--comment);
+    border-radius: 3px;
+}
+
+.context-header {
+    padding: 6px 16px !important;
+    font-size: 11px !important;
+    color: var(--cyan) !important;
+    font-weight: bold;
+    cursor: default !important;
+    background: transparent !important;
+}
+
+.context-header:hover {
+    background: transparent !important;
+}
+
+.context-separator-text {
+    padding: 2px 16px !important;
+    font-size: 10px !important;
+    color: var(--comment) !important;
+    cursor: default !important;
+}
+
+.context-separator-text:hover {
+    background: transparent !important;
+}
+
+.context-item-submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.submenu-arrow {
+    font-size: 10px;
+    opacity: 0.6;
 }
 
 /* === WINDOW BUTTONS (Minimize/Maximize) === */

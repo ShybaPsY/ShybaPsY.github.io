@@ -13,7 +13,7 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     position: absolute;
     z-index: 100;
     pointer-events: auto;
@@ -31,6 +31,7 @@
     font-weight: bold;
     cursor: grab;
     user-select: none;
+    border-radius: 7px 7px 0 0;
 }
 
 #terminal-header.dragging {
@@ -301,6 +302,21 @@ body.resizing-terminal * {
 
 #terminal.restoring {
     animation: terminal-restore 0.3s ease forwards;
+}
+
+/* Snapped Terminal States */
+#terminal.snapped-left,
+#terminal.snapped-right {
+    border-radius: 8px 8px 0 0 !important;
+    max-width: none;
+    max-height: none;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+#terminal.snapped-left .resize-handle,
+#terminal.snapped-right .resize-handle {
+    display: none;
 }
 
 /* Maximized Terminal State */

@@ -126,12 +126,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         let offsetY = 0;
         let rafId = null;
         let targetX = 0, targetY = 0;
+        let snapZone = null;
 
         const startDragging = (e) => {
             if (e.target.closest('.button') || e.target.closest('.buttons')) {
                 return;
             }
             if (e.type === 'mousedown' && e.button !== 0) return;
+
+            // If snapped or maximized, restore first
+            if (terminal.classList.contains('snapped-left') ||
+                terminal.classList.contains('snapped-right') ||
+                terminal.classList.contains('maximized')) {
+                terminal.classList.remove('snapped-left', 'snapped-right', 'maximized');
+                if (terminal.dataset.prevWidth) {
+                    terminal.style.width = terminal.dataset.prevWidth;
+                    terminal.style.height = terminal.dataset.prevHeight;
+                }
+                // Center on cursor
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                offsetX = terminal.offsetWidth / 2;
+                offsetY = 20;
+                terminal.style.left = `${clientX - offsetX}px`;
+                terminal.style.top = `${clientY - offsetY}px`;
+                isDragging = true;
+                terminalHeader.classList.add('dragging');
+                document.body.classList.add('dragging-terminal');
+                terminal.style.zIndex = ++WindowManager.highestZIndex;
+                terminal.style.willChange = 'left, top';
+                if (e.type === 'touchstart') e.preventDefault();
+                return;
+            }
 
             isDragging = true;
             const rect = terminal.getBoundingClientRect();
@@ -172,6 +198,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             targetX = Math.max(0, Math.min(clientX - offsetX, maxLeft));
             targetY = Math.max(0, Math.min(clientY - offsetY, maxTop));
 
+            // Detect snap zones
+            snapZone = WindowManager.detectSnapZone(clientX, clientY);
+            WindowManager.showSnapPreview(snapZone);
+
             if (!rafId) {
                 rafId = requestAnimationFrame(() => {
                     terminal.style.left = `${targetX}px`;
@@ -191,6 +221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             terminalHeader.classList.remove('dragging');
             document.body.classList.remove('dragging-terminal');
             terminal.style.willChange = '';
+
+            // Apply snap if in zone
+            if (snapZone) {
+                WindowManager.applySnap(terminal, snapZone);
+            }
+            WindowManager.hideSnapPreview();
+            snapZone = null;
+
             if (rafId) {
                 cancelAnimationFrame(rafId);
                 rafId = null;

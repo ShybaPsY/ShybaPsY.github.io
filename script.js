@@ -2544,6 +2544,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === DRAG FUNCTIONALITY ===
     if (terminal && terminalHeader) {
+        const SNAP_THRESHOLD = 30;
+        const TASKBAR_HEIGHT = 48;
+        let snapPreview = null;
+        let snapZone = null;
+
         const dragState = {
             isDragging: false,
             offsetX: 0,
@@ -2593,6 +2598,92 @@ document.addEventListener('DOMContentLoaded', () => {
             setTerminalPosition(centeredLeft, centeredTop);
         };
 
+        const detectSnapZone = (mouseX, mouseY) => {
+            const screenW = window.innerWidth;
+            if (mouseY <= SNAP_THRESHOLD) {
+                return 'top';
+            } else if (mouseX <= SNAP_THRESHOLD) {
+                return 'left';
+            } else if (mouseX >= screenW - SNAP_THRESHOLD) {
+                return 'right';
+            }
+            return null;
+        };
+
+        const showSnapPreview = (zone) => {
+            if (!zone) {
+                hideSnapPreview();
+                return;
+            }
+            if (!snapPreview) {
+                snapPreview = document.createElement('div');
+                snapPreview.className = 'snap-preview';
+                snapPreview.style.zIndex = '9999';
+                document.body.appendChild(snapPreview);
+            }
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight - TASKBAR_HEIGHT;
+            snapPreview.classList.add('visible');
+            switch (zone) {
+                case 'left':
+                    Object.assign(snapPreview.style, { left: '0', top: '0', width: `${screenW / 2}px`, height: `${screenH}px` });
+                    break;
+                case 'right':
+                    Object.assign(snapPreview.style, { left: `${screenW / 2}px`, top: '0', width: `${screenW / 2}px`, height: `${screenH}px` });
+                    break;
+                case 'top':
+                    Object.assign(snapPreview.style, { left: '0', top: '0', width: `${screenW}px`, height: `${screenH}px` });
+                    break;
+            }
+        };
+
+        const hideSnapPreview = () => {
+            if (snapPreview) {
+                snapPreview.classList.remove('visible');
+            }
+        };
+
+        const applySnap = (zone) => {
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight - TASKBAR_HEIGHT;
+
+            // Save previous state for restore
+            terminal.dataset.prevWidth = terminal.style.width || `${terminal.offsetWidth}px`;
+            terminal.dataset.prevHeight = terminal.style.height || `${terminal.offsetHeight}px`;
+            terminal.dataset.prevLeft = terminal.style.left;
+            terminal.dataset.prevTop = terminal.style.top;
+            terminal.dataset.prevPosition = terminal.style.position || 'absolute';
+
+            // Force override all constraints
+            terminal.style.setProperty('max-width', 'none', 'important');
+            terminal.style.setProperty('max-height', 'none', 'important');
+            terminal.style.setProperty('position', 'fixed', 'important');
+            terminal.style.setProperty('margin', '0', 'important');
+            terminal.style.borderRadius = '0';
+
+            switch (zone) {
+                case 'left':
+                    terminal.style.setProperty('left', '0px', 'important');
+                    terminal.style.setProperty('top', '0px', 'important');
+                    terminal.style.setProperty('width', `${screenW / 2}px`, 'important');
+                    terminal.style.setProperty('height', `${screenH}px`, 'important');
+                    break;
+                case 'right':
+                    terminal.style.setProperty('left', `${screenW / 2}px`, 'important');
+                    terminal.style.setProperty('top', '0px', 'important');
+                    terminal.style.setProperty('width', `${screenW / 2}px`, 'important');
+                    terminal.style.setProperty('height', `${screenH}px`, 'important');
+                    break;
+                case 'top':
+                    terminal.style.setProperty('left', '0px', 'important');
+                    terminal.style.setProperty('top', '0px', 'important');
+                    terminal.style.setProperty('width', `${screenW}px`, 'important');
+                    terminal.style.setProperty('height', `${screenH}px`, 'important');
+                    break;
+            }
+            terminal.dataset.snapped = zone;
+        };
+
         const startDragging = (event) => {
             if (event.type === 'mousedown' && event.button !== 0) return;
 
@@ -2600,6 +2691,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!position) return;
 
             const terminalRect = terminal.getBoundingClientRect();
+
+            // If snapped, restore to normal dragging mode
+            if (terminal.dataset.snapped) {
+                // Clear all important styles
+                terminal.style.removeProperty('max-width');
+                terminal.style.removeProperty('max-height');
+                terminal.style.removeProperty('position');
+                terminal.style.removeProperty('margin');
+                terminal.style.removeProperty('left');
+                terminal.style.removeProperty('top');
+                terminal.style.removeProperty('width');
+                terminal.style.removeProperty('height');
+
+                // Set normal absolute position
+                terminal.style.position = 'absolute';
+                terminal.style.left = `${terminalRect.left}px`;
+                terminal.style.top = `${terminalRect.top}px`;
+                terminal.style.width = `${terminalRect.width}px`;
+                terminal.style.height = `${terminalRect.height}px`;
+                terminal.style.borderRadius = '8px';
+
+                delete terminal.dataset.snapped;
+            }
+
             dragState.isDragging = true;
             dragState.offsetX = position.x - terminalRect.left;
             dragState.offsetY = position.y - terminalRect.top;
@@ -2624,6 +2739,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTerminalPosition(nextLeft, nextTop);
 
+            // Detect and show snap preview
+            snapZone = detectSnapZone(position.x, position.y);
+            showSnapPreview(snapZone);
+
             if (event.type === 'touchmove') {
                 event.preventDefault();
             }
@@ -2635,6 +2754,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dragState.isDragging = false;
             terminalHeader.classList.remove('dragging');
             pageBody.classList.remove('dragging-terminal');
+
+            // Apply snap if in zone
+            if (snapZone) {
+                applySnap(snapZone);
+            }
+            hideSnapPreview();
+            snapZone = null;
         };
 
         terminalHeader.addEventListener('mousedown', startDragging);

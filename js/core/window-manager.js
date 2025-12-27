@@ -99,16 +99,19 @@ export const WindowManager = {
                 return;
             }
 
-            // If maximized, restore first
-            if (windowEl.classList.contains('maximized')) {
-                const rect = windowEl.getBoundingClientRect();
-                windowEl.classList.remove('maximized');
+            // If snapped or maximized, restore first
+            if (windowEl.classList.contains('maximized') ||
+                windowEl.classList.contains('snapped-left') ||
+                windowEl.classList.contains('snapped-right')) {
+                windowEl.classList.remove('maximized', 'snapped-left', 'snapped-right');
                 windowEl.style.width = windowEl.dataset.prevWidth || '400px';
                 windowEl.style.height = windowEl.dataset.prevHeight || '300px';
                 // Position window centered on cursor
                 const newWidth = parseInt(windowEl.style.width);
                 offsetX = newWidth / 2;
                 offsetY = 20;
+                windowEl.style.left = `${e.clientX - offsetX}px`;
+                windowEl.style.top = `${e.clientY - offsetY}px`;
             } else {
                 const rect = windowEl.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;

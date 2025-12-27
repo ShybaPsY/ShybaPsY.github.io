@@ -186,6 +186,28 @@
         </div>
     </div>
 
+    <!-- Algebrite for Calculus Calculator -->
+    <script src="https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.min.js"></script>
+
+    <!-- MathJax for Math Rendering -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+            fontCache: 'global'
+        },
+        startup: {
+            ready: () => {
+                MathJax.startup.defaultReady();
+            }
+        }
+    };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
     <!-- Main Script (ES6 Module) -->
     <script type="module" src="js/main.js"></script>
 </body>

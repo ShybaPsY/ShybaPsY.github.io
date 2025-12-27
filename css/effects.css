@@ -503,27 +503,29 @@ body.dragging-terminal .app-window {
     font-size: 12px;
 }
 
-/* === DESKTOP PET (Pixel Art Style) === */
+/* === DESKTOP PET (GIF Animation Style) === */
 
 #desktop-pet {
     position: fixed;
-    z-index: 9998;
+    z-index: 10000;
     cursor: pointer;
     user-select: none;
     pointer-events: auto;
 }
 
-#desktop-pet canvas {
+#desktop-pet .pet-sprite {
     display: block;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
-    transition: filter 0.2s ease, transform 0.2s ease;
+    transition: filter 0.2s ease;
 }
 
-#desktop-pet:hover canvas {
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-    transform: scale(1.1);
+#desktop-pet:hover .pet-sprite {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) brightness(1.1);
 }
 
 .pet-menu {
@@ -564,6 +566,62 @@ body.dragging-terminal .app-window {
 .pet-menu-item.active {
     background-color: var(--green);
     color: var(--background);
+}
+
+/* Pet Speech Bubble */
+.pet-speech-bubble {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    background: var(--background);
+    border: 2px solid var(--cyan);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-family: 'Fira Code', monospace;
+    color: var(--foreground);
+    white-space: normal;
+    max-width: 220px;
+    min-width: 150px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    margin-bottom: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    z-index: 10001;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+.pet-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid var(--cyan);
+}
+
+.pet-speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid var(--background);
+    z-index: 1;
+}
+
+.pet-speech-bubble.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1);
 }
 
 /* === EASTER EGGS === */

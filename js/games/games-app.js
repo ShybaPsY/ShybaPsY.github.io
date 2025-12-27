@@ -44,6 +44,25 @@ export const GamesApp = {
         }
     },
 
+    startGame(gameId) {
+        const gameMap = {
+            'snake': () => this.startSnake(),
+            'pong': () => this.startPong(),
+            'tetris': () => this.startTetris(),
+            '2048': () => this.start2048(),
+            'breakout': () => this.startBreakout(),
+            'space-invaders': () => this.startInvaders(),
+            'asteroids': () => this.startAsteroids(),
+            'dino': () => this.startDino(),
+            'flappy': () => this.startFlappy(),
+            'minesweeper': () => this.startMinesweeper(),
+            'memory': () => this.startMemory()
+        };
+        if (gameMap[gameId]) {
+            gameMap[gameId]();
+        }
+    },
+
     showMenu() {
         this.cleanup();
         const container = document.getElementById('games-content');
