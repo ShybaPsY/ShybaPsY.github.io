@@ -5,8 +5,11 @@
 export const WindowManager = {
     windows: {},
     highestZIndex: 100,
-    Taskbar: null, // Will be set during initialization
-    appCleanupHandlers: {}, // Store cleanup handlers for apps
+    Taskbar: null,
+    appCleanupHandlers: {},
+    snapPreview: null,
+    SNAP_THRESHOLD: 30,
+    TASKBAR_HEIGHT: 48,
 
     setTaskbar(taskbar) {
         this.Taskbar = taskbar;
@@ -87,33 +90,180 @@ export const WindowManager = {
         const header = windowEl.querySelector('.app-window-header');
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
+        let rafId = null;
+        let currentX = 0, currentY = 0;
+        let snapZone = null;
 
         const startDrag = (e) => {
-            // Don't drag if clicking on buttons
             if (e.target.closest('.app-window-btn') || e.target.closest('.app-window-buttons')) {
                 return;
             }
+
+            // If maximized, restore first
+            if (windowEl.classList.contains('maximized')) {
+                const rect = windowEl.getBoundingClientRect();
+                windowEl.classList.remove('maximized');
+                windowEl.style.width = windowEl.dataset.prevWidth || '400px';
+                windowEl.style.height = windowEl.dataset.prevHeight || '300px';
+                // Position window centered on cursor
+                const newWidth = parseInt(windowEl.style.width);
+                offsetX = newWidth / 2;
+                offsetY = 20;
+            } else {
+                const rect = windowEl.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+            }
+
             isDragging = true;
-            const rect = windowEl.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
             header.classList.add('dragging');
+            windowEl.classList.add('dragging');
         };
 
         const drag = (e) => {
             if (!isDragging) return;
-            windowEl.style.left = `${e.clientX - offsetX}px`;
-            windowEl.style.top = `${e.clientY - offsetY}px`;
+            currentX = e.clientX - offsetX;
+            currentY = e.clientY - offsetY;
+
+            // Detect snap zones
+            snapZone = this.detectSnapZone(e.clientX, e.clientY);
+            this.showSnapPreview(snapZone);
+
+            if (!rafId) {
+                rafId = requestAnimationFrame(() => {
+                    windowEl.style.left = `${currentX}px`;
+                    windowEl.style.top = `${currentY}px`;
+                    rafId = null;
+                });
+            }
         };
 
         const stopDrag = () => {
+            if (!isDragging) return;
             isDragging = false;
             header.classList.remove('dragging');
+            windowEl.classList.remove('dragging');
+
+            // Apply snap if in zone
+            if (snapZone) {
+                this.applySnap(windowEl, snapZone);
+            }
+            this.hideSnapPreview();
+            snapZone = null;
+
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
         };
 
         header.addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
+    },
+
+    detectSnapZone(mouseX, mouseY) {
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+        const threshold = this.SNAP_THRESHOLD;
+
+        if (mouseY <= threshold) {
+            return 'top'; // Maximize
+        } else if (mouseX <= threshold) {
+            return 'left'; // Left half
+        } else if (mouseX >= screenW - threshold) {
+            return 'right'; // Right half
+        }
+        return null;
+    },
+
+    showSnapPreview(zone) {
+        if (!zone) {
+            this.hideSnapPreview();
+            return;
+        }
+
+        if (!this.snapPreview) {
+            this.snapPreview = document.createElement('div');
+            this.snapPreview.className = 'snap-preview';
+            document.body.appendChild(this.snapPreview);
+        }
+
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight - this.TASKBAR_HEIGHT;
+
+        this.snapPreview.classList.add('visible');
+
+        switch (zone) {
+            case 'left':
+                Object.assign(this.snapPreview.style, {
+                    left: '0', top: '0',
+                    width: `${screenW / 2}px`,
+                    height: `${screenH}px`
+                });
+                break;
+            case 'right':
+                Object.assign(this.snapPreview.style, {
+                    left: `${screenW / 2}px`, top: '0',
+                    width: `${screenW / 2}px`,
+                    height: `${screenH}px`
+                });
+                break;
+            case 'top':
+                Object.assign(this.snapPreview.style, {
+                    left: '0', top: '0',
+                    width: `${screenW}px`,
+                    height: `${screenH}px`
+                });
+                break;
+        }
+    },
+
+    hideSnapPreview() {
+        if (this.snapPreview) {
+            this.snapPreview.classList.remove('visible');
+        }
+    },
+
+    applySnap(windowEl, zone) {
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight - this.TASKBAR_HEIGHT;
+
+        // Save previous position for double-click restore
+        windowEl.dataset.prevWidth = windowEl.style.width || `${windowEl.offsetWidth}px`;
+        windowEl.dataset.prevHeight = windowEl.style.height || `${windowEl.offsetHeight}px`;
+        windowEl.dataset.prevLeft = windowEl.style.left || `${windowEl.offsetLeft}px`;
+        windowEl.dataset.prevTop = windowEl.style.top || `${windowEl.offsetTop}px`;
+
+        windowEl.classList.add('snapping');
+
+        switch (zone) {
+            case 'left':
+                windowEl.style.left = '0';
+                windowEl.style.top = '0';
+                windowEl.style.width = `${screenW / 2}px`;
+                windowEl.style.height = `${screenH}px`;
+                windowEl.classList.add('snapped-left');
+                break;
+            case 'right':
+                windowEl.style.left = `${screenW / 2}px`;
+                windowEl.style.top = '0';
+                windowEl.style.width = `${screenW / 2}px`;
+                windowEl.style.height = `${screenH}px`;
+                windowEl.classList.add('snapped-right');
+                break;
+            case 'top':
+                windowEl.style.left = '0';
+                windowEl.style.top = '0';
+                windowEl.style.width = `${screenW}px`;
+                windowEl.style.height = `${screenH}px`;
+                windowEl.classList.add('maximized');
+                break;
+        }
+
+        setTimeout(() => {
+            windowEl.classList.remove('snapping');
+        }, 250);
     },
 
     setupWindowResize(windowEl) {
@@ -122,6 +272,8 @@ export const WindowManager = {
         let isResizing = false;
         let resizeDir = null;
         let startX, startY, startWidth, startHeight;
+        let rafId = null;
+        let newWidth = 0, newHeight = 0;
 
         const startResize = (e) => {
             e.stopPropagation();
@@ -133,6 +285,7 @@ export const WindowManager = {
             startHeight = windowEl.offsetHeight;
             document.body.style.cursor = e.target.style.cursor || 'se-resize';
             document.body.style.userSelect = 'none';
+            windowEl.classList.add('resizing');
         };
 
         const doResize = (e) => {
@@ -141,18 +294,32 @@ export const WindowManager = {
             const dy = e.clientY - startY;
 
             if (resizeDir.includes('e')) {
-                windowEl.style.width = `${Math.max(MIN_WIDTH, startWidth + dx)}px`;
+                newWidth = Math.max(MIN_WIDTH, startWidth + dx);
             }
             if (resizeDir.includes('s')) {
-                windowEl.style.height = `${Math.max(MIN_HEIGHT, startHeight + dy)}px`;
+                newHeight = Math.max(MIN_HEIGHT, startHeight + dy);
+            }
+
+            if (!rafId) {
+                rafId = requestAnimationFrame(() => {
+                    if (resizeDir.includes('e')) windowEl.style.width = `${newWidth}px`;
+                    if (resizeDir.includes('s')) windowEl.style.height = `${newHeight}px`;
+                    rafId = null;
+                });
             }
         };
 
         const stopResize = () => {
+            if (!isResizing) return;
             isResizing = false;
             resizeDir = null;
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+            windowEl.classList.remove('resizing');
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
         };
 
         windowEl.querySelectorAll('.app-resize-handle').forEach(handle => {

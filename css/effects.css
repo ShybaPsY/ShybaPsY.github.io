@@ -214,14 +214,44 @@ body.crt-enabled .app-window {
     display: none;
 }
 
-/* Maximize/Restore Animation */
-.app-window {
+/* === WINDOW SNAPPING === */
+
+.snap-preview {
+    position: fixed;
+    background: rgba(var(--foreground-rgb, 255, 255, 255), 0.1);
+    border: 2px dashed var(--comment);
+    border-radius: 8px;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, left 0.15s ease, top 0.15s ease,
+                width 0.15s ease, height 0.15s ease;
+}
+
+.snap-preview.visible {
+    opacity: 1;
+}
+
+.app-window.snapping {
+    transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease;
+}
+
+.app-window.snapped-left,
+.app-window.snapped-right {
+    border-radius: 0;
+}
+
+/* Maximize/Restore Animation - only during maximize */
+.app-window.maximizing {
     transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease,
                 border-radius 0.25s ease, box-shadow 0.25s ease;
 }
 
-.app-window.maximizing {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* Disable transitions during drag/resize for performance */
+.app-window-header.dragging + .app-window-body,
+body.resizing-terminal .app-window,
+body.dragging-terminal .app-window {
+    transition: none !important;
 }
 
 @keyframes windowMaximize {
@@ -274,6 +304,28 @@ body.crt-enabled .app-window {
     height: 1px;
     background-color: var(--comment);
     margin: 4px 0;
+}
+
+.context-item-submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.submenu-arrow {
+    font-size: 8px;
+    opacity: 0.6;
+}
+
+.context-submenu {
+    position: fixed;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 6px;
+    padding: 4px 0;
+    min-width: 140px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 100000;
 }
 
 /* === ACHIEVEMENT TOAST === */
@@ -330,4 +382,321 @@ body.crt-enabled .app-window {
     font-size: 14px;
     font-weight: bold;
     color: var(--yellow);
+}
+
+/* === SPOTLIGHT SEARCH === */
+
+#spotlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100001;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 100px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#spotlight-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#spotlight {
+    width: 500px;
+    max-width: 90vw;
+    background: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+#spotlight-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--comment);
+}
+
+#spotlight-input-wrapper svg {
+    color: var(--comment);
+    flex-shrink: 0;
+}
+
+#spotlight-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+}
+
+#spotlight-input::placeholder {
+    color: var(--comment);
+}
+
+#spotlight-results {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.spotlight-group {
+    padding: 4px 0;
+}
+
+.spotlight-group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--comment);
+    padding: 6px 16px 4px;
+    font-weight: 600;
+}
+
+.spotlight-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.spotlight-item:hover,
+.spotlight-item.selected {
+    background: var(--comment);
+}
+
+.spotlight-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.spotlight-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.spotlight-name {
+    font-size: 13px;
+    color: var(--foreground);
+}
+
+.spotlight-desc {
+    font-size: 10px;
+    color: var(--comment);
+}
+
+.spotlight-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--comment);
+    font-size: 12px;
+}
+
+/* === DESKTOP PET (Pixel Art Style) === */
+
+#desktop-pet {
+    position: fixed;
+    z-index: 9998;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+}
+
+#desktop-pet canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+#desktop-pet:hover canvas {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    transform: scale(1.1);
+}
+
+.pet-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    padding: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    margin-bottom: 10px;
+    min-width: 120px;
+}
+
+.pet-menu.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.pet-menu-item {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+
+.pet-menu-item:hover {
+    background-color: var(--comment);
+}
+
+.pet-menu-item.active {
+    background-color: var(--green);
+    color: var(--background);
+}
+
+/* === EASTER EGGS === */
+
+#secret-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+#secret-overlay.closing {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.secret-content {
+    text-align: center;
+    color: var(--foreground);
+    animation: scaleIn 0.4s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.secret-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--yellow);
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px var(--yellow);
+    animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.secret-icon {
+    font-size: 80px;
+    margin: 20px 0;
+    animation: bounce 0.5s ease infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+.secret-text {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.secret-reward {
+    font-size: 14px;
+    color: var(--green);
+    margin-bottom: 10px;
+}
+
+.secret-hint {
+    font-size: 12px;
+    color: var(--comment);
+    margin-bottom: 20px;
+}
+
+.secret-close {
+    padding: 12px 30px;
+    font-size: 16px;
+    background: var(--green);
+    color: var(--background);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.secret-close:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--green);
+}
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 999998;
+    animation: confettiFall 3s ease forwards;
+}
+
+@keyframes confettiFall {
+    to {
+        top: 100vh;
+        transform: rotate(720deg);
+    }
+}
+
+.secret-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background);
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 999999;
+    animation: toastIn 0.3s ease;
+}
+
+.secret-toast.fade-out {
+    animation: fadeOut 0.3s ease forwards;
 }

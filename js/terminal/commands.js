@@ -182,20 +182,33 @@ export function createCommands(dependencies) {
   3 directories, 11 files`,
 
         get neofetch() {
+            const uptime = Math.floor((Date.now() - performance.timing.navigationStart) / 1000);
+            const hours = Math.floor(uptime / 3600);
+            const mins = Math.floor((uptime % 3600) / 60);
+            const secs = uptime % 60;
+            const uptimeStr = hours > 0 ? `${hours}h ${mins}m ${secs}s` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+            const apps = Object.keys(localStorage).filter(k => k.includes('used')).length;
+            const achievements = JSON.parse(localStorage.getItem('achievements') || '[]').length;
+
             return `
-  <span class="detail-cyan">      ___           ___       </span>     <span class="detail-green">gabriel@portfolio</span>
-  <span class="detail-cyan">     /  /\\         /__/\\      </span>     <span class="comment">─────────────────</span>
-  <span class="detail-cyan">    /  /:/_       |  |::\\     </span>     <span class="title-blue">OS:</span> Portfolio v2.0
-  <span class="detail-cyan">   /  /:/ /\\      |  |:|:\\    </span>     <span class="title-blue">Host:</span> GitHub Pages
-  <span class="detail-cyan">  /  /:/_/::\\   __|__|:|\\:\\   </span>     <span class="title-blue">Kernel:</span> JavaScript ES6+
-  <span class="detail-cyan"> /__/:/__\\/\\:\\ /__/::::| \\:\\  </span>     <span class="title-blue">Uptime:</span> ${Math.floor((Date.now() - performance.timing.navigationStart) / 1000)} seconds
-  <span class="detail-cyan"> \\  \\:\\ /~~/:/ \\  \\:\\~~\\__\\/  </span>     <span class="title-blue">Shell:</span> terminal.js
-  <span class="detail-cyan">  \\  \\:\\  /:/   \\  \\:\\        </span>     <span class="title-blue">Theme:</span> ${ThemeManager.current}
-  <span class="detail-cyan">   \\  \\:\\/:/     \\  \\:\\       </span>     <span class="title-blue">Terminal:</span> Fira Code
-  <span class="detail-cyan">    \\  \\::/       \\  \\:\\      </span>     <span class="title-blue">CPU:</span> Full-Stack Developer
-  <span class="detail-cyan">     \\__\\/         \\__\\/      </span>     <span class="title-blue">Memory:</span> Infinito
-                                    <span class="title-blue">Location:</span> Anhumas, SP
-                                    <span class="title-blue">Languages:</span> PT, EN, ES`;
+  <span class="detail-green">   ▄██████▄     ▄█</span>         <span class="detail-green">gabriel@portfolio</span>
+  <span class="detail-green">  ███    ███   ███</span>         <span class="comment">──────────────────</span>
+  <span class="detail-green">  ███    █▀    ███</span>         <span class="title-blue">OS:</span> Portfolio OS v2.0
+  <span class="detail-green"> ▄███         ███</span>          <span class="title-blue">Host:</span> GitHub Pages
+  <span class="detail-green">▀▀███ ████▄   ███</span>          <span class="title-blue">Kernel:</span> JavaScript ES6+
+  <span class="detail-green">  ███    ███  ███</span>          <span class="title-blue">Uptime:</span> ${uptimeStr}
+  <span class="detail-green">  ███    ███  ███▌    ▄</span>    <span class="title-blue">Shell:</span> terminal.js v1.0
+  <span class="detail-green">  ███    ███  █████▄▄██</span>    <span class="title-blue">Theme:</span> ${ThemeManager.current}
+  <span class="detail-green">  ████████▀   ▀</span>            <span class="title-blue">Terminal:</span> Fira Code 14px
+                             <span class="title-blue">Resolution:</span> ${window.innerWidth}x${window.innerHeight}
+                             <span class="title-blue">CPU:</span> Full-Stack Developer
+                             <span class="title-blue">Memory:</span> ∞ / ∞ MB
+                             <span class="title-blue">Apps:</span> ${apps} tracked
+                             <span class="title-blue">Achievements:</span> ${achievements}/9 unlocked
+                             <span class="title-blue">Location:</span> Anhumas, SP, Brazil
+                             <span class="title-blue">Languages:</span> PT-BR, EN, ES
+
+                             <span style="background:#ff5555;color:#ff5555;">██</span><span style="background:#ffb86c;color:#ffb86c;">██</span><span style="background:#f1fa8c;color:#f1fa8c;">██</span><span style="background:#50fa7b;color:#50fa7b;">██</span><span style="background:#8be9fd;color:#8be9fd;">██</span><span style="background:#bd93f9;color:#bd93f9;">██</span><span style="background:#ff79c6;color:#ff79c6;">██</span>`;
         },
 
         sudo: `
@@ -333,5 +346,29 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
                 ? '<span class="detail-green">Efeito CRT ativado!</span> Aproveite a nostalgia.'
                 : '<span class="comment">Efeito CRT desativado.</span>';
         },
+
+        rickroll: function() {
+            return `
+  <span class="detail-green">  Never gonna give you up</span>
+  <span class="detail-cyan">  Never gonna let you down</span>
+  <span class="detail-green">  Never gonna run around and desert you</span>
+  <span class="detail-cyan">  Never gonna make you cry</span>
+  <span class="detail-green">  Never gonna say goodbye</span>
+  <span class="detail-cyan">  Never gonna tell a lie and hurt you</span>
+
+  <span class="comment">  You just got rickrolled!</span>
+
+  <span class="highlight"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">Clique para a experiencia completa!</a></span>`;
+        },
+
+        konami: `
+  <span class="highlight">Codigo Konami</span>
+
+  <span class="comment">Use o teclado:</span>
+  <span class="detail-cyan">  cima cima baixo baixo</span>
+  <span class="detail-cyan">  esquerda direita esquerda direita</span>
+  <span class="detail-cyan">  B A</span>
+
+  <span class="comment">Algo magico pode acontecer...</span>`,
     };
 }

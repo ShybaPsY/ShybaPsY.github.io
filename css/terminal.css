@@ -11,14 +11,14 @@
     border: 1px solid var(--comment);
     border-radius: 8px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: absolute;
     z-index: 100;
     pointer-events: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 #terminal-header {
@@ -39,6 +39,11 @@
 
 body.dragging-terminal {
     user-select: none;
+}
+
+body.dragging-terminal #terminal,
+body.resizing-terminal #terminal {
+    transition: none !important;
 }
 
 #terminal-header .buttons {
@@ -282,9 +287,6 @@ body.resizing-terminal * {
 }
 
 /* Terminal Minimize/Maximize Animations */
-#terminal {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
 
 #terminal.minimizing {
     animation: terminal-minimize 0.3s ease forwards;

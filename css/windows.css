@@ -24,6 +24,18 @@
     flex-direction: column;
     pointer-events: auto;
     overflow: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.app-window.dragging {
+    transition: none !important;
+    will-change: left, top;
+}
+
+.app-window.resizing {
+    transition: none !important;
+    will-change: width, height;
 }
 
 .app-window-header {

@@ -272,3 +272,252 @@
     cursor: pointer;
     color: var(--foreground);
 }
+
+/* === NOTEPAD APP === */
+
+.notepad-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.notepad-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid var(--comment);
+    flex-shrink: 0;
+}
+
+.notepad-btn {
+    padding: 6px 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.notepad-btn:hover {
+    background-color: var(--comment);
+    border-color: var(--comment);
+}
+
+.notepad-divider {
+    width: 1px;
+    background-color: var(--comment);
+    margin: 0 4px;
+}
+
+.notepad-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+.notepad-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: var(--background);
+    border: 1px solid var(--comment);
+    border-radius: 4px 4px 0 0;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+
+.notepad-tab:hover {
+    background-color: var(--comment);
+}
+
+.notepad-tab.active {
+    background-color: var(--comment);
+    border-bottom-color: var(--comment);
+}
+
+.notepad-tab .tab-close {
+    font-size: 14px;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.notepad-tab .tab-close:hover {
+    opacity: 1;
+    color: var(--red);
+}
+
+.notepad-tab-add {
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.notepad-tab-add:hover {
+    opacity: 1;
+}
+
+.notepad-editor {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--foreground);
+    line-height: 1.5;
+}
+
+.notepad-editor::placeholder {
+    color: var(--comment);
+}
+
+.notepad-status {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 6px 12px;
+    font-size: 10px;
+    color: var(--comment);
+    border-top: 1px solid var(--comment);
+    flex-shrink: 0;
+}
+
+/* === CALCULATOR APP === */
+
+.calculator-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.calculator-display {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: right;
+}
+
+.calculator-expression {
+    font-size: 12px;
+    color: var(--comment);
+    min-height: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calculator-result {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    flex: 1;
+}
+
+.calc-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    font-size: 16px;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+}
+
+.calc-btn-number {
+    background-color: var(--comment);
+    color: var(--foreground);
+}
+
+.calc-btn-number:hover {
+    background-color: var(--foreground);
+    color: var(--background);
+}
+
+.calc-btn-operator {
+    background-color: var(--blue);
+    color: var(--foreground);
+}
+
+.calc-btn-operator:hover {
+    filter: brightness(1.2);
+}
+
+.calc-btn-function {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--foreground);
+}
+
+.calc-btn-function:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.calc-btn-equals {
+    background-color: var(--green);
+    color: var(--background);
+}
+
+.calc-btn-equals:hover {
+    filter: brightness(1.2);
+}
+
+.calc-btn-clear {
+    background-color: var(--red);
+    color: var(--foreground);
+}
+
+.calc-btn-clear:hover {
+    filter: brightness(1.2);
+}
+
+.calculator-mode {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.calculator-mode button {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid var(--comment);
+    background: transparent;
+    color: var(--foreground);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background-color 0.15s ease;
+}
+
+.calculator-mode button:hover {
+    background-color: var(--comment);
+}
+
+.calculator-mode button.active {
+    background-color: var(--blue);
+    border-color: var(--blue);
+}

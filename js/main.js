@@ -21,6 +21,8 @@ import { MatrixEffect } from './effects/matrix.js';
 import { ThemePickerApp } from './apps/theme-picker.js';
 import { ASCIIPlayerApp } from './apps/ascii-player.js';
 import { MusicApp } from './apps/music-player.js';
+import { NotepadApp } from './apps/notepad.js';
+import { CalculatorApp } from './apps/calculator.js';
 
 // Games module
 import { GamesApp } from './games/games-app.js';
@@ -30,6 +32,9 @@ import { Terminal } from './terminal/terminal.js';
 
 // Features modules
 import { AchievementManager } from './features/achievements.js';
+import { Spotlight } from './features/spotlight.js';
+import { DesktopPet } from './features/desktop-pet.js';
+import { EasterEggs } from './features/easter-eggs.js';
 
 // API modules
 import { GitHubAPI } from './api/github-api.js';
@@ -49,6 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     ASCIIPlayerApp.init(WindowManager, AchievementManager);
     MusicApp.init(WindowManager, AchievementManager);
     GamesApp.init(WindowManager, AchievementManager);
+    NotepadApp.init(WindowManager, AchievementManager);
+    CalculatorApp.init(WindowManager, AchievementManager);
 
     // Initialize terminal with all dependencies
     Terminal.init({
@@ -69,7 +76,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         ThemePickerApp,
         ASCIIPlayerApp,
         MusicApp,
-        GamesApp
+        GamesApp,
+        NotepadApp,
+        CalculatorApp
     });
 
     // Initialize context menu
@@ -78,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
+        NotepadApp,
+        CalculatorApp,
         Terminal
     });
 
@@ -91,6 +102,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         commandInput
     });
 
+    // Initialize Spotlight search
+    Spotlight.init({
+        ThemePickerApp,
+        ASCIIPlayerApp,
+        MusicApp,
+        GamesApp,
+        NotepadApp,
+        CalculatorApp,
+        Terminal
+    });
+
     // Initialize taskbar and connect to WindowManager
     Taskbar.init(WindowManager, commandInput, terminal);
     WindowManager.setTaskbar(Taskbar);
@@ -102,14 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
+        let rafId = null;
+        let targetX = 0, targetY = 0;
 
         const startDragging = (e) => {
-            // Don't drag if clicking on buttons
             if (e.target.closest('.button') || e.target.closest('.buttons')) {
                 return;
             }
-
-            // Only left mouse button
             if (e.type === 'mousedown' && e.button !== 0) return;
 
             isDragging = true;
@@ -126,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             terminalHeader.classList.add('dragging');
             document.body.classList.add('dragging-terminal');
             terminal.style.zIndex = ++WindowManager.highestZIndex;
+            terminal.style.willChange = 'left, top';
 
             if (e.type === 'touchstart') {
                 e.preventDefault();
@@ -144,18 +166,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 clientY = e.clientY;
             }
 
-            let newLeft = clientX - offsetX;
-            let newTop = clientY - offsetY;
-
-            // Constrain to viewport
             const maxLeft = window.innerWidth - terminal.offsetWidth;
-            const maxTop = window.innerHeight - terminal.offsetHeight - 48; // Account for taskbar
+            const maxTop = window.innerHeight - terminal.offsetHeight - 48;
 
-            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-            newTop = Math.max(0, Math.min(newTop, maxTop));
+            targetX = Math.max(0, Math.min(clientX - offsetX, maxLeft));
+            targetY = Math.max(0, Math.min(clientY - offsetY, maxTop));
 
-            terminal.style.left = `${newLeft}px`;
-            terminal.style.top = `${newTop}px`;
+            if (!rafId) {
+                rafId = requestAnimationFrame(() => {
+                    terminal.style.left = `${targetX}px`;
+                    terminal.style.top = `${targetY}px`;
+                    rafId = null;
+                });
+            }
 
             if (e.type === 'touchmove') {
                 e.preventDefault();
@@ -167,6 +190,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             isDragging = false;
             terminalHeader.classList.remove('dragging');
             document.body.classList.remove('dragging-terminal');
+            terminal.style.willChange = '';
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
         };
 
         terminalHeader.addEventListener('mousedown', startDragging);
@@ -219,6 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (terminal) {
         const MIN_WIDTH = 400;
         const MIN_HEIGHT = 300;
+        let resizeRafId = null;
 
         const resizeState = {
             isResizing: false,
@@ -228,7 +257,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             startWidth: 0,
             startHeight: 0,
             startLeft: 0,
-            startTop: 0
+            startTop: 0,
+            newWidth: 0,
+            newHeight: 0,
+            newLeft: 0,
+            newTop: 0
         };
 
         const resizeHandles = terminal.querySelectorAll('.resize-handle');
@@ -269,6 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.body.classList.add('resizing-terminal');
             document.body.style.cursor = window.getComputedStyle(handle).cursor;
+            terminal.style.willChange = 'width, height, left, top';
         };
 
         const handleResize = (event) => {
@@ -281,42 +315,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             const deltaY = position.y - resizeState.startY;
             const dir = resizeState.direction;
 
-            let newWidth = resizeState.startWidth;
-            let newHeight = resizeState.startHeight;
-            let newLeft = resizeState.startLeft;
-            let newTop = resizeState.startTop;
+            resizeState.newWidth = resizeState.startWidth;
+            resizeState.newHeight = resizeState.startHeight;
+            resizeState.newLeft = resizeState.startLeft;
+            resizeState.newTop = resizeState.startTop;
 
-            // Handle horizontal resize
             if (dir.includes('e')) {
-                newWidth = Math.max(MIN_WIDTH, resizeState.startWidth + deltaX);
+                resizeState.newWidth = Math.max(MIN_WIDTH, resizeState.startWidth + deltaX);
             }
             if (dir.includes('w')) {
                 const potentialWidth = resizeState.startWidth - deltaX;
                 if (potentialWidth >= MIN_WIDTH) {
-                    newWidth = potentialWidth;
-                    newLeft = resizeState.startLeft + deltaX;
+                    resizeState.newWidth = potentialWidth;
+                    resizeState.newLeft = resizeState.startLeft + deltaX;
                 }
             }
-
-            // Handle vertical resize
             if (dir.includes('s')) {
-                newHeight = Math.max(MIN_HEIGHT, resizeState.startHeight + deltaY);
+                resizeState.newHeight = Math.max(MIN_HEIGHT, resizeState.startHeight + deltaY);
             }
             if (dir.includes('n')) {
                 const potentialHeight = resizeState.startHeight - deltaY;
                 if (potentialHeight >= MIN_HEIGHT) {
-                    newHeight = potentialHeight;
-                    newTop = resizeState.startTop + deltaY;
+                    resizeState.newHeight = potentialHeight;
+                    resizeState.newTop = resizeState.startTop + deltaY;
                 }
             }
 
-            // Apply new dimensions
-            terminal.style.width = `${newWidth}px`;
-            terminal.style.height = `${newHeight}px`;
-            terminal.style.maxWidth = 'none';
-            terminal.style.maxHeight = 'none';
-            terminal.style.left = `${newLeft}px`;
-            terminal.style.top = `${newTop}px`;
+            if (!resizeRafId) {
+                resizeRafId = requestAnimationFrame(() => {
+                    terminal.style.width = `${resizeState.newWidth}px`;
+                    terminal.style.height = `${resizeState.newHeight}px`;
+                    terminal.style.maxWidth = 'none';
+                    terminal.style.maxHeight = 'none';
+                    terminal.style.left = `${resizeState.newLeft}px`;
+                    terminal.style.top = `${resizeState.newTop}px`;
+                    resizeRafId = null;
+                });
+            }
         };
 
         const stopResize = () => {
@@ -326,6 +361,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             resizeState.direction = null;
             document.body.classList.remove('resizing-terminal');
             document.body.style.cursor = '';
+            terminal.style.willChange = '';
+            if (resizeRafId) {
+                cancelAnimationFrame(resizeRafId);
+                resizeRafId = null;
+            }
         };
 
         resizeHandles.forEach(handle => {
@@ -542,6 +582,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize all systems
         ParticleBackground.init();
+
+        // Initialize Desktop Pet
+        DesktopPet.init();
+
+        // Initialize Easter Eggs
+        EasterEggs.init();
 
         // Show welcome message
         await Terminal.showWelcome();

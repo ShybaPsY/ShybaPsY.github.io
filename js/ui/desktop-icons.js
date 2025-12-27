@@ -38,6 +38,12 @@ export const DesktopIcons = {
             case 'games':
                 this.apps.GamesApp?.open();
                 break;
+            case 'notepad':
+                this.apps.NotepadApp?.open();
+                break;
+            case 'calculator':
+                this.apps.CalculatorApp?.open();
+                break;
         }
     }
 };

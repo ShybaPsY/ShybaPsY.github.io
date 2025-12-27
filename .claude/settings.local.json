@@ -5,7 +5,10 @@
       "Bash(git add:*)",
       "Bash(dir /b)",
       "WebSearch",
-      "WebFetch(domain:de1.api.radio-browser.info)"
+      "WebFetch(domain:de1.api.radio-browser.info)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\asdadadsd\")"
     ],
     "deny": [],
     "ask": []
