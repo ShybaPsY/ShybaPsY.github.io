@@ -19,6 +19,9 @@ export const DesktopPet = {
     isOnGround: true,
     jumpY: 0,
     lastTipIndex: -1,
+    isDragging: false,
+    wasDragging: false,
+    dragOffset: { x: 0, y: 0 },
 
     // Base URL for VS Code Pets assets
     baseUrl: 'https://raw.githubusercontent.com/tonybaloney/vscode-pets/main/media',
@@ -27,7 +30,7 @@ export const DesktopPet = {
         "Os aplicativos são funcionais e clicáveis!",
         "Clique com o botão direito na área de trabalho para mudar o papel de parede!",
         "Arraste as janelas pela barra de título para movê-las!",
-        "Dê um duplo clique em mim para trocar de pet!",
+        "Clique com o botão direito em mim para trocar de pet!",
         "Use o terminal para comandos secretos!",
         "O botão CRT na taskbar ativa o efeito retrô!",
         "A calculadora tem modo científico, programador e cálculo!",
@@ -198,8 +201,83 @@ export const DesktopPet = {
         this.updatePosition();
         document.body.appendChild(this.element);
 
+        // Click and right-click handlers
         this.element.addEventListener('click', (e) => this.handleClick(e));
-        this.element.addEventListener('dblclick', (e) => this.showPetMenu(e));
+        this.element.addEventListener('contextmenu', (e) => this.showPetMenu(e));
+
+        // Drag and drop handlers
+        this.element.addEventListener('mousedown', (e) => this.startDrag(e));
+        document.addEventListener('mousemove', (e) => this.onDrag(e));
+        document.addEventListener('mouseup', (e) => this.endDrag(e));
+
+        // Touch support for mobile
+        this.element.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
+        document.addEventListener('touchmove', (e) => this.onDrag(e), { passive: false });
+        document.addEventListener('touchend', (e) => this.endDrag(e));
+    },
+
+    startDrag(e) {
+        if (e.target.closest('.pet-menu')) return;
+
+        e.preventDefault();
+        this.isDragging = true;
+        this.targetX = null; // Stop any current movement
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const rect = this.element.getBoundingClientRect();
+
+        this.dragOffset.x = clientX - rect.left;
+        this.dragOffset.y = clientY - rect.top;
+
+        this.element.style.cursor = 'grabbing';
+        this.imgElement.style.transition = 'none';
+    },
+
+    onDrag(e) {
+        if (!this.isDragging) return;
+
+        e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const newX = clientX - this.dragOffset.x;
+        const newY = window.innerHeight - clientY - (64 - this.dragOffset.y);
+
+        this.position.x = Math.max(0, Math.min(window.innerWidth - 64, newX));
+        this.jumpY = Math.max(0, newY - 48);
+
+        this.element.style.left = `${this.position.x}px`;
+        this.element.style.bottom = `${48 + this.jumpY}px`;
+    },
+
+    endDrag(e) {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.wasDragging = true;
+        this.element.style.cursor = 'grab';
+        this.imgElement.style.transition = '';
+
+        // If dropped in the air, fall down
+        if (this.jumpY > 0) {
+            this.isOnGround = false;
+            const fallLoop = setInterval(() => {
+                this.jumpY -= 8;
+                if (this.jumpY <= 0) {
+                    this.jumpY = 0;
+                    this.isOnGround = true;
+                    clearInterval(fallLoop);
+                }
+                this.updatePosition();
+            }, 30);
+        }
+
+        // Reset wasDragging after a short delay
+        setTimeout(() => {
+            this.wasDragging = false;
+        }, 100);
     },
 
     updateSprite() {
@@ -225,7 +303,7 @@ export const DesktopPet = {
     startBehaviorLoop() {
         this.behaviorInterval = setInterval(() => {
             this.decideBehavior();
-        }, 3000 + Math.random() * 4000);
+        }, 2000 + Math.random() * 2000);
     },
 
     startTipLoop() {
@@ -260,8 +338,10 @@ export const DesktopPet = {
     },
 
     decideBehavior() {
+        if (this.isDragging) return;
+
         if (this.state === 'sleep') {
-            if (Math.random() < 0.2) {
+            if (Math.random() < 0.3) {
                 this.setState('idle');
             }
             return;
@@ -269,21 +349,27 @@ export const DesktopPet = {
 
         const rand = Math.random();
 
-        if (rand < 0.3) {
+        if (rand < 0.15) {
+            // Walk (15%)
             this.walkTo(Math.random() * (window.innerWidth - 100) + 50);
-        } else if (rand < 0.5) {
+        } else if (rand < 0.50) {
+            // Run (35%) - more running!
             this.runTo(Math.random() * (window.innerWidth - 100) + 50);
-        } else if (rand < 0.6) {
+        } else if (rand < 0.65) {
+            // Idle (15%)
             this.setState('idle');
             this.targetX = null;
-        } else if (rand < 0.7) {
+        } else if (rand < 0.70) {
+            // Sleep (5%) - less sleeping
             this.setState('sleep');
             this.targetX = null;
-        } else if (rand < 0.8) {
+        } else if (rand < 0.90) {
+            // Jump (20%) - more jumping!
             this.jump();
         } else {
-            this.setState('idle');
-            this.targetX = null;
+            // Jump while running (10%)
+            this.runTo(Math.random() * (window.innerWidth - 100) + 50);
+            setTimeout(() => this.jump(), 200);
         }
     },
 
@@ -325,7 +411,7 @@ export const DesktopPet = {
     },
 
     updateMovement() {
-        if (this.targetX === null) return;
+        if (this.targetX === null || this.isDragging) return;
 
         const distance = this.targetX - this.position.x;
 
@@ -352,6 +438,11 @@ export const DesktopPet = {
 
     handleClick(e) {
         e.stopPropagation();
+        // Don't run if we just finished dragging
+        if (this.wasDragging) {
+            this.wasDragging = false;
+            return;
+        }
         this.runTo(e.clientX);
     },
 

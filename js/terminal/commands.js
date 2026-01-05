@@ -20,17 +20,12 @@ export function createCommands(dependencies) {
   <span class="output-command">github</span>         - Mostra minhas estatísticas do GitHub.
   <span class="output-command">download cv</span>    - Link para baixar meu currículo.
 
-  <span class="title-blue">Customization:</span>
-  <span class="output-command">themes</span>         - Lista os temas disponíveis.
-  <span class="output-command">theme [nome]</span>   - Muda o tema do terminal.
-
   <span class="title-blue">Utilities:</span>
   <span class="output-command">clear</span>          - Limpa a tela.
   <span class="output-command">exit</span>           - Fecha o terminal.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
   <span class="output-command">quote</span>          - Exibe uma citação inspiradora sobre programação.
   <span class="output-command">conquistas</span>     - Lista suas conquistas desbloqueadas.
-  <span class="output-command">crt</span>            - Ativa/desativa efeito CRT no monitor.
   <span class="output-command">extras</span>         - Comandos extras e exploração.`,
 
         sobre: `
@@ -116,7 +111,7 @@ export function createCommands(dependencies) {
 
   Clique no link abaixo para baixar meu CV em formato PDF.
 
-  <span class="title-blue">Link:</span> <a href="Currículo - Gabriel Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
+  <span class="title-blue">Link:</span> <a href="CV - Gabriel Mendes Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
 
         bemvindo: welcomeMessage,
 
@@ -305,17 +300,11 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="highlight">Desktop Apps:</span>
 
   <span class="title-blue">Applications:</span>
-  <span class="output-command">open themes</span>     - Seletor visual de temas
   <span class="output-command">open player</span>     - Player de animações ASCII
   <span class="output-command">open music</span>      - Player de música lo-fi
   <span class="output-command">open games</span>      - Mini jogos (Snake, Pong)
 
   <span class="comment">Você também pode clicar duas vezes nos ícones à esquerda!</span>`,
-
-        'open themes': function() {
-            ThemePickerApp.open();
-            return '<span class="detail-green">Abrindo Theme Picker...</span>';
-        },
 
         'open player': function() {
             ASCIIPlayerApp.open();
@@ -334,17 +323,6 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
 
         conquistas: function() {
             return AchievementManager.listAchievements();
-        },
-
-        crt: function() {
-            document.body.classList.toggle('crt-enabled');
-            const crtBtn = document.getElementById('taskbar-crt');
-            if (crtBtn) crtBtn.classList.toggle('active');
-            const enabled = document.body.classList.contains('crt-enabled');
-            localStorage.setItem('crt-enabled', enabled);
-            return enabled
-                ? '<span class="detail-green">Efeito CRT ativado!</span> Aproveite a nostalgia.'
-                : '<span class="comment">Efeito CRT desativado.</span>';
         },
 
         rickroll: function() {

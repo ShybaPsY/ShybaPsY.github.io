@@ -3166,16 +3166,11 @@ document.addEventListener('DOMContentLoaded', () => {
   <span class="output-command">github</span>         - Mostra minhas estatísticas do GitHub.
   <span class="output-command">download cv</span>    - Link para baixar meu currículo.
 
-  <span class="title-blue">Customization:</span>
-  <span class="output-command">themes</span>         - Lista os temas disponíveis.
-  <span class="output-command">theme [nome]</span>   - Muda o tema do terminal.
-
   <span class="title-blue">Utilities:</span>
   <span class="output-command">clear</span>          - Limpa a tela.
   <span class="output-command">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.
   <span class="output-command">quote</span>          - Exibe uma citação inspiradora sobre programação.
   <span class="output-command">conquistas</span>     - Lista suas conquistas desbloqueadas.
-  <span class="output-command">crt</span>            - Ativa/desativa efeito CRT no monitor.
   <span class="output-command">extras</span>         - Comandos extras e exploração.`,
 
         sobre: `
@@ -3261,7 +3256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   Clique no link abaixo para baixar meu CV em formato PDF.
 
-  <span class="title-blue">Link:</span> <a href="Currículo - Gabriel Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
+  <span class="title-blue">Link:</span> <a href="CV - Gabriel Mendes Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
 
         bemvindo: welcomeMessage,
 
@@ -3454,17 +3449,11 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="highlight">Desktop Apps:</span>
 
   <span class="title-blue">Applications:</span>
-  <span class="output-command">open themes</span>     - Seletor visual de temas
   <span class="output-command">open player</span>     - Player de animações ASCII
   <span class="output-command">open music</span>      - Player de música lo-fi
   <span class="output-command">open games</span>      - Mini jogos (Snake, Pong)
 
   <span class="comment">Você também pode clicar duas vezes nos ícones à esquerda!</span>`,
-
-        'open themes': function() {
-            ThemePickerApp.open();
-            return '<span class="detail-green">Abrindo Theme Picker...</span>';
-        },
 
         'open player': function() {
             ASCIIPlayerApp.open();
@@ -3483,17 +3472,6 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
 
         conquistas: function() {
             return AchievementManager.listAchievements();
-        },
-
-        crt: function() {
-            document.body.classList.toggle('crt-enabled');
-            const crtBtn = document.getElementById('taskbar-crt');
-            if (crtBtn) crtBtn.classList.toggle('active');
-            const enabled = document.body.classList.contains('crt-enabled');
-            localStorage.setItem('crt-enabled', enabled);
-            return enabled
-                ? '<span class="detail-green">Efeito CRT ativado!</span> Aproveite a nostalgia.'
-                : '<span class="comment">Efeito CRT desativado.</span>';
         },
     };
 
@@ -3535,9 +3513,6 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         'ajuda': 'help',
         'commands': 'help',
         '?': 'help',
-        // Theme aliases
-        'tema': 'theme',
-        'temas': 'themes',
         // Extras aliases
         'easter': 'extras',
         'easteregg': 'extras',
@@ -3561,7 +3536,7 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
         getAllCommands() {
             const cmds = Object.keys(commands);
             const als = Object.keys(aliases);
-            const special = ['clear', 'matrix', 'theme', 'themes'];
+            const special = ['clear', 'matrix'];
             return [...new Set([...cmds, ...als, ...special])].sort();
         },
 
@@ -3753,7 +3728,12 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
 
         matrixCanvas = document.createElement('canvas');
         matrixCanvas.classList.add('matrix-canvas-local');
-        document.body.appendChild(matrixCanvas);
+        const desktop = document.getElementById('desktop');
+        if (desktop) {
+            desktop.insertBefore(matrixCanvas, desktop.firstChild);
+        } else {
+            document.body.appendChild(matrixCanvas);
+        }
 
         const ctx = matrixCanvas.getContext('2d');
         const characters = '\u30a2\u30a1\u30ab\u30b5\u30bf\u30ca\u30cf\u30de\u30e4\u30e3\u30e9\u30ef\u30ac\u30b6\u30c0\u30d0\u30d1\u30a4\u30a3\u30ad\u30b7\u30c1\u30cb\u30d2\u30df\u30ea\u30f0\u30ae\u30b8\u30c2\u30d3\u30d4\u30a6\u30a5\u30af\u30b9\u30c4\u30cc\u30d5\u30e0\u30e6\u30e5\u30eb\u30b0\u30ba\u30d6\u30d7\u30a8\u30a7\u30b1\u30bb\u30c6\u30cd\u30d8\u30e1\u30ec\u30f1\u30b2\u30bc\u30c7\u30d9\u30da\u30aa\u30a9\u30b3\u30bd\u30c8\u30ce\u30db\u30e2\u30e8\u30e7\u30ed\u30f2\u30b4\u30be\u30c9\u30dc\u30dd\u30f4\u30c3\u30f3ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -3887,19 +3867,6 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
             if (matrixWasRunning) {
                 responseText += "<br><span class=\"comment\">Efeito Matrix desativado.</span>";
             }
-        }
-        // Handle themes command
-        else if (normalizedCommand === 'themes') {
-            responseText = ThemeManager.list();
-        }
-        // Handle theme command with argument
-        else if (normalizedCommand.startsWith('theme ')) {
-            const themeName = normalizedCommand.substring(6).trim();
-            responseText = ThemeManager.apply(themeName);
-        }
-        // Handle theme command without argument
-        else if (normalizedCommand === 'theme') {
-            responseText = `Current theme: <span class="highlight">${ThemeManager.current}</span>\n\nUse '<span class="output-command">themes</span>' to see available themes.`;
         }
         // Handle regular commands
         else if (commands[normalizedCommand]) {

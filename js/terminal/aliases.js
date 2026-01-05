@@ -39,9 +39,6 @@ export const aliases = {
     'ajuda': 'help',
     'commands': 'help',
     '?': 'help',
-    // Theme aliases
-    'tema': 'theme',
-    'temas': 'themes',
     // Extras aliases
     'easter': 'extras',
     'easteregg': 'extras',

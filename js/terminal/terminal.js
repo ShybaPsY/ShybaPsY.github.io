@@ -306,19 +306,6 @@ export const Terminal = {
             this.setCursorLock(false);
             return;
         }
-        // Handle themes command
-        else if (normalizedCommand === 'themes') {
-            responseText = this.ThemeManager.list();
-        }
-        // Handle theme command with argument
-        else if (normalizedCommand.startsWith('theme ')) {
-            const themeName = normalizedCommand.substring(6).trim();
-            responseText = this.ThemeManager.apply(themeName, this.AchievementManager);
-        }
-        // Handle theme command without argument
-        else if (normalizedCommand === 'theme') {
-            responseText = `Current theme: <span class="highlight">${this.ThemeManager.current}</span>\n\nUse '<span class="output-command">themes</span>' to see available themes.`;
-        }
         // Handle regular commands
         else if (this.commands[normalizedCommand]) {
             const commandValue = this.commands[normalizedCommand];

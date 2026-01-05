@@ -10,7 +10,7 @@
     left: 0;
     display: block;
     background-color: var(--background);
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
 }
 
@@ -508,9 +508,13 @@ body.dragging-terminal .app-window {
 #desktop-pet {
     position: fixed;
     z-index: 10000;
-    cursor: pointer;
+    cursor: grab;
     user-select: none;
     pointer-events: auto;
+}
+
+#desktop-pet:active {
+    cursor: grabbing;
 }
 
 #desktop-pet .pet-sprite {
