@@ -1,0 +1,717 @@
+/* ================================================
+   PROJETOS APP STYLES
+   Project showcase with animations, carousel, and 3D flip cards
+   ================================================ */
+
+/* === MAIN CONTAINER === */
+.projetos-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 16px;
+    overflow: hidden;
+}
+
+/* === HEADER WITH PARTICLES === */
+.projetos-header {
+    position: relative;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-radius: 12px;
+    border: 1px solid var(--comment);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.projetos-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 50%, var(--green) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, var(--cyan) 0%, transparent 50%);
+    opacity: 0.1;
+    animation: headerPulse 4s ease-in-out infinite;
+}
+
+@keyframes headerPulse {
+
+    0%,
+    100% {
+        opacity: 0.1;
+    }
+
+    50% {
+        opacity: 0.15;
+    }
+}
+
+.projetos-title {
+    position: relative;
+    z-index: 1;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.projetos-subtitle {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    color: var(--foreground);
+    opacity: 0.8;
+}
+
+/* === PARTICLE CANVAS === */
+.projetos-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* === SEARCH BAR === */
+.projetos-search {
+    position: relative;
+    z-index: 1;
+    margin-top: 12px;
+}
+
+.projetos-search-input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.projetos-search-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(80, 250, 123, 0.15);
+}
+
+.projetos-search-input::placeholder {
+    color: var(--comment);
+}
+
+.projetos-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--comment);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* === FEATURED CAROUSEL === */
+.projetos-featured {
+    flex-shrink: 0;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #2d3250, #1a1d30);
+    border: 2px solid #50fa7b;
+    box-shadow: 0 4px 20px rgba(80, 250, 123, 0.15);
+}
+
+.projetos-featured-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, #50fa7b, #8be9fd);
+    color: #1a1a2e;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.projetos-carousel {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.projetos-carousel-slide {
+    min-width: 100%;
+    padding: 50px 24px 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.projetos-carousel-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.projetos-carousel-desc {
+    font-size: 15px;
+    color: #e0e0e0;
+    line-height: 1.7;
+}
+
+.projetos-carousel-tech {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.projetos-tech-badge {
+    padding: 6px 14px;
+    background: #50fa7b;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #1a1a2e;
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.projetos-carousel-nav {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.projetos-carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.projetos-carousel-dot.active {
+    background: #50fa7b;
+    transform: scale(1.2);
+    border-color: #ffffff;
+}
+
+.projetos-carousel-dot:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.projetos-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    background: rgba(80, 250, 123, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: #1a1a2e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.projetos-carousel-arrow:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.projetos-carousel-arrow.prev {
+    left: 12px;
+}
+
+.projetos-carousel-arrow.next {
+    right: 12px;
+}
+
+/* === PROJECT GRID === */
+.projetos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 4px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+}
+
+/* === 3D FLIP CARD === */
+.projetos-card {
+    perspective: 1000px;
+    height: 220px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: cardReveal 0.5s ease forwards;
+}
+
+@keyframes cardReveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.projetos-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.projetos-card:hover .projetos-card-inner {
+    transform: rotateY(180deg);
+}
+
+.projetos-card-front,
+.projetos-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Front Face */
+.projetos-card-front {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border: 2px solid var(--comment);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.projetos-card:hover .projetos-card-front {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 0 0 4px var(--cyan);
+}
+
+.projetos-card-thumbnail {
+    flex: 1;
+    background: linear-gradient(135deg, var(--comment) 0%, rgba(0, 0, 0, 0.3) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--foreground);
+    overflow: hidden;
+}
+
+.projetos-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.projetos-card-info {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+}
+
+.projetos-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.projetos-card-desc {
+    font-size: 10px;
+    color: var(--foreground);
+    opacity: 0.75;
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.projetos-card-tech-mini {
+    display: flex;
+    gap: 4px;
+    margin-top: auto;
+    overflow: hidden;
+}
+
+.projetos-tech-mini {
+    padding: 3px 8px;
+    background: rgba(139, 233, 253, 0.2);
+    border-radius: 4px;
+    font-size: 10px;
+    color: #8be9fd;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Back Face */
+.projetos-card-back {
+    background: linear-gradient(135deg, var(--background) 0%, rgba(0, 0, 0, 0.9) 100%);
+    border: 2px solid var(--green);
+    transform: rotateY(180deg);
+    padding: 12px;
+    justify-content: space-between;
+}
+
+.projetos-card-back-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #50fa7b;
+    margin-bottom: 8px;
+}
+
+.projetos-card-back-desc {
+    font-size: 10px;
+    color: #f8f8f2;
+    opacity: 0.9;
+    line-height: 1.4;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.projetos-card-back-links {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.projetos-card-link {
+    flex: 1;
+    padding: 6px;
+    background: var(--comment);
+    border: none;
+    border-radius: 4px;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.projetos-card-link:hover {
+    background: var(--green);
+    color: var(--background);
+}
+
+.projetos-card-link.github:hover {
+    background: var(--magenta);
+}
+
+.projetos-card-details-btn {
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    border: none;
+    border-radius: 4px;
+    color: var(--background);
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 8px;
+}
+
+.projetos-card-details-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(80, 250, 123, 0.3);
+}
+
+/* === DETAIL MODAL === */
+.projetos-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.projetos-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.projetos-modal {
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    background: var(--background);
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.projetos-modal-overlay.active .projetos-modal {
+    transform: scale(1) translateY(0);
+}
+
+.projetos-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-bottom: 1px solid var(--comment);
+}
+
+.projetos-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.projetos-modal-close {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--comment);
+    border-radius: 8px;
+    color: var(--foreground);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.projetos-modal-close:hover {
+    background: var(--red);
+    border-color: var(--red);
+}
+
+.projetos-modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Custom Scrollbar for Modal */
+.projetos-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.projetos-modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.projetos-modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--green), var(--cyan));
+    border-radius: 4px;
+}
+
+.projetos-modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--cyan), var(--green));
+}
+
+/* Image Carousel in Modal */
+.projetos-modal-carousel {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, var(--comment) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.projetos-modal-carousel-placeholder {
+    font-size: 48px;
+    color: var(--foreground);
+    opacity: 0.5;
+}
+
+.projetos-modal-carousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.projetos-modal-desc {
+    font-size: 13px;
+    color: var(--foreground);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.projetos-modal-tech {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.projetos-modal-tech-badge {
+    padding: 6px 14px;
+    background: rgba(139, 233, 253, 0.15);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #8be9fd;
+    border: 1px solid rgba(139, 233, 253, 0.5);
+    font-weight: 500;
+}
+
+.projetos-modal-meta {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #f8f8f2;
+    opacity: 0.9;
+}
+
+.projetos-modal-links {
+    display: flex;
+    gap: 12px;
+}
+
+.projetos-modal-link {
+    flex: 1;
+    padding: 12px;
+    background: var(--comment);
+    border: none;
+    border-radius: 8px;
+    color: var(--foreground);
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.projetos-modal-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.projetos-modal-link.github {
+    background: linear-gradient(135deg, #6e5494, #4a3660);
+}
+
+.projetos-modal-link.github:hover {
+    background: linear-gradient(135deg, #8b6aad, #6e5494);
+}
+
+.projetos-modal-link.live {
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    color: var(--background);
+}
+
+/* === NO RESULTS === */
+.projetos-no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--comment);
+    text-align: center;
+    gap: 12px;
+}
+
+.projetos-no-results-icon {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.projetos-no-results-text {
+    font-size: 14px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 500px) {
+    .projetos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .projetos-card {
+        height: 150px;
+    }
+
+    .projetos-carousel-arrow {
+        width: 28px;
+        height: 28px;
+    }
+
+    .projetos-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+}
+
+@media (max-width: 350px) {
+    .projetos-grid {
+        grid-template-columns: 1fr;
+    }
+}

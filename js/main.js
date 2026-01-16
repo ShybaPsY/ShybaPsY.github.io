@@ -27,6 +27,9 @@ import { CalculatorApp } from './apps/calculator.js';
 // Games module
 import { GamesApp } from './games/games-app.js';
 
+// Projetos module
+import { ProjetosApp } from './apps/projetos-app.js';
+
 // Terminal module
 import { Terminal } from './terminal/terminal.js';
 
@@ -54,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ASCIIPlayerApp.init(WindowManager, AchievementManager);
     MusicApp.init(WindowManager, AchievementManager);
     GamesApp.init(WindowManager, AchievementManager);
+    ProjetosApp.init(WindowManager, AchievementManager);
     NotepadApp.init(WindowManager, AchievementManager);
     CalculatorApp.init(WindowManager, AchievementManager);
 
@@ -77,6 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
+        ProjetosApp,
         NotepadApp,
         CalculatorApp
     });
@@ -87,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
+        ProjetosApp,
         NotepadApp,
         CalculatorApp,
         Terminal
@@ -108,6 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
+        ProjetosApp,
         NotepadApp,
         CalculatorApp,
         Terminal
@@ -591,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update taskbar to handle terminal clicks
     const originalHandleWindowClick = Taskbar.handleWindowClick.bind(Taskbar);
-    Taskbar.handleWindowClick = function(appId) {
+    Taskbar.handleWindowClick = function (appId) {
         if (appId === 'terminal') {
             TerminalControls.focus();
         } else {

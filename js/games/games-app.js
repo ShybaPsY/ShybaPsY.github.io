@@ -63,8 +63,44 @@ export const GamesApp = {
         }
     },
 
+    // Adjust window size based on game type
+    adjustWindowSize(gameType) {
+        const windowEl = this.WindowManager?.windows?.['games'];
+        if (!windowEl) return;
+
+        const sizes = {
+            'menu': { width: 480, height: 520 },
+            'snake': { width: 450, height: 520 },
+            'pong': { width: 500, height: 450 },
+            'tetris': { width: 320, height: 580 },
+            'breakout': { width: 520, height: 450 },
+            'invaders': { width: 480, height: 500 },
+            'asteroids': { width: 500, height: 500 },
+            'dino': { width: 750, height: 450 },
+            '2048': { width: 380, height: 480 },
+            'flappy': { width: 380, height: 550 },
+            'minesweeper': { width: 340, height: 420 },
+            'memory': { width: 360, height: 450 }
+        };
+
+        const size = sizes[gameType] || sizes.menu;
+        windowEl.style.width = `${size.width}px`;
+        windowEl.style.height = `${size.height}px`;
+
+        // Center the window after resize
+        const maxX = window.innerWidth - size.width - 10;
+        const maxY = window.innerHeight - size.height - 60;
+        const currentLeft = parseInt(windowEl.style.left) || 0;
+        const currentTop = parseInt(windowEl.style.top) || 0;
+
+        if (currentLeft > maxX) windowEl.style.left = `${Math.max(10, maxX)}px`;
+        if (currentTop > maxY) windowEl.style.top = `${Math.max(10, maxY)}px`;
+    },
+
+
     showMenu() {
         this.cleanup();
+        this.adjustWindowSize('menu');
         const container = document.getElementById('games-content');
         if (!container) return;
 
@@ -72,47 +108,47 @@ export const GamesApp = {
         container.innerHTML = `
             <div class="game-option" data-game="snake">
                 <div class="game-option-title">🐍 Snake</div>
-                <div class="game-option-desc">Arrow keys • Fill the grid!</div>
+                <div class="game-option-desc">Arrow keys to move</div>
             </div>
             <div class="game-option" data-game="pong">
                 <div class="game-option-title">🏓 Pong</div>
-                <div class="game-option-desc">W/S keys • First to 5!</div>
+                <div class="game-option-desc">W/S or Arrows</div>
             </div>
             <div class="game-option" data-game="tetris">
                 <div class="game-option-title">🧱 Tetris</div>
-                <div class="game-option-desc">Arrow keys • Clear lines!</div>
+                <div class="game-option-desc">Arrows to control</div>
             </div>
             <div class="game-option" data-game="breakout">
-                <div class="game-option-title">🧱 Breakout</div>
-                <div class="game-option-desc">Mouse/Arrow • Break bricks!</div>
+                <div class="game-option-title">🎯 Breakout</div>
+                <div class="game-option-desc">Left/Right arrows</div>
             </div>
             <div class="game-option" data-game="invaders">
                 <div class="game-option-title">👾 Invaders</div>
-                <div class="game-option-desc">Arrow + Space • Shoot!</div>
+                <div class="game-option-desc">Arrows + Space</div>
             </div>
             <div class="game-option" data-game="asteroids">
                 <div class="game-option-title">🚀 Asteroids</div>
-                <div class="game-option-desc">Arrows + Space • Survive!</div>
+                <div class="game-option-desc">Arrows + Space</div>
             </div>
             <div class="game-option" data-game="dino">
                 <div class="game-option-title">🦖 Dino Run</div>
-                <div class="game-option-desc">Space to jump!</div>
+                <div class="game-option-desc">Space to jump</div>
             </div>
             <div class="game-option" data-game="2048">
                 <div class="game-option-title">🔢 2048</div>
-                <div class="game-option-desc">Arrow keys • Merge tiles!</div>
+                <div class="game-option-desc">Arrow keys</div>
             </div>
             <div class="game-option" data-game="flappy">
-                <div class="game-option-title">🐦 Flappy Bird</div>
-                <div class="game-option-desc">Space/Click • Fly!</div>
+                <div class="game-option-title">🐦 Flappy</div>
+                <div class="game-option-desc">Space or click</div>
             </div>
             <div class="game-option" data-game="minesweeper">
-                <div class="game-option-title">💣 Minesweeper</div>
-                <div class="game-option-desc">Click • Find mines!</div>
+                <div class="game-option-title">💣 Mines</div>
+                <div class="game-option-desc">Click to reveal</div>
             </div>
             <div class="game-option" data-game="memory">
                 <div class="game-option-title">🃏 Memory</div>
-                <div class="game-option-desc">Click • Match pairs!</div>
+                <div class="game-option-desc">Match the pairs</div>
             </div>
         `;
 
@@ -144,6 +180,7 @@ export const GamesApp = {
     },
 
     startSnake() {
+        this.adjustWindowSize('snake');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `
@@ -175,10 +212,10 @@ export const GamesApp = {
             this.resizeObserver.observe(container);
         }
 
-        let snake = [{x: 7, y: 7}];
-        let food = {x: 10, y: 10};
-        let direction = {dx: 0, dy: 0};
-        let nextDirection = {dx: 0, dy: 0};
+        let snake = [{ x: 7, y: 7 }];
+        let food = { x: 10, y: 10 };
+        let direction = { dx: 0, dy: 0 };
+        let nextDirection = { dx: 0, dy: 0 };
         let score = 0;
         let gameOver = false;
 
@@ -187,7 +224,7 @@ export const GamesApp = {
             for (let x = 0; x < tileCount; x++) {
                 for (let y = 0; y < tileCount; y++) {
                     if (!snake.some(s => s.x === x && s.y === y)) {
-                        emptyCells.push({x, y});
+                        emptyCells.push({ x, y });
                     }
                 }
             }
@@ -220,10 +257,10 @@ export const GamesApp = {
 
         const handleKey = (e) => {
             if (gameOver) return;
-            if (e.key === 'ArrowUp' && direction.dy !== 1) { nextDirection = {dx: 0, dy: -1}; }
-            else if (e.key === 'ArrowDown' && direction.dy !== -1) { nextDirection = {dx: 0, dy: 1}; }
-            else if (e.key === 'ArrowLeft' && direction.dx !== 1) { nextDirection = {dx: -1, dy: 0}; }
-            else if (e.key === 'ArrowRight' && direction.dx !== -1) { nextDirection = {dx: 1, dy: 0}; }
+            if (e.key === 'ArrowUp' && direction.dy !== 1) { nextDirection = { dx: 0, dy: -1 }; }
+            else if (e.key === 'ArrowDown' && direction.dy !== -1) { nextDirection = { dx: 0, dy: 1 }; }
+            else if (e.key === 'ArrowLeft' && direction.dx !== 1) { nextDirection = { dx: -1, dy: 0 }; }
+            else if (e.key === 'ArrowRight' && direction.dx !== -1) { nextDirection = { dx: 1, dy: 0 }; }
         };
 
         document.addEventListener('keydown', handleKey);
@@ -232,9 +269,9 @@ export const GamesApp = {
         const gameLoop = () => {
             if (gameOver) return;
 
-            direction = {...nextDirection};
+            direction = { ...nextDirection };
             const gridSize = canvas.width / tileCount;
-            const head = {x: snake[0].x + direction.dx, y: snake[0].y + direction.dy};
+            const head = { x: snake[0].x + direction.dx, y: snake[0].y + direction.dy };
 
             if (head.x < 0) head.x = tileCount - 1;
             if (head.x >= tileCount) head.x = 0;
@@ -281,6 +318,7 @@ export const GamesApp = {
     },
 
     startPong() {
+        this.adjustWindowSize('pong');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `
@@ -465,6 +503,7 @@ export const GamesApp = {
     },
 
     startTetris() {
+        this.adjustWindowSize('tetris');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `
@@ -478,14 +517,11 @@ export const GamesApp = {
         const COLS = 10, ROWS = 20;
 
         const resizeCanvas = () => {
-            const scoreHeight = 30, buttonHeight = 45, padding = 20;
-            const availableWidth = container.clientWidth - padding;
+            const scoreHeight = 50, buttonHeight = 55, padding = 16;
             const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
-            if (availableWidth > 0 && availableHeight > 0) {
-                const cellSize = Math.min(availableWidth / COLS, availableHeight / ROWS);
-                canvas.width = cellSize * COLS;
-                canvas.height = cellSize * ROWS;
-            }
+            const cellSize = Math.floor(availableHeight / ROWS);
+            canvas.width = cellSize * COLS;
+            canvas.height = cellSize * ROWS;
         };
         resizeCanvas();
 
@@ -495,17 +531,81 @@ export const GamesApp = {
             this.resizeObserver.observe(container);
         }
 
-        const PIECES = [[[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]], [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]]];
-        const COLORS = ['#00f5ff', '#ffeb3b', '#e040fb', '#ff9800', '#2196f3', '#4caf50', '#f44336'];
+        const PIECES = [
+            [[1, 1, 1, 1]],           // I
+            [[1, 1], [1, 1]],         // O
+            [[0, 1, 0], [1, 1, 1]],     // T
+            [[1, 0, 0], [1, 1, 1]],     // J
+            [[0, 0, 1], [1, 1, 1]],     // L
+            [[0, 1, 1], [1, 1, 0]],     // S
+            [[1, 1, 0], [0, 1, 1]]      // Z
+        ];
+        const COLORS = [
+            { main: '#00f5ff', light: '#7fffff', dark: '#00a5b0' },  // I - Cyan
+            { main: '#ffeb3b', light: '#ffff72', dark: '#c8b900' },  // O - Yellow
+            { main: '#e040fb', light: '#ff79ff', dark: '#a000c6' },  // T - Purple
+            { main: '#2196f3', light: '#6ec6ff', dark: '#0069c0' },  // J - Blue
+            { main: '#ff9800', light: '#ffc947', dark: '#c66900' },  // L - Orange
+            { main: '#4caf50', light: '#80e27e', dark: '#087f23' },  // S - Green
+            { main: '#f44336', light: '#ff7961', dark: '#ba000d' }   // Z - Red
+        ];
 
-        let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+        let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
         let score = 0, gameOver = false;
-        let piece, pieceX, pieceY, pieceColor;
+        let piece, pieceX, pieceY, pieceColorIdx;
+
+        const drawBlock = (x, y, colorIdx, ghost = false) => {
+            const cellW = canvas.width / COLS;
+            const cellH = canvas.height / ROWS;
+            const color = COLORS[colorIdx];
+            const px = x * cellW;
+            const py = y * cellH;
+            const pad = 1;
+
+            if (ghost) {
+                ctx.strokeStyle = color.main;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px + pad + 2, py + pad + 2, cellW - pad * 2 - 4, cellH - pad * 2 - 4);
+                return;
+            }
+
+            // Main block
+            ctx.fillStyle = color.main;
+            ctx.fillRect(px + pad, py + pad, cellW - pad * 2, cellH - pad * 2);
+
+            // 3D highlight (top-left)
+            ctx.fillStyle = color.light;
+            ctx.beginPath();
+            ctx.moveTo(px + pad, py + pad);
+            ctx.lineTo(px + cellW - pad, py + pad);
+            ctx.lineTo(px + cellW - pad - 4, py + pad + 4);
+            ctx.lineTo(px + pad + 4, py + pad + 4);
+            ctx.lineTo(px + pad + 4, py + cellH - pad - 4);
+            ctx.lineTo(px + pad, py + cellH - pad);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3D shadow (bottom-right)
+            ctx.fillStyle = color.dark;
+            ctx.beginPath();
+            ctx.moveTo(px + cellW - pad, py + pad);
+            ctx.lineTo(px + cellW - pad, py + cellH - pad);
+            ctx.lineTo(px + pad, py + cellH - pad);
+            ctx.lineTo(px + pad + 4, py + cellH - pad - 4);
+            ctx.lineTo(px + cellW - pad - 4, py + cellH - pad - 4);
+            ctx.lineTo(px + cellW - pad - 4, py + pad + 4);
+            ctx.closePath();
+            ctx.fill();
+
+            // Inner face
+            ctx.fillStyle = color.main;
+            ctx.fillRect(px + pad + 4, py + pad + 4, cellW - pad * 2 - 8, cellH - pad * 2 - 8);
+        };
 
         const newPiece = () => {
             const idx = Math.floor(Math.random() * PIECES.length);
             piece = PIECES[idx].map(r => [...r]);
-            pieceColor = COLORS[idx];
+            pieceColorIdx = idx;
             pieceX = Math.floor(COLS / 2) - Math.floor(piece[0].length / 2);
             pieceY = 0;
             if (collides()) { gameOver = true; showEnd(); }
@@ -514,7 +614,7 @@ export const GamesApp = {
         const collides = (px = pieceX, py = pieceY, p = piece) => {
             for (let y = 0; y < p.length; y++) {
                 for (let x = 0; x < p[y].length; x++) {
-                    if (p[y][x] && (px + x < 0 || px + x >= COLS || py + y >= ROWS || (py + y >= 0 && board[py + y][px + x]))) return true;
+                    if (p[y][x] && (px + x < 0 || px + x >= COLS || py + y >= ROWS || (py + y >= 0 && board[py + y][px + x] !== null))) return true;
                 }
             }
             return false;
@@ -523,7 +623,7 @@ export const GamesApp = {
         const merge = () => {
             for (let y = 0; y < piece.length; y++) {
                 for (let x = 0; x < piece[y].length; x++) {
-                    if (piece[y][x] && pieceY + y >= 0) board[pieceY + y][pieceX + x] = pieceColor;
+                    if (piece[y][x] && pieceY + y >= 0) board[pieceY + y][pieceX + x] = pieceColorIdx;
                 }
             }
         };
@@ -531,7 +631,12 @@ export const GamesApp = {
         const clearLines = () => {
             let lines = 0;
             for (let y = ROWS - 1; y >= 0; y--) {
-                if (board[y].every(c => c)) { board.splice(y, 1); board.unshift(Array(COLS).fill(0)); lines++; y++; }
+                if (board[y].every(c => c !== null)) {
+                    board.splice(y, 1);
+                    board.unshift(Array(COLS).fill(null));
+                    lines++;
+                    y++;
+                }
             }
             if (lines) score += [0, 100, 300, 500, 800][lines];
             document.getElementById('tetris-score').textContent = score;
@@ -542,18 +647,23 @@ export const GamesApp = {
             if (!collides(pieceX, pieceY, rotated)) piece = rotated;
         };
 
+        const getGhostY = () => {
+            let ghostY = pieceY;
+            while (!collides(pieceX, ghostY + 1, piece)) ghostY++;
+            return ghostY;
+        };
+
         const showEnd = () => {
             clearInterval(this.gameLoop);
-            const size = Math.min(canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(0,0,0,0.85)';
+            ctx.fillStyle = 'rgba(0,0,0,0.9)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = this.getColor('--red');
-            ctx.font = `bold ${size * 0.1}px 'Fira Code', monospace`;
+            ctx.font = `bold ${canvas.width * 0.12}px 'Fira Code', monospace`;
             ctx.textAlign = 'center';
-            ctx.fillText('YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.05);
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
             ctx.fillStyle = this.getColor('--foreground');
-            ctx.font = `${size * 0.06}px 'Fira Code', monospace`;
-            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + size * 0.05);
+            ctx.font = `${canvas.width * 0.08}px 'Fira Code', monospace`;
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 30);
         };
 
         const handleKey = (e) => {
@@ -562,6 +672,7 @@ export const GamesApp = {
             else if (e.key === 'ArrowRight' && !collides(pieceX + 1, pieceY)) pieceX++;
             else if (e.key === 'ArrowDown' && !collides(pieceX, pieceY + 1)) pieceY++;
             else if (e.key === 'ArrowUp') rotate();
+            else if (e.key === ' ') { while (!collides(pieceX, pieceY + 1)) pieceY++; }
             e.preventDefault();
         };
         document.addEventListener('keydown', handleKey);
@@ -578,33 +689,40 @@ export const GamesApp = {
                 else { merge(); clearLines(); newPiece(); if (gameOver) return; }
             }
 
-            const cellW = canvas.width / COLS, cellH = canvas.height / ROWS;
-            ctx.fillStyle = '#000';
+            // Background
+            ctx.fillStyle = '#0a0a12';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Draw board pieces
             for (let y = 0; y < ROWS; y++) {
                 for (let x = 0; x < COLS; x++) {
-                    if (board[y][x]) { ctx.fillStyle = board[y][x]; ctx.fillRect(x * cellW + 1, y * cellH + 1, cellW - 2, cellH - 2); }
+                    if (board[y][x] !== null) drawBlock(x, y, board[y][x]);
                 }
             }
 
-            ctx.fillStyle = pieceColor;
+            // Draw ghost piece
+            const ghostY = getGhostY();
             for (let y = 0; y < piece.length; y++) {
                 for (let x = 0; x < piece[y].length; x++) {
-                    if (piece[y][x]) ctx.fillRect((pieceX + x) * cellW + 1, (pieceY + y) * cellH + 1, cellW - 2, cellH - 2);
+                    if (piece[y][x]) drawBlock(pieceX + x, ghostY + y, pieceColorIdx, true);
                 }
             }
 
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            for (let x = 0; x <= COLS; x++) { ctx.beginPath(); ctx.moveTo(x * cellW, 0); ctx.lineTo(x * cellW, canvas.height); ctx.stroke(); }
-            for (let y = 0; y <= ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * cellH); ctx.lineTo(canvas.width, y * cellH); ctx.stroke(); }
+            // Draw active piece
+            for (let y = 0; y < piece.length; y++) {
+                for (let x = 0; x < piece[y].length; x++) {
+                    if (piece[y][x]) drawBlock(pieceX + x, pieceY + y, pieceColorIdx);
+                }
+            }
         };
 
         this.gameLoop = setInterval(gameLoop, 16);
         document.getElementById('game-back').addEventListener('click', () => this.showMenu());
     },
 
+
     startBreakout() {
+        this.adjustWindowSize('breakout');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `
@@ -728,6 +846,7 @@ export const GamesApp = {
     },
 
     startInvaders() {
+        this.adjustWindowSize('invaders');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `
@@ -808,6 +927,7 @@ export const GamesApp = {
     },
 
     startAsteroids() {
+        this.adjustWindowSize('asteroids');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `<div class="game-score">Score: <span id="asteroids-score">0</span></div><canvas id="asteroids-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
@@ -851,40 +971,296 @@ export const GamesApp = {
     },
 
     startDino() {
+        this.adjustWindowSize('dino');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
-        container.innerHTML = `<div class="game-score">Score: <span id="dino-score">0</span></div><canvas id="dino-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
+        container.innerHTML = `<canvas id="dino-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
         const canvas = document.getElementById('dino-canvas');
         const ctx = canvas.getContext('2d');
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const w = container.clientWidth - padding; const h = container.clientHeight - scoreHeight - buttonHeight - padding; if (w > 0 && h > 0) { canvas.width = Math.max(200, w); canvas.height = Math.max(150, h); } };
+
+        const resizeCanvas = () => {
+            const buttonHeight = 50, padding = 10;
+            const w = container.clientWidth - padding;
+            const h = container.clientHeight - buttonHeight - padding;
+            if (w > 0 && h > 0) { canvas.width = Math.max(500, w); canvas.height = Math.max(200, h); }
+        };
         resizeCanvas();
         if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
-        const groundY = () => canvas.height * 0.8;
-        const dinoSize = () => canvas.height * 0.12;
-        let dinoY = 0, velocityY = 0, isJumping = false, obstacles = [], score = 0, gameOver = false, speed = 5;
-        const handleKey = (e) => { if ((e.key === ' ' || e.key === 'ArrowUp') && !isJumping && !gameOver) { velocityY = -canvas.height * 0.035; isJumping = true; e.preventDefault(); } if (gameOver && e.key === ' ') { dinoY = 0; velocityY = 0; isJumping = false; obstacles = []; score = 0; gameOver = false; speed = 5; } };
+
+        // Load sprite images
+        const sprites = {};
+        const imagePaths = {
+            dinoRun1: 'js/games/dino_run_images/dino_run1.png',
+            dinoRun2: 'js/games/dino_run_images/dino_run2.png',
+            dinoStand: 'js/games/dino_run_images/standing_still.png',
+            dinoStandBlink: 'js/games/dino_run_images/standing_still_eye_closed.png',
+            cactus1: 'js/games/dino_run_images/cactus_1.png',
+            cactus2: 'js/games/dino_run_images/cactus_2.png',
+            cactus3: 'js/games/dino_run_images/cactus_3.png',
+            ground: 'js/games/dino_run_images/ground.png'
+        };
+        let imagesLoaded = 0;
+        const totalImages = Object.keys(imagePaths).length;
+
+        // Game constants
+        const GROUND_Y = () => canvas.height - 15; // Ground line position
+        const DINO_SCALE = () => 0.5; // User specified size
+        const GRAVITY = 0.58;
+        const JUMP_FORCE = -12;
+
+        // Game state
+        let dinoY = 0, velocityY = 0, isJumping = false;
+        let obstacles = [], clouds = [];
+        let score = 0, highScore = 0, gameOver = false, gameStarted = false, speed = 7;
+        let runFrame = 0, frameCount = 0, blinkTimer = 0;
+        let groundOffset = 0;
+
+        // Initial clouds
+        for (let i = 0; i < 4; i++) {
+            clouds.push({ x: canvas.width * 0.2 + Math.random() * canvas.width, y: 25 + Math.random() * 40 });
+        }
+
+        // Cloud drawing (pixel style)
+        const drawCloud = (x, y) => {
+            ctx.fillStyle = '#d4d4d4';
+            const s = Math.max(0.8, canvas.height / 280);
+            ctx.fillRect(x, y, 46 * s, 14 * s);
+            ctx.fillRect(x + 6 * s, y - 6 * s, 28 * s, 6 * s);
+            ctx.fillRect(x + 4 * s, y + 14 * s, 36 * s, 4 * s);
+        };
+
+        const handleKey = (e) => {
+            if (e.key === ' ' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!gameStarted && !gameOver) {
+                    gameStarted = true;
+                    return;
+                }
+                if (gameOver) {
+                    // Restart game
+                    dinoY = 0; velocityY = 0; isJumping = false;
+                    obstacles = []; score = 0; gameOver = false; gameStarted = true; speed = 7;
+                    return;
+                }
+                if (!isJumping) {
+                    velocityY = JUMP_FORCE * DINO_SCALE();
+                    isJumping = true;
+                }
+            }
+        };
         document.addEventListener('keydown', handleKey);
         this.keyHandler = handleKey;
-        const showEnd = () => { gameOver = true; const size = Math.min(canvas.width, canvas.height); ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = this.getColor('--red'); ctx.font = `bold ${size * 0.12}px 'Fira Code', monospace`; ctx.textAlign = 'center'; ctx.fillText('YOU LOSE', canvas.width / 2, canvas.height / 2 - size * 0.08); ctx.fillStyle = this.getColor('--foreground'); ctx.font = `${size * 0.06}px 'Fira Code', monospace`; ctx.fillText(`Score: ${Math.floor(score / 10)}`, canvas.width / 2, canvas.height / 2 + size * 0.02); ctx.fillStyle = this.getColor('--comment'); ctx.font = `${size * 0.04}px 'Fira Code', monospace`; ctx.fillText('SPACE to restart or Back to return', canvas.width / 2, canvas.height / 2 + size * 0.12); };
-        const gameLoop = () => {
-            if (gameOver) return;
-            velocityY += canvas.height * 0.002; dinoY += velocityY; if (dinoY >= 0) { dinoY = 0; isJumping = false; velocityY = 0; }
-            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width * 0.6) { if (Math.random() < 0.02) { const h = canvas.height * (0.08 + Math.random() * 0.08); obstacles.push({ x: canvas.width, w: canvas.width * 0.05, h: h }); } }
-            obstacles = obstacles.filter(o => { o.x -= speed; return o.x > -o.w; });
-            const dino = { x: canvas.width * 0.1, y: groundY() + dinoY - dinoSize(), w: dinoSize() * 0.6, h: dinoSize() };
-            for (const o of obstacles) { if (dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y + dino.h > groundY() - o.h) { showEnd(); return; } }
-            score++; if (score % 100 === 0) speed += 0.5;
-            document.getElementById('dino-score').textContent = Math.floor(score / 10);
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = this.getColor('--comment'); ctx.fillRect(0, groundY(), canvas.width, 2);
-            ctx.fillStyle = this.getColor('--green'); ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
-            ctx.fillStyle = this.getColor('--red'); obstacles.forEach(o => ctx.fillRect(o.x, groundY() - o.h, o.w, o.h));
+
+        const showEnd = () => {
+            gameOver = true;
+            gameStarted = false;
+            if (score > highScore) highScore = score;
+
+            // Draw game over icon and text
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillRect(canvas.width / 2 - 90, canvas.height / 2 - 35, 180, 70);
+
+            ctx.strokeStyle = '#535353';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(canvas.width / 2 - 90, canvas.height / 2 - 35, 180, 70);
+
+            ctx.fillStyle = '#535353';
+            ctx.font = 'bold 16px "Fira Code", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 8);
+            ctx.font = '13px "Fira Code", monospace';
+            ctx.fillText(`Score: ${Math.floor(score / 10)}`, canvas.width / 2, canvas.height / 2 + 12);
+            ctx.font = '10px "Fira Code", monospace';
+            ctx.fillStyle = '#757575';
+            ctx.fillText('Press SPACE to restart', canvas.width / 2, canvas.height / 2 + 28);
         };
-        this.gameLoop = setInterval(gameLoop, 16);
+
+        const gameLoop = () => {
+            frameCount++;
+            if (frameCount % 5 === 0) runFrame++;
+            blinkTimer++;
+
+            const scale = DINO_SCALE();
+            const ground = GROUND_Y();
+
+            // Physics (only when game started)
+            if (gameStarted && !gameOver) {
+                velocityY += GRAVITY * scale;
+                dinoY += velocityY;
+                if (dinoY >= 0) { dinoY = 0; isJumping = false; velocityY = 0; }
+
+                // Spawn obstacles 
+                if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 250 - Math.random() * 150) {
+                    const types = [1, 2, 3];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    obstacles.push({ x: canvas.width + 50, type });
+                }
+
+                // Update positions
+                obstacles = obstacles.filter(o => { o.x -= speed; return o.x > -100; });
+                groundOffset = (groundOffset + speed) % (sprites.ground ? sprites.ground.width * scale : 1200);
+
+                // Score
+                score++;
+                if (score % 100 === 0) speed = Math.min(14, speed + 0.4);
+            }
+
+            // Update clouds always
+            clouds = clouds.map(c => {
+                c.x -= (gameStarted && !gameOver ? speed * 0.15 : 0.3);
+                if (c.x < -80) { c.x = canvas.width + 80 + Math.random() * 100; c.y = 25 + Math.random() * 40; }
+                return c;
+            });
+
+            // --- DRAWING ---
+            // Background
+            ctx.fillStyle = '#f7f7f7';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Clouds
+            clouds.forEach(c => drawCloud(c.x, c.y));
+
+            // Ground using sprite
+            if (sprites.ground && sprites.ground.complete) {
+                const gw = sprites.ground.width * scale * 0.5;
+                const gh = sprites.ground.height * scale * 0.5;
+                for (let x = -groundOffset % gw; x < canvas.width + gw; x += gw) {
+                    ctx.drawImage(sprites.ground, x, ground - gh * 0.3, gw, gh);
+                }
+            } else {
+                // Fallback ground line
+                ctx.fillStyle = '#535353';
+                ctx.fillRect(0, ground, canvas.width, 1);
+            }
+
+            // Draw dino
+            const dinoX = 60;
+            let dinoSprite;
+            if (!gameStarted && !gameOver) {
+                // Idle state with blinking
+                dinoSprite = (blinkTimer % 200 < 10) ? sprites.dinoStandBlink : sprites.dinoStand;
+            } else if (isJumping) {
+                dinoSprite = sprites.dinoStand;
+            } else {
+                dinoSprite = (runFrame % 2 === 0) ? sprites.dinoRun1 : sprites.dinoRun2;
+            }
+
+            if (dinoSprite && dinoSprite.complete) {
+                const dw = dinoSprite.width * scale;
+                const dh = dinoSprite.height * scale;
+                const dinoDrawY = ground - dh + 5 + dinoY; // Sit on ground
+                ctx.drawImage(dinoSprite, dinoX, dinoDrawY, dw, dh);
+
+                // Collision detection (only when game running)
+                if (gameStarted && !gameOver) {
+                    const dinoBox = { x: dinoX + 8 * scale, y: dinoDrawY + 8 * scale, w: dw - 16 * scale, h: dh - 12 * scale };
+
+                    for (const o of obstacles) {
+                        const cactusSprite = sprites[`cactus${o.type}`];
+                        if (cactusSprite && cactusSprite.complete) {
+                            const cw = cactusSprite.width * scale;
+                            const ch = cactusSprite.height * scale;
+                            const cactusBox = { x: o.x + 4 * scale, y: ground - ch + 4 * scale, w: cw - 8 * scale, h: ch - 8 * scale };
+
+                            if (dinoBox.x + dinoBox.w > cactusBox.x &&
+                                dinoBox.x < cactusBox.x + cactusBox.w &&
+                                dinoBox.y + dinoBox.h > cactusBox.y) {
+                                showEnd();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Draw obstacles using sprites
+            obstacles.forEach(o => {
+                const cactusSprite = sprites[`cactus${o.type}`];
+                if (cactusSprite && cactusSprite.complete) {
+                    const cw = cactusSprite.width * scale;
+                    const ch = cactusSprite.height * scale;
+                    ctx.drawImage(cactusSprite, o.x, ground - ch + 5, cw, ch); // Sit on ground
+                }
+            });
+
+            // HI score display
+            ctx.fillStyle = '#757575';
+            ctx.font = '11px "Fira Code", monospace';
+            ctx.textAlign = 'right';
+            if (highScore > 0) {
+                ctx.fillText(`HI ${Math.floor(highScore / 10).toString().padStart(5, '0')}  ${Math.floor(score / 10).toString().padStart(5, '0')}`, canvas.width - 15, 22);
+            } else {
+                ctx.fillText(Math.floor(score / 10).toString().padStart(5, '0'), canvas.width - 15, 22);
+            }
+
+            // Start prompt
+            if (!gameStarted && !gameOver) {
+                ctx.fillStyle = '#535353';
+                ctx.font = '14px "Fira Code", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('Press SPACE to start', canvas.width / 2, canvas.height / 2 - 20);
+            }
+
+            // Game over screen
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(canvas.width / 2 - 90, canvas.height / 2 - 35, 180, 70);
+
+                ctx.strokeStyle = '#535353';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(canvas.width / 2 - 90, canvas.height / 2 - 35, 180, 70);
+
+                ctx.fillStyle = '#535353';
+                ctx.font = 'bold 16px "Fira Code", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 8);
+                ctx.font = '13px "Fira Code", monospace';
+                ctx.fillText(`Score: ${Math.floor(score / 10)}`, canvas.width / 2, canvas.height / 2 + 12);
+                ctx.font = '10px "Fira Code", monospace';
+                ctx.fillStyle = '#757575';
+                ctx.fillText('Press SPACE to restart', canvas.width / 2, canvas.height / 2 + 28);
+            }
+        };
+
+        // Load all images then start game loop
+        const loadImages = () => {
+            for (const [key, path] of Object.entries(imagePaths)) {
+                const img = new Image();
+                img.onload = () => {
+                    imagesLoaded++;
+                    if (imagesLoaded === totalImages) {
+                        // All images loaded, start game
+                        this.gameLoop = setInterval(gameLoop, 16);
+                    }
+                };
+                img.onerror = () => {
+                    console.warn(`Failed to load: ${path}`);
+                    imagesLoaded++;
+                    if (imagesLoaded === totalImages) {
+                        this.gameLoop = setInterval(gameLoop, 16);
+                    }
+                };
+                img.src = path;
+                sprites[key] = img;
+            }
+        };
+
+        // Show loading state
+        ctx.fillStyle = '#f7f7f7';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#535353';
+        ctx.font = '14px "Fira Code", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Loading...', canvas.width / 2, canvas.height / 2);
+
+        loadImages();
         document.getElementById('game-back').addEventListener('click', () => this.showMenu());
     },
 
+
+
     start2048() {
+        this.adjustWindowSize('2048');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `<div class="game-score">Score: <span id="2048-score">0</span></div><canvas id="2048-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
@@ -910,33 +1286,245 @@ export const GamesApp = {
     },
 
     startFlappy() {
+        this.adjustWindowSize('flappy');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         container.innerHTML = `<div class="game-score">Score: <span id="flappy-score">0</span></div><canvas id="flappy-canvas" class="game-canvas"></canvas><button class="game-back-btn" id="game-back">Back</button>`;
         const canvas = document.getElementById('flappy-canvas');
         const ctx = canvas.getContext('2d');
-        const resizeCanvas = () => { const scoreHeight = 30, buttonHeight = 45, padding = 20; const availableWidth = container.clientWidth - padding; const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding; if (availableWidth > 0 && availableHeight > 0) { canvas.width = Math.max(200, Math.min(availableWidth, 400)); canvas.height = Math.max(300, Math.min(availableHeight, 500)); } };
+
+        const resizeCanvas = () => {
+            const scoreHeight = 50, buttonHeight = 55, padding = 16;
+            const availableWidth = container.clientWidth - padding;
+            const availableHeight = container.clientHeight - scoreHeight - buttonHeight - padding;
+            if (availableWidth > 0 && availableHeight > 0) {
+                canvas.width = Math.max(250, Math.min(availableWidth, 450));
+                canvas.height = Math.max(350, Math.min(availableHeight, 550));
+            }
+        };
         resizeCanvas();
         if (window.ResizeObserver) { const debouncedResize = this.debounce(resizeCanvas); this.resizeObserver = new ResizeObserver(debouncedResize); this.resizeObserver.observe(container); }
-        const bird = { x: 50, y: 150, velocity: 0, size: 20 };
-        const gravity = 0.5, jumpForce = -8, pipes = [], pipeWidth = 50, pipeGap = 120;
+
+        const bird = { x: 60, y: 0, velocity: 0, size: 28 };
+        const gravity = 0.45, jumpForce = -7.5;
+        const pipes = [], pipeWidth = 55, pipeGap = 130;
+        const groundHeight = 40;
         let score = 0, gameOver = false, started = false;
+        let wingAngle = 0, clouds = [];
+
+        // Initialize bird Y and clouds
+        bird.y = canvas.height / 2;
+        for (let i = 0; i < 4; i++) {
+            clouds.push({ x: Math.random() * canvas.width, y: 30 + Math.random() * 80, size: 20 + Math.random() * 30 });
+        }
+
+        const drawBird = (x, y, size, vel) => {
+            // Wing flap animation based on velocity
+            wingAngle = Math.sin(Date.now() / 80) * 0.4;
+            if (vel < -2) wingAngle = 0.6;  // Wings up when jumping
+            if (vel > 3) wingAngle = -0.3; // Wings down when falling
+
+            const rotation = Math.min(Math.max(vel * 0.05, -0.5), 0.7);
+
+            ctx.save();
+            ctx.translate(x + size / 2, y + size / 2);
+            ctx.rotate(rotation);
+
+            // Body
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size * 0.5, size * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Wing
+            ctx.fillStyle = '#FFA500';
+            ctx.save();
+            ctx.rotate(wingAngle);
+            ctx.beginPath();
+            ctx.ellipse(-size * 0.1, size * 0.1, size * 0.35, size * 0.2, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Tail
+            ctx.fillStyle = '#FF8C00';
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.45, -size * 0.1);
+            ctx.lineTo(-size * 0.7, -size * 0.25);
+            ctx.lineTo(-size * 0.7, size * 0.15);
+            ctx.lineTo(-size * 0.45, size * 0.05);
+            ctx.fill();
+
+            // Eye white
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(size * 0.2, -size * 0.1, size * 0.18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye pupil
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(size * 0.25, -size * 0.1, size * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye highlight
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(size * 0.22, -size * 0.14, size * 0.03, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Beak
+            ctx.fillStyle = '#FF6347';
+            ctx.beginPath();
+            ctx.moveTo(size * 0.4, -size * 0.05);
+            ctx.lineTo(size * 0.7, size * 0.05);
+            ctx.lineTo(size * 0.4, size * 0.15);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        };
+
+        const drawPipe = (x, topHeight) => {
+            const capHeight = 25;
+            const capOverhang = 8;
+
+            // Top pipe
+            const gradient1 = ctx.createLinearGradient(x, 0, x + pipeWidth, 0);
+            gradient1.addColorStop(0, '#228B22');
+            gradient1.addColorStop(0.5, '#32CD32');
+            gradient1.addColorStop(1, '#228B22');
+            ctx.fillStyle = gradient1;
+            ctx.fillRect(x, 0, pipeWidth, topHeight - capHeight);
+
+            // Top pipe cap
+            ctx.fillStyle = '#2E8B2E';
+            ctx.fillRect(x - capOverhang, topHeight - capHeight, pipeWidth + capOverhang * 2, capHeight);
+            ctx.fillStyle = '#3CB371';
+            ctx.fillRect(x - capOverhang, topHeight - capHeight, pipeWidth + capOverhang * 2, 5);
+
+            // Bottom pipe
+            const bottomY = topHeight + pipeGap;
+            ctx.fillStyle = gradient1;
+            ctx.fillRect(x, bottomY + capHeight, pipeWidth, canvas.height - bottomY - groundHeight);
+
+            // Bottom pipe cap
+            ctx.fillStyle = '#2E8B2E';
+            ctx.fillRect(x - capOverhang, bottomY, pipeWidth + capOverhang * 2, capHeight);
+            ctx.fillStyle = '#3CB371';
+            ctx.fillRect(x - capOverhang, bottomY + capHeight - 5, pipeWidth + capOverhang * 2, 5);
+        };
+
+        const drawCloud = (x, y, size) => {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.4, y - size * 0.2, size * 0.6, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.9, y, size * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
         const jump = () => { if (gameOver) return; if (!started) started = true; bird.velocity = jumpForce; };
         const handleKey = (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } };
         const handleClick = () => jump();
         document.addEventListener('keydown', handleKey);
         canvas.addEventListener('click', handleClick);
         this.keyHandler = handleKey;
-        const spawnPipe = () => { const minHeight = 50; const maxHeight = canvas.height - pipeGap - minHeight; const topHeight = Math.random() * (maxHeight - minHeight) + minHeight; pipes.push({ x: canvas.width, topHeight: topHeight, passed: false }); };
-        const showEndScreen = () => { gameOver = true; clearInterval(this.gameLoop); ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = this.getColor('--red'); ctx.font = 'bold 24px "Fira Code", monospace'; ctx.textAlign = 'center'; ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20); ctx.fillStyle = this.getColor('--foreground'); ctx.font = '16px "Fira Code", monospace'; ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 20); };
-        const update = () => { if (gameOver || !started) return; bird.velocity += gravity; bird.y += bird.velocity; if (bird.y < 0 || bird.y + bird.size > canvas.height) { showEndScreen(); return; } for (let i = pipes.length - 1; i >= 0; i--) { pipes[i].x -= 3; if (bird.x + bird.size > pipes[i].x && bird.x < pipes[i].x + pipeWidth) { if (bird.y < pipes[i].topHeight || bird.y + bird.size > pipes[i].topHeight + pipeGap) { showEndScreen(); return; } } if (!pipes[i].passed && pipes[i].x + pipeWidth < bird.x) { pipes[i].passed = true; score++; document.getElementById('flappy-score').textContent = score; } if (pipes[i].x + pipeWidth < 0) { pipes.splice(i, 1); } } };
-        const draw = () => { if (gameOver) return; const bgColor = this.getColor('--background'); const pipeColor = this.getColor('--green'); const birdColor = this.getColor('--yellow'); ctx.fillStyle = bgColor; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = pipeColor; pipes.forEach(pipe => { ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight); ctx.fillRect(pipe.x, pipe.topHeight + pipeGap, pipeWidth, canvas.height); }); ctx.fillStyle = birdColor; ctx.beginPath(); ctx.arc(bird.x + bird.size/2, bird.y + bird.size/2, bird.size/2, 0, Math.PI * 2); ctx.fill(); if (!started) { ctx.fillStyle = this.getColor('--foreground'); ctx.font = '14px "Fira Code", monospace'; ctx.textAlign = 'center'; ctx.fillText('Press SPACE or Click to start', canvas.width / 2, canvas.height / 2); } };
+
+        const spawnPipe = () => {
+            const minHeight = 60;
+            const maxHeight = canvas.height - pipeGap - minHeight - groundHeight;
+            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            pipes.push({ x: canvas.width, topHeight: topHeight, passed: false });
+        };
+
+        const showEndScreen = () => {
+            gameOver = true;
+            clearInterval(this.gameLoop);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = this.getColor('--red');
+            ctx.font = 'bold 28px "Fira Code", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 30);
+            ctx.fillStyle = this.getColor('--yellow');
+            ctx.font = '20px "Fira Code", monospace';
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+            ctx.fillStyle = this.getColor('--comment');
+            ctx.font = '14px "Fira Code", monospace';
+            ctx.fillText('Click Back to return', canvas.width / 2, canvas.height / 2 + 50);
+        };
+
+        const update = () => {
+            if (gameOver || !started) return;
+            bird.velocity += gravity;
+            bird.y += bird.velocity;
+            if (bird.y < 0 || bird.y + bird.size > canvas.height - groundHeight) { showEndScreen(); return; }
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= 3.5;
+                if (bird.x + bird.size * 0.4 > pipes[i].x && bird.x - bird.size * 0.3 < pipes[i].x + pipeWidth) {
+                    if (bird.y - bird.size * 0.3 < pipes[i].topHeight || bird.y + bird.size * 0.3 > pipes[i].topHeight + pipeGap) {
+                        showEndScreen(); return;
+                    }
+                }
+                if (!pipes[i].passed && pipes[i].x + pipeWidth < bird.x) {
+                    pipes[i].passed = true;
+                    score++;
+                    document.getElementById('flappy-score').textContent = score;
+                }
+                if (pipes[i].x + pipeWidth < 0) { pipes.splice(i, 1); }
+            }
+            clouds.forEach(c => { c.x -= 0.8; if (c.x + c.size < 0) { c.x = canvas.width + c.size; c.y = 30 + Math.random() * 80; } });
+        };
+
+        const draw = () => {
+            if (gameOver) return;
+
+            // Sky gradient
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGradient.addColorStop(0, '#1e3c72');
+            skyGradient.addColorStop(0.5, '#2a5298');
+            skyGradient.addColorStop(1, '#1e3c72');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Clouds
+            clouds.forEach(c => drawCloud(c.x, c.y, c.size));
+
+            // Pipes
+            pipes.forEach(pipe => drawPipe(pipe.x, pipe.topHeight));
+
+            // Ground
+            const groundGradient = ctx.createLinearGradient(0, canvas.height - groundHeight, 0, canvas.height);
+            groundGradient.addColorStop(0, '#8B4513');
+            groundGradient.addColorStop(0.3, '#654321');
+            groundGradient.addColorStop(1, '#3d2817');
+            ctx.fillStyle = groundGradient;
+            ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+
+            // Ground grass
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - groundHeight, canvas.width, 8);
+            ctx.fillStyle = '#32CD32';
+            ctx.fillRect(0, canvas.height - groundHeight, canvas.width, 3);
+
+            // Bird
+            drawBird(bird.x, bird.y, bird.size, bird.velocity);
+
+            if (!started) {
+                ctx.fillStyle = this.getColor('--foreground');
+                ctx.font = '16px "Fira Code", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('Press SPACE or Click to start', canvas.width / 2, canvas.height / 2);
+            }
+        };
+
         let frameCount = 0;
-        this.gameLoop = setInterval(() => { update(); draw(); frameCount++; if (started && !gameOver && frameCount % 90 === 0) { spawnPipe(); } }, 1000 / 60);
+        this.gameLoop = setInterval(() => { update(); draw(); frameCount++; if (started && !gameOver && frameCount % 100 === 0) { spawnPipe(); } }, 1000 / 60);
         document.getElementById('game-back').addEventListener('click', () => { canvas.removeEventListener('click', handleClick); this.showMenu(); });
     },
 
     startMinesweeper() {
+        this.adjustWindowSize('minesweeper');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         const gridSize = 8, mineCount = 10;
@@ -956,6 +1544,7 @@ export const GamesApp = {
     },
 
     startMemory() {
+        this.adjustWindowSize('memory');
         const container = document.getElementById('games-content');
         container.className = 'game-canvas-container';
         const symbols = ['🍎', '🍊', '🍋', '🍇', '🍉', '🍓', '🥝', '🍒'];

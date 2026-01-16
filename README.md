@@ -1,36 +1,108 @@
-Portfólio Interativo — Gabriel Mendes Lopes
-==========================================
+# Portfolio Interativo — Gabriel Mendes Lopes
 
-Portfólio pessoal em formato de terminal interativo, com tema escuro, efeito de digitação e histórico de comandos. 100% front‑end (HTML, CSS e JavaScript puro).
+Portfolio pessoal em formato de sistema operacional interativo. Uma experiência desktop completa rodando no navegador, com terminal, jogos, calculadora e muito mais.
 
-- Acesse: https://shybapsy.github.io
+🔗 **Acesse:** https://shybapsy.github.io
 
-Recursos
-- Terminal interativo com histórico (setas ↑/↓) e cursor customizado
-- Efeito “Matrix” ativável com o comando `matrix` (desativa com `clear`)
-- Comandos úteis: `help`, `sobre`, `experiencia`, `projetos`, `skills`, `cursos`, `idiomas`, `contato`, `download cv`, `clear`, `bemvindo`
-- Favicon configurado (favicon.ico) e tipografia com Fira Code
+---
 
-Como usar (local)
-- Opção simples: abra `index.html` no navegador
-- Opção com servidor: `python -m http.server 8080` e acesse http://localhost:8080
+## Sobre o Projeto
 
-Personalização rápida
-- Conteúdos dos comandos: edite o objeto `commands` em `index.html:492`
-- Seções específicas (exemplos):
-  - Sobre: `index.html:507`
-  - Experiência: `index.html:518`
-  - Skills: `index.html:541`
-- Currículo: substitua o arquivo `Currículo - Gabriel Lopes.pdf` na raiz; se renomear, atualize o link em `index.html:586`
-- Favicon: troque `favicon.ico` na raiz, se desejar
+Desenvolvi este portfolio como um "sistema operacional" que roda no navegador. A ideia era criar algo diferente dos portfolios tradicionais e mostrar minhas habilidades como desenvolvedor fullstack na prática.
 
-Tecnologias
-- HTML, CSS, JavaScript (sem frameworks)
-- Google Fonts (Fira Code)
+São mais de **10.000 linhas de JavaScript puro**, sem frameworks, organizadas em módulos ES6 com separação clara de responsabilidades.
 
-Deploy
-- Este repositório segue o padrão `usuario.github.io`, então o GitHub Pages publica automaticamente o site.
-- Basta fazer commit/push na branch padrão (geralmente `main`).
+---
 
-Licença
-- Uso pessoal. Entre em contato caso queira reutilizar partes do projeto.
+## Funcionalidades
+
+### Sistema de Janelas
+- Gerenciador de janelas customizado (arrastar, redimensionar, minimizar, maximizar)
+- Snap-to-edge nas bordas da tela
+- Múltiplas janelas simultâneas com foco e z-index
+
+### Terminal Interativo
+- Mais de 25 comandos disponíveis
+- Tab completion e fuzzy search
+- Histórico de comandos (setas ↑/↓)
+- Efeito Matrix ativável
+- Comandos: `help`, `sobre`, `experiencia`, `projetos`, `skills`, `github`, `quote`, `matrix`...
+
+### Aplicativos
+- **Calculadora** — 4 modos: básico, científico, programador (hex/bin/oct), cálculo (derivadas/integrais)
+- **Notepad** — Editor de texto com salvamento local
+- **Music Player** — Player de rádios lo-fi
+- **ASCII Player** — Converte vídeos em arte ASCII
+- **Themes** — 10+ temas de cores
+- **Projetos** — Showcase dos meus projetos com cards 3D
+
+### Mini Games (11 jogos)
+Snake, Pong, Tetris, Breakout, Space Invaders, Asteroids, Dino Run, 2048, Flappy, Minesweeper, Memory
+
+### Extras
+- Spotlight search (Ctrl+Espaço)
+- Desktop pet animado
+- Boot sequence com animação
+- Particle effects
+- Sistema de conquistas
+- Integração com GitHub API
+
+---
+
+## Tecnologias
+
+- **JavaScript ES6** — Módulos, classes, async/await
+- **CSS3** — Variáveis, gradientes, animações, grid, flexbox
+- **Canvas API** — Jogos e efeitos visuais
+- **HTML5** — Semântico e acessível
+- **Algebrite + MathJax** — Cálculo simbólico na calculadora
+
+---
+
+## Estrutura do Projeto
+
+```
+├── css/
+│   ├── base.css, variables.css, effects.css...
+│   └── apps.css, games.css, terminal.css...
+├── js/
+│   ├── main.js (entry point)
+│   ├── core/ (window-manager, theme-manager, keyboard-shortcuts)
+│   ├── apps/ (calculator, notepad, music-player, projetos...)
+│   ├── terminal/ (terminal, commands, tab-completion, fuzzy-search)
+│   ├── features/ (spotlight, achievements, desktop-pet, wallpaper)
+│   ├── effects/ (particles, matrix, boot-sequence)
+│   └── ui/ (taskbar, context-menu, desktop-icons)
+└── index.html
+```
+
+---
+
+## Rodar Localmente
+
+```bash
+# Opção 1: Servidor Python
+python -m http.server 8080
+# Acesse: http://localhost:8080
+
+# Opção 2: VS Code Live Server
+# Instale a extensão e clique em "Go Live"
+```
+
+> **Nota:** Abrir diretamente o `index.html` não funciona por causa de restrições de CORS com ES modules.
+
+---
+
+## Deploy
+
+Este repositório segue o padrão `usuario.github.io`, então o GitHub Pages publica automaticamente. Basta fazer push na branch `main`.
+
+---
+
+## Licença
+
+Uso pessoal. Entre em contato caso queira reutilizar partes do projeto.
+
+---
+
+**Desenvolvido por Gabriel Mendes Lopes**

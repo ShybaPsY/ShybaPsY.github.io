@@ -22,7 +22,7 @@ export const DesktopIcons = {
     },
 
     openApp(appName) {
-        switch(appName) {
+        switch (appName) {
             case 'terminal':
                 window.dispatchEvent(new CustomEvent('open-terminal'));
                 break;
@@ -37,6 +37,9 @@ export const DesktopIcons = {
                 break;
             case 'games':
                 this.apps.GamesApp?.open();
+                break;
+            case 'projetos':
+                this.apps.ProjetosApp?.open();
                 break;
             case 'notepad':
                 this.apps.NotepadApp?.open();

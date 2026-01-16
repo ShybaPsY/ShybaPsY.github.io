@@ -4,85 +4,294 @@
 
 .games-menu {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
     overflow-y: auto;
     flex: 1;
     align-content: start;
     min-height: 0;
-    padding: 4px;
+    padding: 8px;
 }
 
 .game-option {
-    padding: 12px;
-    background-color: rgba(0, 0, 0, 0.3);
+    padding: 16px 12px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
     border: 1px solid var(--comment);
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
+    text-align: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 0;
 }
 
 .game-option:hover {
     border-color: var(--green);
-    transform: scale(1.02);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-option:hover::before {
+    opacity: 0.1;
+}
+
+.game-option:active {
+    transform: translateY(-1px);
 }
 
 .game-option-title {
-    font-size: 16px;
-    margin-bottom: 4px;
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    line-height: 1.3;
 }
 
 .game-option-desc {
-    font-size: 11px;
+    font-size: clamp(9px, 2vw, 11px);
     color: var(--comment);
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
 }
 
+/* Game Canvas Container */
 .game-canvas-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     flex: 1;
     width: 100%;
     overflow: hidden;
     min-height: 0;
     contain: layout style;
+    padding: 8px;
+    box-sizing: border-box;
 }
 
 .game-canvas {
     border: 2px solid var(--comment);
-    border-radius: 4px;
-    background-color: #000;
-    flex: 1;
-    width: 100%;
+    border-radius: 8px;
+    background-color: #0a0a12;
     max-width: 100%;
+    max-height: 100%;
     min-height: 0;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+
 .game-score {
-    font-size: 14px;
+    font-size: clamp(12px, 2.5vw, 16px);
+    font-weight: 600;
     color: var(--yellow);
     flex-shrink: 0;
+    padding: 6px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 1px solid var(--comment);
 }
 
 .game-back-btn {
-    padding: 8px 16px;
-    background-color: var(--comment);
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--comment) 0%, #4a5568 100%);
     color: var(--foreground);
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-family: 'Fira Code', monospace;
-    font-size: 12px;
-    transition: background-color 0.2s ease;
+    font-size: clamp(11px, 2vw, 13px);
+    font-weight: 500;
+    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
 .game-back-btn:hover {
-    background-color: var(--blue);
+    background: linear-gradient(135deg, var(--blue) 0%, #63b3ed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.game-back-btn:active {
+    transform: translateY(0);
+}
+
+/* 2048 Game Specific Styles */
+.game-2048-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.game-2048-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    border: 2px solid var(--comment);
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+}
+
+.game-2048-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-weight: bold;
+    font-size: clamp(14px, 4vw, 24px);
+    transition: all 0.15s ease;
+    aspect-ratio: 1;
+}
+
+/* Minesweeper Specific Styles */
+.game-minesweeper-grid {
+    display: grid;
+    gap: 2px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    border: 2px solid var(--comment);
+    max-width: 100%;
+    overflow: auto;
+}
+
+.game-minesweeper-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--comment);
+    border-radius: 3px;
+    font-family: 'Fira Code', monospace;
+    font-weight: bold;
+    font-size: clamp(10px, 2vw, 14px);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    min-width: 24px;
+    min-height: 24px;
+    aspect-ratio: 1;
+}
+
+.game-minesweeper-cell:hover:not(.revealed) {
+    background: var(--blue);
+}
+
+.game-minesweeper-cell.revealed {
+    background: rgba(0, 0, 0, 0.3);
+    cursor: default;
+}
+
+.game-minesweeper-cell.mine {
+    background: var(--red);
+}
+
+/* Memory Game Specific Styles */
+.game-memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+
+.game-memory-card {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--comment) 0%, #4a5568 100%);
+    border-radius: 8px;
+    font-size: clamp(16px, 5vw, 28px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.game-memory-card:hover:not(.flipped):not(.matched) {
+    transform: scale(1.05);
+    border-color: var(--cyan);
+}
+
+.game-memory-card.flipped,
+.game-memory-card.matched {
+    background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+}
+
+.game-memory-card.matched {
+    opacity: 0.7;
+}
+
+/* Game Info Display */
+.game-info {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: clamp(11px, 2vw, 13px);
+    color: var(--comment);
+}
+
+.game-info span {
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 400px) {
+    .games-menu {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 4px;
+    }
+
+    .game-option {
+        padding: 12px 8px;
+    }
+
+    .game-2048-grid {
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .game-memory-grid {
+        gap: 6px;
+        padding: 8px;
+    }
 }
