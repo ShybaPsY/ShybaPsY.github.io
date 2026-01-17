@@ -42,7 +42,7 @@ export const Terminal = {
 </span>`,
 
     init(dependencies) {
-        const { ThemeManager, WindowManager, AchievementManager, MatrixEffect, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, GitHubAPI, QuoteAPI } = dependencies;
+        const { ThemeManager, WindowManager, AchievementManager, MatrixEffect, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, ProjetosApp, GitHubAPI, QuoteAPI } = dependencies;
 
         this.ThemeManager = ThemeManager;
         this.WindowManager = WindowManager;
@@ -73,6 +73,7 @@ export const Terminal = {
             ASCIIPlayerApp,
             MusicApp,
             GamesApp,
+            ProjetosApp,
             AchievementManager,
             GitHubAPI,
             QuoteAPI,

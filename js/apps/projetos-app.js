@@ -304,6 +304,9 @@ export const ProjetosApp = {
         const project = this.projects.find(p => p.id === projectId);
         if (!project) return;
 
+        const hasImages = project.images && project.images.length > 0;
+        const imageCount = hasImages ? project.images.length : 0;
+
         // Create modal overlay
         const overlay = document.createElement('div');
         overlay.className = 'projetos-modal-overlay';
@@ -317,8 +320,23 @@ export const ProjetosApp = {
                 </div>
                 <div class="projetos-modal-content">
                     <div class="projetos-modal-carousel">
-                        ${project.images && project.images.length > 0
-                ? `<img src="${project.images[0]}" alt="${project.title}">`
+                        ${hasImages
+                ? `
+                            <div class="carousel-images" id="carousel-images">
+                                ${project.images.map((img, i) => `
+                                    <img src="${img}" alt="${project.title} - ${i + 1}" class="carousel-image ${i === 0 ? 'active' : ''}" data-index="${i}">
+                                `).join('')}
+                            </div>
+                            ${imageCount > 1 ? `
+                                <button class="carousel-nav carousel-prev" id="carousel-prev">‹</button>
+                                <button class="carousel-nav carousel-next" id="carousel-next">›</button>
+                                <div class="carousel-dots" id="carousel-dots">
+                                    ${project.images.map((_, i) => `
+                                        <span class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        `
                 : `<div class="projetos-modal-carousel-placeholder">${this.getProjectIcon(project)}</div>`
             }
                     </div>
@@ -355,6 +373,46 @@ export const ProjetosApp = {
             overlay.classList.add('active');
         });
 
+        // Carousel navigation
+        if (hasImages && imageCount > 1) {
+            let currentIndex = 0;
+            const images = overlay.querySelectorAll('.carousel-image');
+            const dots = overlay.querySelectorAll('.carousel-dot');
+            const prevBtn = overlay.querySelector('#carousel-prev');
+            const nextBtn = overlay.querySelector('#carousel-next');
+
+            const showImage = (index) => {
+                images.forEach((img, i) => img.classList.toggle('active', i === index));
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                currentIndex = index;
+            };
+
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showImage((currentIndex - 1 + imageCount) % imageCount);
+            });
+
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showImage((currentIndex + 1) % imageCount);
+            });
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showImage(parseInt(dot.dataset.index));
+                });
+            });
+
+            // Auto-advance every 2 seconds
+            const autoAdvance = setInterval(() => {
+                showImage((currentIndex + 1) % imageCount);
+            }, 2000);
+
+            // Store interval to clear on modal close
+            overlay.dataset.carouselInterval = autoAdvance;
+        }
+
         // Close handlers
         const closeBtn = document.getElementById('modal-close');
         closeBtn.addEventListener('click', () => this.closeModal());
@@ -378,6 +436,10 @@ export const ProjetosApp = {
     closeModal() {
         const modal = document.getElementById('projetos-modal');
         if (modal) {
+            // Clear carousel auto-advance interval
+            if (modal.dataset.carouselInterval) {
+                clearInterval(parseInt(modal.dataset.carouselInterval));
+            }
             modal.classList.remove('active');
             setTimeout(() => {
                 modal.remove();

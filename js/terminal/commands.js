@@ -3,10 +3,10 @@
 // ================================================
 
 export function createCommands(dependencies) {
-    const { ThemeManager, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, AchievementManager, GitHubAPI, QuoteAPI, welcomeMessage } = dependencies;
+      const { ThemeManager, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, ProjetosApp, AchievementManager, GitHubAPI, QuoteAPI, welcomeMessage } = dependencies;
 
-    return {
-        help: `
+      return {
+            help: `
   <span class="highlight">Comandos Disponíveis:</span>
 
   <span class="title-blue">Portfolio:</span>
@@ -28,7 +28,7 @@ export function createCommands(dependencies) {
   <span class="output-command">conquistas</span>     - Lista suas conquistas desbloqueadas.
   <span class="output-command">extras</span>         - Comandos extras e exploração.`,
 
-        sobre: `
+            sobre: `
   <span class="highlight">Sobre Mim</span>
 
   Olá! Sou Gabriel Mendes Lopes, um <span class="title-blue">desenvolvedor fullstack</span> apaixonado por criar soluções eficientes, escaláveis e robustas.
@@ -40,7 +40,7 @@ export function createCommands(dependencies) {
   Tenho interesse em desenvolvimento de aplicações e automações.
   Sou proativo, dedicado e estou sempre em busca de aprendizado contínuo para me tornar um profissional de excelência.`,
 
-        experiencia: `
+            experiencia: `
   <span class="highlight">Experiência Profissional</span>
 
   <span class="output-command">Bolsista de Iniciação Tecnológica (PIBITI) - Unesp</span>
@@ -52,22 +52,13 @@ export function createCommands(dependencies) {
 
   - Prototipagem, execução de testes sistemáticos para validação do equipamento e preparação da documentação para registro de patente e software.`,
 
-        projetos: `
-  <span class="highlight">Meus Projetos</span>
 
-  1. <span class="title-blue">Sistema de Registro de Novo Colaborador</span>
-     - <span class="detail-green">Descrição:</span> Sistema multi-tenant para registro de admissão de funcionários, permitindo que contadores gerenciem formulários únicos e coletem informações de colaboradores de forma segura.
-     - <span class="detail-green">Tecnologias:</span> HTML, CSS (TailwindCSS), JavaScript, Supabase (PostgreSQL), Vercel Serverless Functions.
+            projetos: function () {
+                  ProjetosApp.open();
+                  return '<span class="detail-green">Abrindo Projetos...</span>';
+            },
 
-  2. <span class="title-blue">Piezo Peak Analyzer (PPA)</span>
-     - <span class="detail-green">Descrição:</span> Aplicação desktop para análise e visualização de medições de sensores piezoelétricos, com detecção de picos, cálculo de potência e gráficos interativos sincronizados.
-     - <span class="detail-green">Tecnologias:</span> Java 24, JavaFX, Maven, BigDecimal (alta precisão numérica).
-
-  3. <span class="title-blue">Absorbance Point Analyzer (APA)</span>
-     - <span class="detail-green">Descrição:</span> Sistema de análise de dados de espectroscopia de absorbância para detecção de picos e cálculo da proporção de fase beta em análises cristalográficas.
-     - <span class="detail-green">Tecnologias:</span> Java 24, JavaFX, Maven, ControlsFX, ValidatorFX.`,
-
-        skills: `
+            skills: `
   <span class="highlight">Habilidades Técnicas e Interpessoais</span>
 
   <span class="title-blue">Hard Skills (Técnicas):</span>
@@ -81,7 +72,7 @@ export function createCommands(dependencies) {
   <span class="title-blue">Soft Skills (Interpessoais):</span>
   - Comunicação, Resolução de Problemas, Proatividade, Trabalho em Equipe, Negociação.`,
 
-        cursos: `
+            cursos: `
   <span class="highlight">Cursos e Certificações</span>
 
   - <span class="title-blue">2024:</span> Curso Completo de Linguagem C e C++ <span class="detail-green">(UDEMY)</span>
@@ -91,14 +82,14 @@ export function createCommands(dependencies) {
   - <span class="title-blue">2023:</span> Implantação de Serviços de IA em Nuvem - Google Cloud AI <span class="detail-green">(SENAI)</span>
   - <span class="title-blue">2023:</span> Implantação de Serviços em Nuvem - Microsoft AZ-900 <span class="detail-green">(SENAI)</span>`,
 
-        idiomas: `
+            idiomas: `
   <span class="highlight">Idiomas</span>
 
   - <span class="title-blue">Português:</span> <span class="detail-green">Nativo</span>
   - <span class="title-blue">Inglês:</span> <span class="detail-green">Avançado (Nível C1)</span>
   - <span class="title-blue">Espanhol:</span> <span class="detail-green">Básico</span>`,
 
-        contato: `
+            contato: `
   <span class="highlight">Entre em Contato</span>
 
   - <span class="title-blue">Email:</span> <a href="mailto:asdgabrielmlopes@gmail.com">asdgabrielmlopes@gmail.com</a>
@@ -106,16 +97,16 @@ export function createCommands(dependencies) {
   - <span class="title-blue">LinkedIn:</span> <a href="https://www.linkedin.com/in/gabriel-lopes-18b839270/" target="_blank">linkedin.com/in/gabriel-lopes-18b839270/</a>
   - <span class="title-blue">GitHub:</span> <a href="https://github.com/ShybaPsY" target="_blank">github.com/ShybaPsY</a>`,
 
-        'download cv': `
+            'download cv': `
   <span class="highlight">Download do Currículo</span>
 
   Clique no link abaixo para baixar meu CV em formato PDF.
 
   <span class="title-blue">Link:</span> <a href="CV - Gabriel Mendes Lopes.pdf" target="_blank">Gabriel_Mendes_Lopes_CV.pdf</a>`,
 
-        bemvindo: welcomeMessage,
+            bemvindo: welcomeMessage,
 
-        extras: `
+            extras: `
   <span class="highlight">Comandos Extras:</span>
 
   <span class="title-blue">Exploração:</span>
@@ -134,7 +125,7 @@ export function createCommands(dependencies) {
 
   <span class="comment">Digite qualquer comando acima para explorá-lo!</span>`,
 
-        ls: `
+            ls: `
   <span class="highlight">Diretórios e Arquivos Disponíveis:</span>
 
   <span class="detail-cyan">📁 portfolio/</span>
@@ -154,7 +145,7 @@ export function createCommands(dependencies) {
 
   <span class="comment">Use os comandos para "abrir" cada arquivo</span>`,
 
-        tree: `
+            tree: `
   <span class="highlight">Estrutura do Portfolio:</span>
 
   <span class="detail-cyan">.</span>
@@ -176,16 +167,16 @@ export function createCommands(dependencies) {
 
   3 directories, 11 files`,
 
-        get neofetch() {
-            const uptime = Math.floor((Date.now() - performance.timing.navigationStart) / 1000);
-            const hours = Math.floor(uptime / 3600);
-            const mins = Math.floor((uptime % 3600) / 60);
-            const secs = uptime % 60;
-            const uptimeStr = hours > 0 ? `${hours}h ${mins}m ${secs}s` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-            const apps = Object.keys(localStorage).filter(k => k.includes('used')).length;
-            const achievements = JSON.parse(localStorage.getItem('achievements') || '[]').length;
+            get neofetch() {
+                  const uptime = Math.floor((Date.now() - performance.timing.navigationStart) / 1000);
+                  const hours = Math.floor(uptime / 3600);
+                  const mins = Math.floor((uptime % 3600) / 60);
+                  const secs = uptime % 60;
+                  const uptimeStr = hours > 0 ? `${hours}h ${mins}m ${secs}s` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                  const apps = Object.keys(localStorage).filter(k => k.includes('used')).length;
+                  const achievements = JSON.parse(localStorage.getItem('achievements') || '[]').length;
 
-            return `
+                  return `
   <span class="detail-green">   ▄██████▄     ▄█</span>         <span class="detail-green">gabriel@portfolio</span>
   <span class="detail-green">  ███    ███   ███</span>         <span class="comment">──────────────────</span>
   <span class="detail-green">  ███    █▀    ███</span>         <span class="title-blue">OS:</span> Portfolio OS v2.0
@@ -204,18 +195,18 @@ export function createCommands(dependencies) {
                              <span class="title-blue">Languages:</span> PT-BR, EN, ES
 
                              <span style="background:#ff5555;color:#ff5555;">██</span><span style="background:#ffb86c;color:#ffb86c;">██</span><span style="background:#f1fa8c;color:#f1fa8c;">██</span><span style="background:#50fa7b;color:#50fa7b;">██</span><span style="background:#8be9fd;color:#8be9fd;">██</span><span style="background:#bd93f9;color:#bd93f9;">██</span><span style="background:#ff79c6;color:#ff79c6;">██</span>`;
-        },
+            },
 
-        sudo: `
+            sudo: `
   <span class="error">Acesso Negado.</span>
 
   Usuário não está no arquivo sudoers. Este incidente será reportado. ;)`,
 
-        coffee: function() {
-            if (AchievementManager) {
-                AchievementManager.check('coffee_lover');
-            }
-            return `
+            coffee: function () {
+                  if (AchievementManager) {
+                        AchievementManager.check('coffee_lover');
+                  }
+                  return `
   <span class="detail-cyan">
       ( (
        ) )
@@ -227,37 +218,37 @@ export function createCommands(dependencies) {
   <span class="highlight">☕ Pegando um café...</span>
 
   <span class="comment">Programador sem café = erro de compilação!</span>`;
-        },
+            },
 
-        hack: async function() {
-            if (AchievementManager) {
-                AchievementManager.check('hacker');
-            }
-            const lines = [
-                '<span class="detail-green">[✓] Inicializando sequência de hack...</span>',
-                '<span class="comment">Conectando ao mainframe...</span>',
-                '<span class="detail-cyan">Bypassing firewall... █████████░ 90%</span>',
-                '<span class="detail-green">[✓] Firewall bypassed</span>',
-                '<span class="comment">Descriptografando senha...</span>',
-                '<span class="detail-cyan">Cracking password... ████████░░ 80%</span>',
-                '<span class="detail-green">[✓] Senha obtida: hunter2</span>',
-                '<span class="comment">Acessando banco de dados...</span>',
-                '<span class="detail-green">[✓] Acesso concedido!</span>',
-                '',
-                '<span class="highlight">🎉 Você hackeou o mainframe!</span>',
-                '<span class="comment">Brincadeira, isso é só um easter egg 😄</span>'
-            ];
-            return lines.join('\n');
-        },
+            hack: async function () {
+                  if (AchievementManager) {
+                        AchievementManager.check('hacker');
+                  }
+                  const lines = [
+                        '<span class="detail-green">[✓] Inicializando sequência de hack...</span>',
+                        '<span class="comment">Conectando ao mainframe...</span>',
+                        '<span class="detail-cyan">Bypassing firewall... █████████░ 90%</span>',
+                        '<span class="detail-green">[✓] Firewall bypassed</span>',
+                        '<span class="comment">Descriptografando senha...</span>',
+                        '<span class="detail-cyan">Cracking password... ████████░░ 80%</span>',
+                        '<span class="detail-green">[✓] Senha obtida: hunter2</span>',
+                        '<span class="comment">Acessando banco de dados...</span>',
+                        '<span class="detail-green">[✓] Acesso concedido!</span>',
+                        '',
+                        '<span class="highlight">🎉 Você hackeou o mainframe!</span>',
+                        '<span class="comment">Brincadeira, isso é só um easter egg 😄</span>'
+                  ];
+                  return lines.join('\n');
+            },
 
-        '42': `
+            '42': `
   <span class="highlight">A Resposta para a Vida, o Universo e Tudo Mais:</span>
 
   <span class="detail-cyan" style="font-size: 2em;">42</span>
 
   <span class="comment">"Don't Panic!" - Guia do Mochileiro das Galáxias</span>`,
 
-        vim: `
+            vim: `
   <span class="detail-cyan">~                                                    </span>
   <span class="detail-cyan">~                                                    </span>
   <span class="detail-cyan">~              VIM - Vi IMproved                     </span>
@@ -270,7 +261,7 @@ export function createCommands(dependencies) {
   <span class="comment">Para sair do Vim, digite ':q' (brincadeira, use 'clear')</span>
   <span class="highlight">Você está preso no Vim!</span> 😱`,
 
-        sl: `
+            sl: `
   <span class="detail-cyan">
       ====        ________                ___________
   _D _|  |_______/        \\__I_I_____===__|_________|
@@ -286,17 +277,17 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="comment">Você digitou 'sl' em vez de 'ls'!</span>
   <span class="highlight">🚂 Choo choo!</span>`,
 
-        github: async function() {
-            const stats = await GitHubAPI.fetchStats();
-            return GitHubAPI.formatStats(stats);
-        },
+            github: async function () {
+                  const stats = await GitHubAPI.fetchStats();
+                  return GitHubAPI.formatStats(stats);
+            },
 
-        quote: async function() {
-            const quote = await QuoteAPI.fetch();
-            return QuoteAPI.format(quote);
-        },
+            quote: async function () {
+                  const quote = await QuoteAPI.fetch();
+                  return QuoteAPI.format(quote);
+            },
 
-        desktop: `
+            desktop: `
   <span class="highlight">Desktop Apps:</span>
 
   <span class="title-blue">Applications:</span>
@@ -306,27 +297,42 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
 
   <span class="comment">Você também pode clicar duas vezes nos ícones à esquerda!</span>`,
 
-        'open player': function() {
-            ASCIIPlayerApp.open();
-            return '<span class="detail-green">Abrindo ASCII Video Player...</span>';
-        },
+            'open player': function () {
+                  ASCIIPlayerApp.open();
+                  return '<span class="detail-green">Abrindo ASCII Video Player...</span>';
+            },
 
-        'open music': function() {
-            MusicApp.open();
-            return '<span class="detail-green">Abrindo Music Player...</span>';
-        },
+            'open music': function () {
+                  MusicApp.open();
+                  return '<span class="detail-green">Abrindo Music Player...</span>';
+            },
 
-        'open games': function() {
-            GamesApp.open();
-            return '<span class="detail-green">Abrindo Mini Games...</span>';
-        },
+            'open games': function () {
+                  GamesApp.open();
+                  return '<span class="detail-green">Abrindo Mini Games...</span>';
+            },
 
-        conquistas: function() {
-            return AchievementManager.listAchievements();
-        },
+            'open projetos': function () {
+                  ProjetosApp.open();
+                  return '<span class="detail-green">Abrindo Projetos...</span>';
+            },
 
-        rickroll: function() {
-            return `
+            'projetos app': function () {
+                  ProjetosApp.open();
+                  return '<span class="detail-green">Abrindo Projetos...</span>';
+            },
+
+            portfolio: function () {
+                  ProjetosApp.open();
+                  return '<span class="detail-green">Abrindo Projetos...</span>';
+            },
+
+            conquistas: function () {
+                  return AchievementManager.listAchievements();
+            },
+
+            rickroll: function () {
+                  return `
   <span class="detail-green">  Never gonna give you up</span>
   <span class="detail-cyan">  Never gonna let you down</span>
   <span class="detail-green">  Never gonna run around and desert you</span>
@@ -337,9 +343,9 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="comment">  You just got rickrolled!</span>
 
   <span class="highlight"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">Clique para a experiencia completa!</a></span>`;
-        },
+            },
 
-        konami: `
+            konami: `
   <span class="highlight">Codigo Konami</span>
 
   <span class="comment">Use o teclado:</span>
@@ -348,5 +354,5 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   <span class="detail-cyan">  B A</span>
 
   <span class="comment">Algo magico pode acontecer...</span>`,
-    };
+      };
 }

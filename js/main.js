@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
+        ProjetosApp,
         GitHubAPI,
         QuoteAPI
     });
