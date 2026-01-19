@@ -80,6 +80,86 @@
     transition: width 0.1s linear;
 }
 
+/* === LANGUAGE SELECTOR === */
+
+.boot-language-select {
+    font-family: 'Fira Code', monospace;
+    color: #00ff00;
+    text-align: center;
+    padding: 20px;
+}
+
+.boot-lang-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 1px;
+}
+
+.boot-lang-divider {
+    color: #00aa00;
+    margin-bottom: 40px;
+    font-size: 12px;
+}
+
+.boot-lang-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.boot-lang-option {
+    padding: 18px 50px;
+    border: 2px solid #00ff00;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    min-width: 300px;
+    justify-content: center;
+    background: rgba(0, 255, 0, 0.02);
+    outline: none;
+}
+
+.boot-lang-option:hover,
+.boot-lang-option:focus {
+    background: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.1);
+    transform: scale(1.02);
+}
+
+.boot-lang-option.selected {
+    background: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+}
+
+.boot-lang-key {
+    color: #ffff00;
+    font-weight: bold;
+}
+
+.boot-lang-flag {
+    font-size: 24px;
+}
+
+.boot-lang-name {
+    font-size: 16px;
+}
+
+.boot-lang-hint {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #00aa00;
+    animation: blink-hint 2s ease-in-out infinite;
+}
+
+@keyframes blink-hint {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
 /* === CRT EFFECT === */
 
 body.crt-enabled {

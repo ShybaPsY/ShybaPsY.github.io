@@ -2,6 +2,8 @@
 // MUSIC PLAYER APP MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const MusicApp = {
     WindowManager: null,
     AchievementManager: null,
@@ -43,7 +45,7 @@ export const MusicApp = {
                 <div class="music-station">
                     <select id="station-select" class="station-select">${stationOptions}</select>
                 </div>
-                <div class="music-info" id="music-status">Select station & press Play</div>
+                <div class="music-info" id="music-status">${t('music.select_station')}</div>
                 <div class="music-controls">
                     <button class="music-btn" id="music-play-btn">Play</button>
                     <div class="volume-control">
@@ -107,7 +109,7 @@ export const MusicApp = {
 
         this.audio.addEventListener('playing', () => {
             this.isPlaying = true;
-            if (statusEl) statusEl.textContent = `Playing: ${station.name}`;
+            if (statusEl) statusEl.textContent = t('music.playing', { station: station.name });
 
             // Track music lover achievement
             if (this.AchievementManager) {
@@ -117,7 +119,7 @@ export const MusicApp = {
         });
 
         this.audio.addEventListener('error', () => {
-            if (statusEl) statusEl.textContent = 'Error - Try another station';
+            if (statusEl) statusEl.textContent = t('music.error');
             this.stop();
             const playBtn = document.getElementById('music-play-btn');
             if (playBtn) {
@@ -127,11 +129,11 @@ export const MusicApp = {
         });
 
         this.audio.addEventListener('waiting', () => {
-            if (statusEl) statusEl.textContent = 'Buffering...';
+            if (statusEl) statusEl.textContent = t('music.buffering');
         });
 
         this.audio.play().catch(() => {
-            if (statusEl) statusEl.textContent = 'Error - Try another station';
+            if (statusEl) statusEl.textContent = t('music.error');
         });
     },
 

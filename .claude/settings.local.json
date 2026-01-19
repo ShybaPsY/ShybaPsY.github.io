@@ -9,7 +9,10 @@
       "Bash(tree:*)",
       "Bash(find:*)",
       "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\asdadadsd\")",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(dir /s \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\")",
+      "Bash(node -e:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

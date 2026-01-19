@@ -2,6 +2,8 @@
 // NOTEPAD APP MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const NotepadApp = {
     WindowManager: null,
     AchievementManager: null,
@@ -29,7 +31,7 @@ export const NotepadApp = {
 
         // If no notes, create a new one
         if (this.tabs.length === 0) {
-            this.tabs.push({ id: this.tabCounter++, name: 'Sem título', content: '' });
+            this.tabs.push({ id: this.tabCounter++, name: t('notepad.untitled'), content: '' });
         }
 
         const content = this.renderContent();
@@ -56,7 +58,7 @@ export const NotepadApp = {
         return `
             <div class="notepad-container">
                 <div class="notepad-toolbar">
-                    <button class="notepad-btn" data-action="new" title="Novo">
+                    <button class="notepad-btn" data-action="new" title="${t('notepad.new')}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
@@ -64,7 +66,7 @@ export const NotepadApp = {
                             <line x1="9" y1="15" x2="15" y2="15"/>
                         </svg>
                     </button>
-                    <button class="notepad-btn" data-action="save" title="Salvar">
+                    <button class="notepad-btn" data-action="save" title="${t('notepad.save')}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                             <polyline points="17 21 17 13 7 13 7 21"/>
@@ -82,12 +84,12 @@ export const NotepadApp = {
                 </div>
                 <div class="notepad-tabs">
                     ${tabsHtml}
-                    <div class="notepad-tab-add" data-action="new" title="Nova aba">+</div>
+                    <div class="notepad-tab-add" data-action="new" title="${t('notepad.new_tab')}">+</div>
                 </div>
-                <textarea class="notepad-editor" placeholder="Comece a digitar...">${activeContent}</textarea>
+                <textarea class="notepad-editor" placeholder="${t('notepad.placeholder')}">${activeContent}</textarea>
                 <div class="notepad-status">
-                    <span>${wordCount} palavras</span>
-                    <span>${charCount} caracteres</span>
+                    <span>${wordCount} ${t('notepad.words')}</span>
+                    <span>${charCount} ${t('notepad.characters')}</span>
                 </div>
             </div>
         `;
@@ -140,7 +142,7 @@ export const NotepadApp = {
     },
 
     newTab(windowEl) {
-        this.tabs.push({ id: this.tabCounter++, name: 'Sem título', content: '' });
+        this.tabs.push({ id: this.tabCounter++, name: t('notepad.untitled'), content: '' });
         this.activeTab = this.tabs.length - 1;
         this.refresh(windowEl);
     },
@@ -163,7 +165,7 @@ export const NotepadApp = {
 
     renameTab(index, windowEl) {
         const tab = this.tabs[index];
-        const newName = prompt('Nome da nota:', tab.name);
+        const newName = prompt(t('notepad.note_name_prompt'), tab.name);
         if (newName && newName.trim()) {
             tab.name = newName.trim();
             this.refresh(windowEl);

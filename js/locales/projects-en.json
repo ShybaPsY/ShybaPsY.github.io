@@ -1,0 +1,108 @@
+{
+  "projects": [
+    {
+      "id": "quotefys-saas",
+      "title": "QuoteFys - AI-Powered Quotation SaaS",
+      "description": "Complete SaaS platform for generating quotations with artificial intelligence",
+      "fullDescription": "SaaS platform I built from scratch for businesses to automatically generate quotations using AI. I structured the entire architecture: React frontend with TypeScript and TailwindCSS, serverless backend on Vercel, PostgreSQL database on Supabase with 12 tables and complete RLS policies. I integrated Google Gemini AI to analyze products and build quotations, implemented subscriptions with MercadoPago (webhooks with HMAC validation), WhatsApp automation via Twilio, PDF generation with jsPDF, and email sending with Resend. The system includes a dashboard with analytics using Tremor, quota and trial system, inventory control, and notifications. I built and connected all the parts - from landing page to payment flow.",
+      "techStack": ["React", "TypeScript", "Vite", "TailwindCSS", "Supabase", "PostgreSQL", "Google Gemini AI", "MercadoPago", "Twilio", "Vercel", "jsPDF", "Resend", "Tremor", "Lucide"],
+      "images": ["assets/img/projects/quotefys/landing.png", "assets/img/projects/quotefys/dashboard.png", "assets/img/projects/quotefys/products.png", "assets/img/projects/quotefys/inventory.png", "assets/img/projects/quotefys/quotes.png", "assets/img/projects/quotefys/analytics.png", "assets/img/projects/quotefys/settings.png"],
+      "thumbnail": "assets/img/projects/quotefys/landing.png",
+      "githubUrl": "",
+      "liveUrl": "https://www.quotefys.com/",
+      "date": "2025-01-15",
+      "featured": true
+    },
+    {
+      "id": "ml-stock-prediction",
+      "title": "Stock Market Prediction with Machine Learning",
+      "description": "ML pipeline for predicting trends in the Brazilian financial market",
+      "fullDescription": "Freelance project where I developed a complete Machine Learning pipeline for predicting the direction of financial market indices. I implemented three models (Random Forest, AdaBoost, and MLP Neural Network) for comparative performance analysis. The system processes historical data from 2000 to 2025, calculates technical indicators (SMA, RSI, MACD, volatility), and classifies trends as up, down, or stable. I used temporal train/test split to simulate real scenarios, with cross-validation using TimeSeriesSplit. The MLP model achieved 52.78% accuracy, significantly above chance for 3 classes.",
+      "techStack": ["Python", "Pandas", "Scikit-learn", "NumPy", "Matplotlib", "Seaborn"],
+      "images": ["assets/img/projects/machine_learning/model_comparison.png", "assets/img/projects/machine_learning/terminal_output.png"],
+      "thumbnail": "assets/img/projects/machine_learning/model_comparison.png",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "doarc-system",
+      "title": "DOARC - Donation Management System",
+      "description": "Fullstack system for donation management with inventory control and reports",
+      "fullDescription": "Complete web system developed as a team for managing donations in a non-profit institution. The frontend in HTML5, CSS3, and JavaScript offers a responsive interface with dashboard, CRUD for donors/recipients/products/volunteers, donation receiving and distribution, inventory control, delivery scheduling, and report generation with PDF and Excel export. The backend uses Spring Boot 3.4 with Java 24 and PostgreSQL, following MVC architecture. Includes user authentication, CPF/email/phone validation, and LGPD compliance.",
+      "techStack": ["Java", "Spring Boot", "REST API", "MVC", "PostgreSQL", "Maven", "JavaScript", "HTML5", "CSS3"],
+      "images": ["assets/img/projects/doarc/dashboard.png"],
+      "thumbnail": "assets/img/projects/doarc/dashboard.png",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "bomservico-platform",
+      "title": "BomServiço - Classifieds Platform",
+      "description": "Fullstack classifieds system for service providers with JWT authentication",
+      "fullDescription": "Complete classifieds/service offers web platform developed as a team. The system allows service provider registration, ad management with up to 3 photos, messaging system between interested parties and providers, and admin panel. I implemented the backend with Spring Boot 3.5, Spring Security with JWT authentication, Spring Data JPA for PostgreSQL persistence. The frontend uses HTML5, CSS with Bootstrap, JavaScript with Fetch API for asynchronous communication. Includes two access levels (admin and provider), data validations, and image upload.",
+      "techStack": ["Java", "Spring Boot", "Spring Security", "JWT", "PostgreSQL", "REST API", "JavaScript", "Bootstrap"],
+      "images": ["assets/img/projects/bomservico/home.png"],
+      "thumbnail": "assets/img/projects/bomservico/home.png",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "knowvirtual-library",
+      "title": "KnowVirtual - Digital Library",
+      "description": "Digital library web application with Netflix-style design and anti-piracy protection",
+      "fullDescription": "Premium digital library with Netflix-inspired interface. I developed the complete frontend in React 18 with TypeScript, Vite, and Tailwind CSS. Features include hero section with highlights, horizontal navigation by categories, search system with debounce, favorites and persistent history with localStorage, secure reader with zoom and rotation. I implemented anti-piracy security layers: right-click blocking, shortcut disabling (F12, Ctrl+S), multiple dynamic watermarks, and print protection. Mobile-first responsive system with user profile, notifications, and advanced settings.",
+      "techStack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Lucide React", "LocalStorage"],
+      "images": ["assets/img/projects/knowvirtual/home.png"],
+      "thumbnail": "assets/img/projects/knowvirtual/home.png",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "piezoinator-system",
+      "title": "Piezoinator - Equipment Control System",
+      "description": "Desktop application for control and monitoring of piezoelectric measurement equipment via Arduino",
+      "fullDescription": "Professional control system developed for scientific research equipment. The desktop application in Python with PyQt5 communicates via serial with Arduino to control pneumatic piston, measure forces with HX711 load cell, and adjust pressure via PWM. Features include real-time graph with pyqtgraph, digital LCD displays, timing control, force presets (10N-50N), emergency stop, logging with CSV export, test profiles saved in JSON. Arduino firmware implements state machine, watchdog timer for safety, and structured communication protocol. Developed as part of a Technological Initiation project.",
+      "techStack": ["Python", "C++", "Arduino", "PyQt5", "pyqtgraph"],
+      "images": ["assets/img/projects/piezoinator/interface.png"],
+      "thumbnail": "assets/img/projects/piezoinator/interface.png",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "portfolio-website",
+      "title": "Interactive Portfolio",
+      "description": "My personal portfolio in desktop style with terminal, games, and functional apps",
+      "fullDescription": "I developed this portfolio as a complete operating system that runs in the browser. The idea was to create something different and show that I can do more than static websites. I built a window manager from scratch, with drag, resize, and edge snapping. The terminal accepts over 25 commands with autocomplete and history. I made 11 canvas games (Snake, Tetris, Pong, etc.), a calculator with scientific and programmer modes, music player, and much more. It's over 10,000 lines of pure JavaScript, no frameworks, organized in modules. The result is an interactive experience that showcases my fullstack developer skills in practice.",
+      "techStack": ["JavaScript", "CSS3", "HTML5", "Canvas API", "ES Modules", "Web Audio API"],
+      "images": ["assets/img/projects/portfolio/terminal.png"],
+      "thumbnail": "assets/img/projects/portfolio/terminal.png",
+      "githubUrl": "https://github.com/ShybaPsY/ShybaPsY.github.io",
+      "liveUrl": "https://shybapsy.github.io",
+      "date": "2025-01-01",
+      "featured": true
+    },
+    {
+      "id": "site-labeltec",
+      "title": "LabElTec UNESP Website",
+      "description": "Institutional website for nanotechnology research laboratory at UNESP",
+      "fullDescription": "I developed the institutional website for LabElTec, a UNESP research laboratory focused on electrospinning and nanostructured materials. The website presents research areas (piezoelectricity, gas sensors, adsorbent materials, solar cells), team, scientific publications, and laboratory equipment. I implemented bilingual support (PT/EN), complete SEO with structured data (JSON-LD), entrance animations, animated statistics counter, and fully responsive design. I used Bootstrap 5 as a base to ensure a professional and consistent experience.",
+      "techStack": ["HTML5", "CSS3", "Bootstrap 5", "JavaScript"],
+      "images": ["assets/img/projects/labeltec/home.png"],
+      "thumbnail": "assets/img/projects/labeltec/home.png",
+      "githubUrl": "https://github.com/ShybaPsY/site-LabElTec",
+      "liveUrl": "",
+      "date": "2025-01-01",
+      "featured": true
+    }
+  ]
+}

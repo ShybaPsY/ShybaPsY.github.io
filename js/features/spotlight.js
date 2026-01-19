@@ -2,6 +2,8 @@
 // SPOTLIGHT SEARCH MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const Spotlight = {
     element: null,
     input: null,
@@ -28,7 +30,7 @@ export const Spotlight = {
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.35-4.35"/>
                     </svg>
-                    <input type="text" id="spotlight-input" placeholder="Buscar apps, comandos, jogos..." autocomplete="off">
+                    <input type="text" id="spotlight-input" data-i18n-placeholder="spotlight.placeholder" placeholder="Search apps, commands, games..." autocomplete="off">
                 </div>
                 <div id="spotlight-results"></div>
             </div>
@@ -57,18 +59,18 @@ export const Spotlight = {
             { type: 'app', name: 'Music', icon: '🎵', action: () => this.apps.MusicApp?.open() },
             { type: 'app', name: 'ASCII Player', icon: '🎬', action: () => this.apps.ASCIIPlayerApp?.open() },
             { type: 'app', name: 'Notepad', icon: '📝', action: () => this.apps.NotepadApp?.open() },
-            { type: 'app', name: 'Calculadora', icon: '🔢', action: () => this.apps.CalculatorApp?.open() },
+            { type: 'app', nameKey: 'spotlight.calculator', icon: '🔢', action: () => this.apps.CalculatorApp?.open() },
 
             // Terminal Commands
-            { type: 'command', name: 'sobre', description: 'Informações sobre mim', icon: '👤', action: () => this.runCommand('sobre') },
-            { type: 'command', name: 'experiencia', description: 'Experiência profissional', icon: '💼', action: () => this.runCommand('experiencia') },
-            { type: 'command', name: 'projetos', description: 'Meus projetos', icon: '📁', action: () => this.runCommand('projetos') },
-            { type: 'command', name: 'skills', description: 'Habilidades técnicas', icon: '⚡', action: () => this.runCommand('skills') },
-            { type: 'command', name: 'contato', description: 'Informações de contato', icon: '📧', action: () => this.runCommand('contato') },
-            { type: 'command', name: 'github', description: 'Estatísticas do GitHub', icon: '🐙', action: () => this.runCommand('github') },
-            { type: 'command', name: 'quote', description: 'Citação de programação', icon: '💬', action: () => this.runCommand('quote') },
-            { type: 'command', name: 'matrix', description: 'Efeito Matrix', icon: '🟩', action: () => this.runCommand('matrix') },
-            { type: 'command', name: 'clear', description: 'Limpar terminal', icon: '🧹', action: () => this.runCommand('clear') },
+            { type: 'command', name: 'sobre', descKey: 'spotlight.sobre_desc', icon: '👤', action: () => this.runCommand('sobre') },
+            { type: 'command', name: 'experiencia', descKey: 'spotlight.experiencia_desc', icon: '💼', action: () => this.runCommand('experiencia') },
+            { type: 'command', name: 'projetos', descKey: 'spotlight.projetos_desc', icon: '📁', action: () => this.runCommand('projetos') },
+            { type: 'command', name: 'skills', descKey: 'spotlight.skills_desc', icon: '⚡', action: () => this.runCommand('skills') },
+            { type: 'command', name: 'contato', descKey: 'spotlight.contato_desc', icon: '📧', action: () => this.runCommand('contato') },
+            { type: 'command', name: 'github', descKey: 'spotlight.github_desc', icon: '🐙', action: () => this.runCommand('github') },
+            { type: 'command', name: 'quote', descKey: 'spotlight.quote_desc', icon: '💬', action: () => this.runCommand('quote') },
+            { type: 'command', name: 'matrix', descKey: 'spotlight.matrix_desc', icon: '🟩', action: () => this.runCommand('matrix') },
+            { type: 'command', name: 'clear', descKey: 'spotlight.clear_desc', icon: '🧹', action: () => this.runCommand('clear') },
 
             // Games
             { type: 'game', name: 'Snake', icon: '🐍', action: () => this.openGame('snake') },
@@ -84,8 +86,8 @@ export const Spotlight = {
             { type: 'game', name: 'Memory', icon: '🧠', action: () => this.openGame('memory') },
 
             // Quick Actions
-            { type: 'action', name: 'Alternar CRT', description: 'Liga/desliga efeito CRT', icon: '📺', action: () => this.toggleCRT() },
-            { type: 'action', name: 'Download CV', description: 'Baixar currículo', icon: '📄', action: () => this.runCommand('download cv') },
+            { type: 'action', nameKey: 'spotlight.toggle_crt_action', descKey: 'spotlight.toggle_crt_desc', icon: '📺', action: () => this.toggleCRT() },
+            { type: 'action', nameKey: 'spotlight.download_cv_action', descKey: 'spotlight.download_cv_desc', icon: '📄', action: () => this.runCommand('download cv') },
         ];
     },
 
@@ -111,6 +113,7 @@ export const Spotlight = {
         this.isOpen = true;
         this.element.classList.add('visible');
         this.input.value = '';
+        this.input.placeholder = t('spotlight.placeholder');
         this.input.focus();
         this.search(); // Show all items
     },
@@ -127,8 +130,8 @@ export const Spotlight = {
 
         if (query) {
             filtered = this.searchItems.filter(item => {
-                const name = item.name.toLowerCase();
-                const desc = (item.description || '').toLowerCase();
+                const name = (item.nameKey ? t(item.nameKey) : item.name).toLowerCase();
+                const desc = (item.descKey ? t(item.descKey) : item.description || '').toLowerCase();
                 return name.includes(query) || desc.includes(query) || this.fuzzyMatch(name, query);
             });
         }
@@ -136,8 +139,10 @@ export const Spotlight = {
         // Sort by relevance
         if (query) {
             filtered.sort((a, b) => {
-                const aStarts = a.name.toLowerCase().startsWith(query);
-                const bStarts = b.name.toLowerCase().startsWith(query);
+                const aName = (a.nameKey ? t(a.nameKey) : a.name).toLowerCase();
+                const bName = (b.nameKey ? t(b.nameKey) : b.name).toLowerCase();
+                const aStarts = aName.startsWith(query);
+                const bStarts = bName.startsWith(query);
                 if (aStarts && !bStarts) return -1;
                 if (!aStarts && bStarts) return 1;
                 return 0;
@@ -158,16 +163,16 @@ export const Spotlight = {
 
     renderResults(items) {
         if (items.length === 0) {
-            this.results.innerHTML = '<div class="spotlight-empty">Nenhum resultado encontrado</div>';
+            this.results.innerHTML = `<div class="spotlight-empty">${t('spotlight.no_results')}</div>`;
             return;
         }
 
         // Group by type
         const grouped = {
-            app: { label: 'Aplicativos', items: [] },
-            command: { label: 'Comandos', items: [] },
-            game: { label: 'Jogos', items: [] },
-            action: { label: 'Ações', items: [] }
+            app: { label: t('spotlight.apps'), items: [] },
+            command: { label: t('spotlight.commands'), items: [] },
+            game: { label: t('spotlight.games'), items: [] },
+            action: { label: t('spotlight.actions'), items: [] }
         };
 
         items.forEach(item => {
@@ -187,11 +192,13 @@ export const Spotlight = {
 
             group.items.forEach(item => {
                 const isSelected = globalIndex === this.selectedIndex;
+                const itemName = item.nameKey ? t(item.nameKey) : item.name;
+                const itemDesc = item.descKey ? t(item.descKey) : item.description;
                 html += `<div class="spotlight-item ${isSelected ? 'selected' : ''}" data-index="${globalIndex}">
                     <span class="spotlight-icon">${item.icon}</span>
                     <div class="spotlight-item-text">
-                        <span class="spotlight-name">${item.name}</span>
-                        ${item.description ? `<span class="spotlight-desc">${item.description}</span>` : ''}
+                        <span class="spotlight-name">${itemName}</span>
+                        ${itemDesc ? `<span class="spotlight-desc">${itemDesc}</span>` : ''}
                     </div>
                 </div>`;
                 globalIndex++;

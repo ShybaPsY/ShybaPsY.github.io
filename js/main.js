@@ -2,6 +2,9 @@
 // MAIN ENTRY POINT
 // ================================================
 
+// i18n module (must be imported first)
+import { i18n, t } from './i18n/i18n.js';
+
 // Core modules
 import { ThemeManager } from './core/theme-manager.js';
 import { WindowManager } from './core/window-manager.js';
@@ -51,6 +54,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const terminal = document.getElementById('terminal');
     const terminalHeader = document.getElementById('terminal-header');
     const commandInput = document.getElementById('command-input');
+
+    // Initialize achievement manager first to load saved achievements
+    AchievementManager.init();
 
     // Initialize apps with their dependencies
     ThemePickerApp.init(WindowManager, ThemeManager, AchievementManager);
@@ -623,8 +629,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STARTUP SEQUENCE
     // ================================================
     async function startup() {
-        // Run boot sequence first
+        // Run boot sequence first (includes language selection)
         await BootSequence.run();
+
+        // Update all elements with data-i18n attributes
+        i18n.updatePageTranslations();
 
         // Initialize all systems
         ParticleBackground.init();

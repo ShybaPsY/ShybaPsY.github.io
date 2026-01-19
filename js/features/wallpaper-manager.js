@@ -2,6 +2,8 @@
 // WALLPAPER MANAGER MODULE - Enhanced Version
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const WallpaperManager = {
     currentWallpaper: 'none',
     animationStyleEl: null,
@@ -9,7 +11,7 @@ export const WallpaperManager = {
     wallpapers: {
         // === NO WALLPAPER ===
         'none': {
-            name: 'Nenhum',
+            name: null, // Will use translation
             type: 'none'
         },
 
@@ -219,10 +221,10 @@ export const WallpaperManager = {
 
     getList() {
         const categories = {
-            'animated': { name: '✨ Animated', items: [] },
-            'gradient': { name: '🎨 Gradients', items: [] },
-            'pattern': { name: '📐 Patterns', items: [] },
-            'none': { name: '⚫ None', items: [] }
+            'animated': { name: t('wallpaper.animated'), items: [] },
+            'gradient': { name: t('wallpaper.gradients'), items: [] },
+            'pattern': { name: t('wallpaper.patterns'), items: [] },
+            'none': { name: t('wallpaper.none'), items: [] }
         };
 
         Object.entries(this.wallpapers).forEach(([id, data]) => {
@@ -230,7 +232,7 @@ export const WallpaperManager = {
             if (categories[type]) {
                 categories[type].items.push({
                     id,
-                    name: data.name,
+                    name: id === 'none' ? t('wallpaper.none') : data.name,
                     isActive: id === this.currentWallpaper
                 });
             }

@@ -2,6 +2,7 @@
 // TERMINAL MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
 import { aliases } from './aliases.js';
 import { TabCompletion } from './tab-completion.js';
 import { FuzzySearch } from './fuzzy-search.js';
@@ -57,14 +58,8 @@ export const Terminal = {
         this.cursor = document.getElementById('cursor');
         this.inputMirror = document.getElementById('input-mirror');
 
-        // Create welcome message
-        this.welcomeMessage = this.asciiArt + `
-  <span class="highlight">Este é o meu Portfólio Interativo!</span>
-
-  Meu nome é Gabriel Mendes Lopes e sou um Desenvolvedor Fullstack.
-
-  Digite '<span class="output-command">help</span>' para ver a lista de comandos disponíveis.
-            `;
+        // Create welcome message using translations
+        this.welcomeMessage = this.buildWelcomeMessage();
 
         // Create commands with dependencies
         this.commands = createCommands({
@@ -257,8 +252,8 @@ export const Terminal = {
             const infoLine = document.createElement('div');
             infoLine.classList.add('line', 'output-text');
             infoLine.innerHTML = matrixStarted
-                ? "<span class=\"highlight\">Efeito Matrix ativado.</span> Digite '<span class=\"output-command\">clear</span>' para desativar."
-                : "<span class=\"comment\">Efeito Matrix já está ativo. Use '<span class=\"output-command\">clear</span>' para desativar.</span>";
+                ? t('terminal.matrix_activated')
+                : t('terminal.matrix_already_active');
             this.output.appendChild(infoLine);
 
             if (matrixStarted && this.AchievementManager) {
@@ -287,14 +282,14 @@ export const Terminal = {
             }
 
             this.output.innerHTML = '';
-            responseText = "Digite '<span class=\"output-command\">help</span>' para ver a lista de comandos disponíveis.";
+            responseText = t('terminal.type_help');
             if (matrixWasRunning) {
-                responseText += "<br><span class=\"comment\">Efeito Matrix desativado.</span>";
+                responseText += "<br>" + t('terminal.matrix_deactivated');
             }
         }
         // Handle exit command
         else if (normalizedCommand === 'exit') {
-            responseText = "<span class=\"comment\">Fechando terminal...</span>";
+            responseText = t('terminal.closing_terminal');
             this.output.appendChild(responseLine);
             responseLine.innerHTML = responseText;
 
@@ -322,11 +317,11 @@ export const Terminal = {
         // Command not found - try fuzzy search
         else {
             const suggestion = FuzzySearch.getSuggestionMessage(normalizedCommand);
-            responseText = `Comando não encontrado: <span class="highlight">${sanitizedCommand}</span>.`;
+            responseText = t('terminal.command_not_found', { command: sanitizedCommand });
             if (suggestion) {
                 responseText += `\n\n${suggestion}`;
             }
-            responseText += `\n\nDigite '<span class="output-command">help</span>' para ver a lista de comandos.`;
+            responseText += `\n\n${t('terminal.type_help')}`;
         }
 
         if (responseText) {
@@ -360,6 +355,9 @@ export const Terminal = {
         this.commandInput.disabled = true;
         this.setCursorLock(true);
 
+        // Rebuild welcome message with current translations
+        this.welcomeMessage = this.buildWelcomeMessage();
+
         const initialLine = document.createElement('div');
         initialLine.classList.add('line', 'output-text');
         this.output.appendChild(initialLine);
@@ -368,5 +366,15 @@ export const Terminal = {
         this.commandInput.disabled = false;
         this.commandInput.focus();
         this.setCursorLock(false);
+    },
+
+    buildWelcomeMessage() {
+        return t('terminal.ascii_art') + `
+  <span class="highlight">${t('terminal.welcome_intro')}</span>
+
+  ${t('terminal.welcome_name')}
+
+  ${t('terminal.welcome_help')}
+            `;
     }
 };

@@ -3,6 +3,8 @@
 // Using assets from VS Code Pets extension
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const DesktopPet = {
     element: null,
     imgElement: null,
@@ -321,13 +323,17 @@ export const DesktopPet = {
     showTip() {
         if (!this.speechBubble || this.state === 'sleep') return;
 
+        // Get tips from translations
+        const tips = t('desktop_pet.tips');
+        const tipsArray = Array.isArray(tips) ? tips : this.tips;
+
         let tipIndex;
         do {
-            tipIndex = Math.floor(Math.random() * this.tips.length);
-        } while (tipIndex === this.lastTipIndex && this.tips.length > 1);
+            tipIndex = Math.floor(Math.random() * tipsArray.length);
+        } while (tipIndex === this.lastTipIndex && tipsArray.length > 1);
 
         this.lastTipIndex = tipIndex;
-        const tip = this.tips[tipIndex];
+        const tip = tipsArray[tipIndex];
 
         this.speechBubble.textContent = tip;
         this.speechBubble.classList.add('visible');

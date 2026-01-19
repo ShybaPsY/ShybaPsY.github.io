@@ -2,6 +2,8 @@
 // GITHUB API MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const GitHubAPI = {
     username: 'ShybaPsY',
     cache: {
@@ -71,23 +73,23 @@ export const GitHubAPI = {
 
     formatStats(stats) {
         if (!stats) {
-            return '<span class="error">Não foi possível carregar as estatísticas do GitHub.</span>\n\n<span class="comment">Verifique sua conexão com a internet.</span>';
+            return `<span class="error">${t('github.error_loading')}</span>\n\n<span class="comment">${t('github.check_connection')}</span>`;
         }
 
-        let output = '<span class="highlight">Estatísticas do GitHub de Gabriel Lopes:</span>\n\n';
+        let output = `<span class="highlight">${t('github.stats_title')}</span>\n\n`;
 
-        output += '<span class="title-blue">📊 Estatísticas:</span>\n';
-        output += `  <span class="detail-cyan">⭐ Total de estrelas:</span>       <span class="detail-green">${stats.totalStars}</span>\n`;
-        output += `  <span class="detail-cyan">📁 Total de repositórios:</span>   <span class="detail-green">${stats.totalRepos}</span>\n\n`;
+        output += `<span class="title-blue">${t('github.stats_section')}</span>\n`;
+        output += `  <span class="detail-cyan">${t('github.total_stars')}</span>       <span class="detail-green">${stats.totalStars}</span>\n`;
+        output += `  <span class="detail-cyan">${t('github.total_repos')}</span>   <span class="detail-green">${stats.totalRepos}</span>\n\n`;
 
-        output += '<span class="title-blue">💻 Tecnologias:</span>\n';
+        output += `<span class="title-blue">${t('github.technologies')}</span>\n`;
         stats.languages.forEach(lang => {
             const barLength = Math.round(parseFloat(lang.percentage) / 5);
             const bar = '█'.repeat(barLength);
             output += `  <span class="detail-cyan">${lang.name}</span> ${lang.percentage}% ${bar}\n`;
         });
 
-        output += `\n<span class="comment">Veja mais em: <a href="https://github.com/${this.username}" target="_blank">github.com/${this.username}</a></span>`;
+        output += `\n<span class="comment">${t('github.see_more')} <a href="https://github.com/${this.username}" target="_blank">github.com/${this.username}</a></span>`;
 
         return output;
     }

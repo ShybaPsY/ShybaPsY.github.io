@@ -2,6 +2,9 @@
 // EASTER EGGS MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+import { AchievementManager } from './achievements.js';
+
 export const EasterEggs = {
     konamiCode: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
     konamiIndex: 0,
@@ -31,7 +34,7 @@ export const EasterEggs = {
 
     triggerKonamiSecret() {
         if (this.secretUnlocked) {
-            this.showSecretMessage('Voce ja desbloqueou o segredo! :)');
+            this.showSecretMessage(t('easter_eggs.already_unlocked'));
             return;
         }
 
@@ -43,12 +46,12 @@ export const EasterEggs = {
         overlay.id = 'secret-overlay';
         overlay.innerHTML = `
             <div class="secret-content">
-                <div class="secret-title">SEGREDO DESBLOQUEADO!</div>
+                <div class="secret-title">${t('easter_eggs.secret_unlocked')}</div>
                 <div class="secret-icon">🎮</div>
-                <div class="secret-text">Parabens! Voce encontrou o codigo Konami!</div>
-                <div class="secret-reward">+30 anos de nostalgia desbloqueados</div>
-                <div class="secret-hint">Dica: Tente o comando "rickroll" no terminal!</div>
-                <button class="secret-close">Incrivel!</button>
+                <div class="secret-text">${t('easter_eggs.konami_found')}</div>
+                <div class="secret-reward">${t('easter_eggs.nostalgia_unlocked')}</div>
+                <div class="secret-hint">${t('easter_eggs.rickroll_hint')}</div>
+                <button class="secret-close">${t('easter_eggs.awesome')}</button>
             </div>
         `;
 
@@ -63,11 +66,7 @@ export const EasterEggs = {
         });
 
         // Unlock secret achievement
-        const achievements = JSON.parse(localStorage.getItem('achievements') || '[]');
-        if (!achievements.includes('secret_finder')) {
-            achievements.push('secret_finder');
-            localStorage.setItem('achievements', JSON.stringify(achievements));
-        }
+        AchievementManager.unlock('secret_finder');
     },
 
     createConfetti() {
@@ -117,16 +116,12 @@ export function getRickrollCommand() {
             '',
             '<span class="comment">  🎵 You just got rickrolled! 🎵</span>',
             '',
-            `<span class="highlight">  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">▶ Clique para a experiencia completa!</a></span>`,
+            `<span class="highlight">  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">▶ ${t('easter_eggs.click_full_experience')}</a></span>`,
             ''
         ];
 
         // Unlock achievement
-        const achievements = JSON.parse(localStorage.getItem('achievements') || '[]');
-        if (!achievements.includes('rickrolled')) {
-            achievements.push('rickrolled');
-            localStorage.setItem('achievements', JSON.stringify(achievements));
-        }
+        AchievementManager.unlock('rickrolled');
 
         return lines.join('\n');
     };
@@ -166,8 +161,8 @@ __/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__
   \\_/      \\__/  \\__/  \\__/  \\__/      \\_/
   </span>
 
-  <span class="highlight">🚂 CHOO CHOO!</span>
-  <span class="comment">Voce digitou 'sl' em vez de 'ls'!</span>
-  <span class="comment">O trem esta passando...</span>`;
+  <span class="highlight">🚂 ${t('easter_eggs.choo_choo')}</span>
+  <span class="comment">${t('easter_eggs.sl_typed')}</span>
+  <span class="comment">${t('easter_eggs.train_passing')}</span>`;
     };
 }

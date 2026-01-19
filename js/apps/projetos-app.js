@@ -3,7 +3,7 @@
 // Project showcase with animations, carousel, and 3D flip cards
 // ================================================
 
-import projectsData from './projects-data.json' with { type: 'json' };
+import { t, i18n } from '../i18n/i18n.js';
 
 export const ProjetosApp = {
     WindowManager: null,
@@ -17,7 +17,7 @@ export const ProjetosApp = {
     init(WindowManager, AchievementManager) {
         this.WindowManager = WindowManager;
         this.AchievementManager = AchievementManager;
-        this.projects = projectsData.projects || [];
+        this.projects = i18n.getProjects() || [];
         this.featuredProjects = this.projects.filter(p => p.featured);
 
         // Register cleanup handler
@@ -29,8 +29,12 @@ export const ProjetosApp = {
     open() {
         if (!this.WindowManager) return;
 
+        // Refresh projects data in case language changed
+        this.projects = i18n.getProjects() || [];
+        this.featuredProjects = this.projects.filter(p => p.featured);
+
         const content = `<div class="projetos-container" id="projetos-content"></div>`;
-        this.WindowManager.createWindow('projetos', 'Projetos', 650, 700, content);
+        this.WindowManager.createWindow('projetos', t('projetos.title'), 650, 700, content);
         this.render();
 
         if (this.AchievementManager) {
@@ -57,15 +61,15 @@ export const ProjetosApp = {
         return `
             <div class="projetos-header">
                 <canvas class="projetos-particles" id="projetos-particles"></canvas>
-                <div class="projetos-title">Meus Projetos</div>
-                <div class="projetos-subtitle">Desenvolvedor Fullstack</div>
+                <div class="projetos-title">${t('projetos.title')}</div>
+                <div class="projetos-subtitle">${t('projetos.subtitle')}</div>
                 <div class="projetos-search">
                     <span class="projetos-search-icon">$</span>
-                    <input 
-                        type="text" 
-                        class="projetos-search-input" 
-                        id="projetos-search" 
-                        placeholder="Buscar projetos..."
+                    <input
+                        type="text"
+                        class="projetos-search-input"
+                        id="projetos-search"
+                        placeholder="${t('projetos.search_placeholder')}"
                     >
                 </div>
             </div>
@@ -93,7 +97,7 @@ export const ProjetosApp = {
 
         return `
             <div class="projetos-featured">
-                <div class="projetos-featured-label">⭐ Destaque</div>
+                <div class="projetos-featured-label">⭐ ${t('projetos.featured')}</div>
                 <button class="projetos-carousel-arrow prev" id="carousel-prev">❮</button>
                 <button class="projetos-carousel-arrow next" id="carousel-next">❯</button>
                 <div class="projetos-carousel" id="projetos-carousel">
@@ -119,7 +123,7 @@ export const ProjetosApp = {
             return `
                 <div class="projetos-no-results">
                     <div class="projetos-no-results-icon">🔍</div>
-                    <div class="projetos-no-results-text">Nenhum projeto encontrado</div>
+                    <div class="projetos-no-results-text">${t('projetos.no_results')}</div>
                 </div>
             `;
         }
@@ -162,7 +166,7 @@ export const ProjetosApp = {
                                 ` : ''}
                             </div>
                             <button class="projetos-card-details-btn" data-id="${project.id}">
-                                Ver Detalhes
+                                ${t('projetos.view_details')}
                             </button>
                         </div>
                     </div>
@@ -348,17 +352,17 @@ export const ProjetosApp = {
                     </div>
                     <div class="projetos-modal-meta">
                         <span>${this.formatDate(project.date)}</span>
-                        ${project.featured ? '<span>Projeto Destaque</span>' : ''}
+                        ${project.featured ? `<span>${t('projetos.featured_project')}</span>` : ''}
                     </div>
                     <div class="projetos-modal-links">
                         ${project.githubUrl ? `
                             <a href="${project.githubUrl}" target="_blank" class="projetos-modal-link github">
-                                Ver no GitHub
+                                ${t('projetos.view_github')}
                             </a>
                         ` : ''}
                         ${project.liveUrl ? `
                             <a href="${project.liveUrl}" target="_blank" class="projetos-modal-link live">
-                                Ver Demo
+                                ${t('projetos.view_demo')}
                             </a>
                         ` : ''}
                     </div>
@@ -450,7 +454,7 @@ export const ProjetosApp = {
     formatDate(dateStr) {
         if (!dateStr) return 'N/A';
         const date = new Date(dateStr);
-        return date.toLocaleDateString('pt-BR', {
+        return date.toLocaleDateString(i18n.getDateLocale(), {
             year: 'numeric',
             month: 'long'
         });

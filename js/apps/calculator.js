@@ -2,6 +2,8 @@
 // CALCULATOR APP MODULE - Enhanced Version
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const CalculatorApp = {
     WindowManager: null,
     AchievementManager: null,
@@ -51,12 +53,12 @@ export const CalculatorApp = {
             <div class="calculator-container">
                 <div class="calculator-header">
                     <div class="calculator-mode">
-                        <button data-mode="basic" class="${this.mode === 'basic' ? 'active' : ''}">Básica</button>
-                        <button data-mode="scientific" class="${this.mode === 'scientific' ? 'active' : ''}">Científica</button>
-                        <button data-mode="programmer" class="${this.mode === 'programmer' ? 'active' : ''}">Programador</button>
-                        <button data-mode="calculus" class="${this.mode === 'calculus' ? 'active' : ''}">Cálculo</button>
+                        <button data-mode="basic" class="${this.mode === 'basic' ? 'active' : ''}">${t('calculator.mode_basic')}</button>
+                        <button data-mode="scientific" class="${this.mode === 'scientific' ? 'active' : ''}">${t('calculator.mode_scientific')}</button>
+                        <button data-mode="programmer" class="${this.mode === 'programmer' ? 'active' : ''}">${t('calculator.mode_programmer')}</button>
+                        <button data-mode="calculus" class="${this.mode === 'calculus' ? 'active' : ''}">${t('calculator.mode_calculus')}</button>
                     </div>
-                    <button class="calc-history-toggle" title="Histórico">⏱</button>
+                    <button class="calc-history-toggle" title="${t('calculator.history')}">⏱</button>
                 </div>
                 ${this.mode === 'calculus' ? this.renderCalculusMode() : this.renderStandardMode()}
                 ${this.renderHistoryPanel()}
@@ -70,7 +72,7 @@ export const CalculatorApp = {
                           this.mode === 'scientific' ? 'scientific-grid' : 'basic-grid';
         return `
             ${this.mode === 'programmer' ? this.renderBaseSelector() : ''}
-            <div class="calculator-display" title="Clique para copiar">
+            <div class="calculator-display" title="${t('calculator.click_to_copy')}">
                 <div class="calculator-expression">${this.expression || '&nbsp;'}</div>
                 <div class="calculator-result">${this.formatDisplayNumber(this.display)}</div>
                 ${this.mode === 'programmer' ? this.renderMultiBaseDisplay() : ''}
@@ -83,7 +85,7 @@ export const CalculatorApp = {
                             ${btn.disabled ? 'disabled' : ''}>${btn.label}</button>
                 `).join('')}
             </div>
-            <div class="calc-toast" id="calc-toast">Copiado!</div>
+            <div class="calc-toast" id="calc-toast">${t('calculator.copied')}</div>
         `;
     },
 
@@ -100,14 +102,14 @@ export const CalculatorApp = {
                     <button class="calc-btn calc-btn-calculus" data-calculus="simplify" title="Simplificar">Simplify</button>
                     <button class="calc-btn calc-btn-calculus" data-calculus="expand" title="Expandir">Expand</button>
                     <button class="calc-btn calc-btn-calculus" data-calculus="factor" title="Fatorar">Factor</button>
-                    <button class="calc-btn calc-btn-clear" data-calculus="clear">Limpar</button>
+                    <button class="calc-btn calc-btn-clear" data-calculus="clear">${t('calculator.clear')}</button>
                 </div>
                 <div class="calculus-output">
-                    <div class="calculus-output-label">Resultado:</div>
-                    <div class="calculus-output-result" id="mathjax-output">${this.calculusOutput || 'Digite uma expressão acima'}</div>
+                    <div class="calculus-output-label">${t('calculator.result')}</div>
+                    <div class="calculus-output-result" id="mathjax-output">${this.calculusOutput || t('calculator.type_expression')}</div>
                 </div>
             </div>
-            <div class="calc-toast" id="calc-toast">Copiado!</div>
+            <div class="calc-toast" id="calc-toast">${t('calculator.copied')}</div>
         `;
     },
 
@@ -142,13 +144,13 @@ export const CalculatorApp = {
         return `
             <div class="calculator-history ${this.historyVisible ? 'visible' : ''}">
                 <div class="history-header">
-                    <button class="history-close" title="Fechar">✕</button>
-                    <span>Histórico</span>
-                    <button class="history-clear" title="Limpar histórico">🗑</button>
+                    <button class="history-close" title="${t('calculator.close')}">✕</button>
+                    <span>${t('calculator.history')}</span>
+                    <button class="history-clear" title="${t('calculator.clear_history')}">🗑</button>
                 </div>
                 <div class="history-list">
                     ${this.history.length === 0 ?
-                        '<div class="history-empty">Sem histórico</div>' :
+                        `<div class="history-empty">${t('calculator.no_history')}</div>` :
                         this.history.map((item, i) => `
                             <div class="history-item" data-index="${i}">
                                 <div class="history-expr">${item.expr}</div>
@@ -585,7 +587,7 @@ export const CalculatorApp = {
                         this.hasResult = true;
                         this.addToHistory(fullExpr + ' =', formattedResult, fullExpr);
                     } catch (e) {
-                        this.display = 'Erro';
+                        this.display = t('calculator.error');
                     }
                 }
                 break;
@@ -685,14 +687,14 @@ export const CalculatorApp = {
         }
 
         if (!this.calculusInput.trim()) {
-            this.calculusOutput = 'Digite uma expressão';
+            this.calculusOutput = t('calculator.type_expression');
             this.refresh(windowEl);
             return;
         }
 
         try {
             if (typeof Algebrite === 'undefined') {
-                this.calculusOutput = 'Algebrite não carregado';
+                this.calculusOutput = t('calculator.algebrite_not_loaded');
                 this.refresh(windowEl);
                 return;
             }
@@ -731,7 +733,7 @@ export const CalculatorApp = {
 
             this.addToHistory(`${operation}(${input})`, result.toString(), `${operation}(${input})`);
         } catch (e) {
-            this.calculusOutput = 'Erro: expressão inválida';
+            this.calculusOutput = t('calculator.error_invalid');
         }
 
         this.refresh(windowEl);
@@ -874,7 +876,7 @@ export const CalculatorApp = {
     },
 
     formatNumber(num) {
-        if (isNaN(num) || !isFinite(num)) return 'Erro';
+        if (isNaN(num) || !isFinite(num)) return t('calculator.error');
         const str = num.toPrecision(10);
         return parseFloat(str).toString();
     },

@@ -2,6 +2,8 @@
 // TASKBAR MODULE
 // ================================================
 
+import { i18n } from '../i18n/i18n.js';
+
 export const Taskbar = {
     clockInterval: null,
     WindowManager: null,
@@ -50,13 +52,14 @@ export const Taskbar = {
 
         if (timeEl || dateEl) {
             const now = new Date();
+            const locale = i18n.getDateLocale();
 
             if (timeEl) {
-                timeEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                timeEl.textContent = now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
             }
 
             if (dateEl) {
-                dateEl.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                dateEl.textContent = now.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
             }
         }
     },

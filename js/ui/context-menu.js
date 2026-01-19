@@ -2,6 +2,7 @@
 // CONTEXT MENU MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
 import { WallpaperManager } from '../features/wallpaper-manager.js';
 
 export const ContextMenu = {
@@ -61,20 +62,20 @@ export const ContextMenu = {
         });
 
         const options = [
-            { label: '💻 Abrir Terminal', action: () => window.dispatchEvent(new CustomEvent('open-terminal')) },
-            { label: '🎨 Abrir Themes', action: () => this.apps.ThemePickerApp?.open() },
-            { label: '🎮 Abrir Games', action: () => this.apps.GamesApp?.open() },
-            { label: '🎵 Abrir Music', action: () => this.apps.MusicApp?.open() },
-            { label: '🎬 Abrir ASCII Player', action: () => this.apps.ASCIIPlayerApp?.open() },
-            { label: '📝 Abrir Notepad', action: () => this.apps.NotepadApp?.open() },
-            { label: '🔢 Abrir Calculadora', action: () => this.apps.CalculatorApp?.open() },
+            { label: t('context_menu.open_terminal'), action: () => window.dispatchEvent(new CustomEvent('open-terminal')) },
+            { label: t('context_menu.open_themes'), action: () => this.apps.ThemePickerApp?.open() },
+            { label: t('context_menu.open_games'), action: () => this.apps.GamesApp?.open() },
+            { label: t('context_menu.open_music'), action: () => this.apps.MusicApp?.open() },
+            { label: t('context_menu.open_ascii'), action: () => this.apps.ASCIIPlayerApp?.open() },
+            { label: t('context_menu.open_notepad'), action: () => this.apps.NotepadApp?.open() },
+            { label: t('context_menu.open_calculator'), action: () => this.apps.CalculatorApp?.open() },
             { separator: true },
             {
-                label: '🖼️ Papel de Parede',
+                label: t('context_menu.wallpaper'),
                 submenu: wallpaperSubmenu
             },
             {
-                label: '📺 Alternar CRT', action: () => {
+                label: t('context_menu.toggle_crt'), action: () => {
                     document.body.classList.toggle('crt-enabled');
                     const crtBtn = document.getElementById('taskbar-crt');
                     if (crtBtn) crtBtn.classList.toggle('active');
@@ -82,7 +83,7 @@ export const ContextMenu = {
                 }
             },
             { separator: true },
-            { label: 'ℹ️ Sobre', action: () => this.apps.Terminal?.executeCommand('sobre') }
+            { label: t('context_menu.about'), action: () => this.apps.Terminal?.executeCommand('sobre') }
         ];
 
         this.element.innerHTML = options.map((opt, idx) => {

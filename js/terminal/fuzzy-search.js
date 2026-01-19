@@ -2,6 +2,8 @@
 // FUZZY SEARCH MODULE
 // ================================================
 
+import { t } from '../i18n/i18n.js';
+
 export const FuzzySearch = {
     TabCompletion: null,
 
@@ -58,12 +60,12 @@ export const FuzzySearch = {
         if (suggestions.length === 0) return null;
 
         if (suggestions.length === 1) {
-            return `Você quis dizer '<span class="output-command">${suggestions[0]}</span>'?`;
+            return t('terminal.did_you_mean_single', { command: suggestions[0] });
         }
 
         const formatted = suggestions
             .map(s => `'<span class="output-command">${s}</span>'`)
             .join(', ');
-        return `Você quis dizer: ${formatted}?`;
+        return t('terminal.did_you_mean_multiple', { commands: formatted });
     }
 };
