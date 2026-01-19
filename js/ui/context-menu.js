@@ -73,12 +73,14 @@ export const ContextMenu = {
                 label: '🖼️ Papel de Parede',
                 submenu: wallpaperSubmenu
             },
-            { label: '📺 Alternar CRT', action: () => {
-                document.body.classList.toggle('crt-enabled');
-                const crtBtn = document.getElementById('taskbar-crt');
-                if (crtBtn) crtBtn.classList.toggle('active');
-                localStorage.setItem('crt-enabled', document.body.classList.contains('crt-enabled'));
-            }},
+            {
+                label: '📺 Alternar CRT', action: () => {
+                    document.body.classList.toggle('crt-enabled');
+                    const crtBtn = document.getElementById('taskbar-crt');
+                    if (crtBtn) crtBtn.classList.toggle('active');
+                    localStorage.setItem('crt-enabled', document.body.classList.contains('crt-enabled'));
+                }
+            },
             { separator: true },
             { label: 'ℹ️ Sobre', action: () => this.apps.Terminal?.executeCommand('sobre') }
         ];

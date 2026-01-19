@@ -105,7 +105,7 @@ export const EasterEggs = {
 
 // Add rickroll command to terminal
 export function getRickrollCommand() {
-    return async function() {
+    return async function () {
         const lines = [
             '',
             '<span class="detail-green">  Never gonna give you up</span>',
@@ -134,7 +134,7 @@ export function getRickrollCommand() {
 
 // Animated SL (Steam Locomotive) command
 export function getAnimatedSL() {
-    return async function() {
+    return async function () {
         const frames = [
             `<span class="detail-cyan">                       (@@)  (  )  (@@)  (  )  (@@)  (  )
                   (   )

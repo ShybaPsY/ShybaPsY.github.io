@@ -8,11 +8,9 @@
     left: 0;
     right: 0;
     height: 48px;
-    background: linear-gradient(
-        180deg,
-        rgba(var(--background-rgb, 26, 27, 38), 0.85) 0%,
-        rgba(var(--background-rgb, 26, 27, 38), 0.95) 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(var(--background-rgb, 26, 27, 38), 0.85) 0%,
+            rgba(var(--background-rgb, 26, 27, 38), 0.95) 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
@@ -38,7 +36,7 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -51,7 +49,7 @@
 #taskbar-start:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(var(--green-rgb, 158, 206, 106), 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 #taskbar-start:hover svg {
@@ -67,12 +65,10 @@
 #taskbar-divider {
     width: 1px;
     height: 24px;
-    background: linear-gradient(
-        180deg,
-        transparent 0%,
-        var(--comment) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            transparent 0%,
+            var(--comment) 50%,
+            transparent 100%);
     margin: 0 4px;
 }
 
@@ -177,12 +173,10 @@
 .tray-divider {
     width: 1px;
     height: 20px;
-    background: linear-gradient(
-        180deg,
-        transparent 0%,
-        var(--comment) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            transparent 0%,
+            var(--comment) 50%,
+            transparent 100%);
 }
 
 /* Tray Icons */
@@ -249,8 +243,15 @@
 
 /* Animations */
 @keyframes taskbar-btn-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--green-rgb, 158, 206, 106), 0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(var(--green-rgb, 158, 206, 106), 0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--green-rgb, 158, 206, 106), 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(var(--green-rgb, 158, 206, 106), 0);
+    }
 }
 
 .taskbar-window-btn.new {
