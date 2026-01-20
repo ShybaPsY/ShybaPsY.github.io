@@ -31,6 +31,7 @@ export const Terminal = {
     isMatrixRunning: false,
     welcomeMessage: '',
     skipTyping: false,
+    isTyping: false,
 
     // ASCII Art
     asciiArt: `<span class="ascii-art">
@@ -123,8 +124,9 @@ export const Terminal = {
 
     setupEventListeners() {
         // Document-level listener to skip typing animation with Enter
+        // Only skip if we're actually in the middle of typing (not just when input is disabled)
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.commandInput.disabled) {
+            if (e.key === 'Enter' && this.commandInput.disabled && this.isTyping) {
                 this.skipTyping = true;
             }
         });
@@ -343,7 +345,9 @@ export const Terminal = {
 
         if (responseText) {
             this.output.appendChild(responseLine);
+            this.isTyping = true;
             await this.typeMessage(responseLine, responseText, speed);
+            this.isTyping = false;
         }
 
         this.skipTyping = false;
@@ -379,7 +383,9 @@ export const Terminal = {
         const initialLine = document.createElement('div');
         initialLine.classList.add('line', 'output-text');
         this.output.appendChild(initialLine);
+        this.isTyping = true;
         await this.typeMessage(initialLine, this.welcomeMessage, 8);
+        this.isTyping = false;
 
         this.skipTyping = false;
         this.commandInput.disabled = false;
