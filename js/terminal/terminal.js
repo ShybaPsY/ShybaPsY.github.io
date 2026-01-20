@@ -30,6 +30,7 @@ export const Terminal = {
     isCursorLocked: false,
     isMatrixRunning: false,
     welcomeMessage: '',
+    skipTyping: false,
 
     // ASCII Art
     asciiArt: `<span class="ascii-art">
@@ -122,8 +123,13 @@ export const Terminal = {
 
     setupEventListeners() {
         this.commandInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter' && !this.commandInput.disabled) {
-                await this.executeCommand(this.commandInput.value);
+            if (e.key === 'Enter') {
+                if (this.commandInput.disabled) {
+                    // Skip typing animation
+                    this.skipTyping = true;
+                } else {
+                    await this.executeCommand(this.commandInput.value);
+                }
             } else if (e.key === 'Tab') {
                 e.preventDefault();
                 if (this.commandInput.value.trim()) {
@@ -176,6 +182,15 @@ export const Terminal = {
             const start = performance.now();
 
             const tick = () => {
+                // Check if skip was requested
+                if (this.skipTyping) {
+                    // Append remaining text at once
+                    targetElement.appendChild(document.createTextNode(text.slice(i)));
+                    this.terminalBody.scrollTop = this.terminalBody.scrollHeight;
+                    resolve();
+                    return;
+                }
+
                 const now = performance.now();
                 const elapsed = now - start;
                 const expectedCount = Math.floor(elapsed / speed);
@@ -272,7 +287,7 @@ export const Terminal = {
         responseLine.classList.add('line', 'output-text');
 
         let responseText;
-        let speed = 10;
+        let speed = 8;
 
         // Handle clear command
         if (normalizedCommand === 'clear') {
@@ -329,6 +344,7 @@ export const Terminal = {
             await this.typeMessage(responseLine, responseText, speed);
         }
 
+        this.skipTyping = false;
         this.commandInput.disabled = false;
         this.commandInput.focus();
         this.setCursorLock(false);
@@ -361,8 +377,9 @@ export const Terminal = {
         const initialLine = document.createElement('div');
         initialLine.classList.add('line', 'output-text');
         this.output.appendChild(initialLine);
-        await this.typeMessage(initialLine, this.welcomeMessage, 10);
+        await this.typeMessage(initialLine, this.welcomeMessage, 8);
 
+        this.skipTyping = false;
         this.commandInput.disabled = false;
         this.commandInput.focus();
         this.setCursorLock(false);
