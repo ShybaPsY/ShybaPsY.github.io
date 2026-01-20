@@ -122,14 +122,16 @@ export const Terminal = {
     },
 
     setupEventListeners() {
+        // Document-level listener to skip typing animation with Enter
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && this.commandInput.disabled) {
+                this.skipTyping = true;
+            }
+        });
+
         this.commandInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter') {
-                if (this.commandInput.disabled) {
-                    // Skip typing animation
-                    this.skipTyping = true;
-                } else {
-                    await this.executeCommand(this.commandInput.value);
-                }
+            if (e.key === 'Enter' && !this.commandInput.disabled) {
+                await this.executeCommand(this.commandInput.value);
             } else if (e.key === 'Tab') {
                 e.preventDefault();
                 if (this.commandInput.value.trim()) {
