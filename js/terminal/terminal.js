@@ -32,6 +32,7 @@ export const Terminal = {
     welcomeMessage: '',
     skipTyping: false,
     isTyping: false,
+    enterKeyHeld: false,
 
     // ASCII Art
     asciiArt: `<span class="ascii-art">
@@ -123,16 +124,26 @@ export const Terminal = {
     },
 
     setupEventListeners() {
-        // Document-level listener to skip typing animation with Enter
-        // Only skip if we're actually in the middle of typing (not just when input is disabled)
+        // Track Enter key state to distinguish between initial command submit and skip request
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.commandInput.disabled && this.isTyping) {
-                this.skipTyping = true;
+            if (e.key === 'Enter') {
+                // Only skip if: we're typing, input is disabled, AND this is a fresh press (not held from command submit)
+                if (this.commandInput.disabled && this.isTyping && !this.enterKeyHeld) {
+                    this.skipTyping = true;
+                }
+                this.enterKeyHeld = true;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                this.enterKeyHeld = false;
             }
         });
 
         this.commandInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter' && !this.commandInput.disabled) {
+                this.enterKeyHeld = true; // Mark Enter as held before executing
                 await this.executeCommand(this.commandInput.value);
             } else if (e.key === 'Tab') {
                 e.preventDefault();
