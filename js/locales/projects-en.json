@@ -1,6 +1,19 @@
 {
   "projects": [
     {
+      "id": "contabilpro-saas",
+      "title": "ContabilPro - Digital Admission SaaS",
+      "description": "SaaS platform for accounting firms to manage employee admissions",
+      "fullDescription": "SaaS platform I developed for accounting firms to manage the employee admission process 100% digitally. The system features an 8-step wizard where candidates fill in personal data, documents (ID, Tax ID, Work Permit, Driver's License, Social Security), address with CEP auto-fill (ViaCEP API integration), dependents and attachments. I implemented CPF validation with complete algorithm, input masks for Brazilian documents, draft persistence in localStorage, and full LGPD compliance (Brazilian data protection law). The dashboard allows accountants to view submissions, filter by status, export records and manage unique forms per company. Built the frontend with React 19, TypeScript, Framer Motion for animations, Tailwind CSS, and backend integrated with Supabase and Google Gemini AI.",
+      "techStack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion", "Supabase", "Google Gemini AI", "Vercel", "Lucide", "Recharts"],
+      "images": [],
+      "thumbnail": "",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-25",
+      "featured": true
+    },
+    {
       "id": "quotefys-saas",
       "title": "QuoteFys - AI-Powered Quotation SaaS",
       "description": "Complete SaaS platform for generating quotations with artificial intelligence",

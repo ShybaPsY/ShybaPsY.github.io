@@ -1,6 +1,19 @@
 {
   "projects": [
     {
+      "id": "contabilpro-saas",
+      "title": "ContabilPro - SaaS de Admissão Digital",
+      "description": "Plataforma SaaS para escritórios de contabilidade gerenciarem admissões de funcionários",
+      "fullDescription": "Plataforma SaaS que desenvolvi para escritórios de contabilidade gerenciarem o processo de admissão de funcionários de forma 100% digital. O sistema possui um wizard de 8 etapas onde candidatos preenchem dados pessoais, documentos (RG, CPF, CTPS, CNH, PIS), endereço com auto-preenchimento via CEP (integração ViaCEP), dependentes e anexos. Implementei validação de CPF com algoritmo completo, máscaras de input para documentos brasileiros, persistência de rascunho no localStorage, e conformidade total com LGPD. O dashboard permite aos contadores visualizar submissões, filtrar por status, exportar fichas e gerenciar formulários únicos por empresa. Construí o frontend em React 19 com TypeScript, Framer Motion para animações, Tailwind CSS, e backend integrado com Supabase e Google Gemini AI.",
+      "techStack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion", "Supabase", "Google Gemini AI", "Vercel", "Lucide", "Recharts"],
+      "images": [],
+      "thumbnail": "",
+      "githubUrl": "",
+      "liveUrl": "",
+      "date": "2025-01-25",
+      "featured": true
+    },
+    {
       "id": "quotefys-saas",
       "title": "QuoteFys - SaaS de Orçamentos com IA",
       "description": "Plataforma SaaS completa para geração de orçamentos com inteligência artificial",
