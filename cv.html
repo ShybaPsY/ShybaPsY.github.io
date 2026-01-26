@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Gabriel Mendes Lopes - Desenvolvedor Fullstack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #22d3ee;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --gradient-accent: linear-gradient(135deg, #22d3ee 0%, #6366f1 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            background: var(--dark);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        @page {
+            margin: 0;
+            background: #0f172a;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: #1e293b;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .cv-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            .sidebar {
+                background: #1e293b !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .skill-bar-fill {
+                background: #6366f1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .project-card {
+                break-inside: avoid;
+            }
+        }
+
+        .cv-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--dark-light);
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 900px) {
+            .cv-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, var(--dark) 0%, #131c2e 100%);
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--gradient);
+            opacity: 0.1;
+            filter: blur(60px);
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .avatar-ring {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: var(--gradient);
+            padding: 4px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .avatar-ring::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--gradient);
+            filter: blur(15px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--white);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--gray) 0%, transparent 100%);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            color: var(--gray-light);
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            color: var(--accent);
+        }
+
+        .contact-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .skill-item {
+            margin-bottom: 12px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+        }
+
+        .skill-name {
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .skill-level {
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .skill-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+            transition: width 1s ease;
+        }
+
+        .language-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .language-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .language-name {
+            font-size: 0.85rem;
+            color: var(--white);
+        }
+
+        .language-level {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Certifications */
+        .cert-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cert-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cert-year {
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(34, 211, 238, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .cert-name {
+            font-size: 0.75rem;
+            color: var(--gray-light);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px;
+            background: var(--dark-light);
+        }
+
+        .main-section {
+            margin-bottom: 35px;
+        }
+
+        .main-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .main-section-title .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-text {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .about-text strong {
+            color: var(--white);
+        }
+
+        /* Experience */
+        .experience-item {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border-left: 3px solid var(--primary);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .experience-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .experience-company {
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .experience-period {
+            font-size: 0.7rem;
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .experience-description {
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            line-height: 1.7;
+        }
+
+        .experience-description li {
+            margin-bottom: 6px;
+            padding-left: 5px;
+        }
+
+        /* Project Cards */
+        .projects-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(5px);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .project-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .project-date {
+            font-size: 0.7rem;
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .project-description {
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tech-tag {
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--accent);
+            border-radius: 20px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Education */
+        .education-item {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .education-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .education-institution {
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .education-period {
+            font-size: 0.75rem;
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Tech Stack Grid */
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+        }
+
+        .stack-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .stack-item:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .stack-icon {
+            height: 28px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stack-icon img {
+            width: 28px;
+            height: 28px;
+            transition: all 0.3s ease;
+            filter: brightness(0.7);
+        }
+
+        .stack-item:hover .stack-icon img {
+            transform: scale(1.15);
+            filter: brightness(1);
+        }
+
+        .stack-name {
+            font-size: 0.65rem;
+            color: var(--gray-light);
+            font-weight: 500;
+        }
+
+        /* Print Button */
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient);
+            border: none;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .print-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 50px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Decorative Elements */
+        .decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--gradient);
+            opacity: 0.03;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .dec-1 {
+            top: -100px;
+            right: -100px;
+        }
+
+        .dec-2 {
+            bottom: -100px;
+            left: -100px;
+        }
+
+        /* SVG Icons */
+        .svg-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .highlight {
+            color: var(--accent);
+        }
+
+        /* Soft Skills */
+        .soft-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .soft-skill {
+            font-size: 0.7rem;
+            padding: 6px 12px;
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="avatar-ring">
+                    <div class="avatar">
+                        <img src="assets/img/profile.png" alt="Gabriel Mendes Lopes">
+                    </div>
+                </div>
+                <h1 class="name">Gabriel Mendes Lopes</h1>
+                <p class="title">Desenvolvedor Fullstack</p>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Contato</h3>
+                <a href="mailto:asdgabrielmlopes@gmail.com" class="contact-item">
+                    <span class="contact-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    </span>
+                    asdgabrielmlopes@gmail.com
+                </a>
+                <a href="https://wa.me/5518996189978" target="_blank" class="contact-item">
+                    <span class="contact-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </span>
+                    +55 18 99618-9978
+                </a>
+                <a href="https://linkedin.com/in/gabriel-lopes-18b839270" target="_blank" class="contact-item">
+                    <span class="contact-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </span>
+                    /in/gabriel-lopes-18b839270
+                </a>
+                <a href="https://github.com/ShybaPsY" target="_blank" class="contact-item">
+                    <span class="contact-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    </span>
+                    github.com/ShybaPsY
+                </a>
+                <div class="contact-item">
+                    <span class="contact-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    </span>
+                    Anhumas, SP - Brasil
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Habilidades</h3>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">React / TypeScript</span>
+                        <span class="skill-level">95%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 95%"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">Java / Spring Boot</span>
+                        <span class="skill-level">90%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 90%"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">Python / ML</span>
+                        <span class="skill-level">85%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 85%"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">C / C++ / Go</span>
+                        <span class="skill-level">80%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 80%"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">PostgreSQL / MongoDB</span>
+                        <span class="skill-level">88%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 88%"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header">
+                        <span class="skill-name">Cloud (GCP / Azure)</span>
+                        <span class="skill-level">75%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-bar-fill" style="width: 75%"></div></div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Idiomas</h3>
+                <div class="language-grid">
+                    <div class="language-item">
+                        <span class="language-name">Portugues</span>
+                        <span class="language-level">Nativo</span>
+                    </div>
+                    <div class="language-item">
+                        <span class="language-name">Ingles</span>
+                        <span class="language-level">Avancado (C1)</span>
+                    </div>
+                    <div class="language-item">
+                        <span class="language-name">Espanhol</span>
+                        <span class="language-level">Basico</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Certificacoes</h3>
+                <div class="cert-grid">
+                    <div class="cert-item">
+                        <span class="cert-year">2024</span>
+                        <span class="cert-name">C/C++ Completo</span>
+                    </div>
+                    <div class="cert-item">
+                        <span class="cert-year">2024</span>
+                        <span class="cert-name">Power BI - SENAI</span>
+                    </div>
+                    <div class="cert-item">
+                        <span class="cert-year">2024</span>
+                        <span class="cert-name">IoT - SENAI</span>
+                    </div>
+                    <div class="cert-item">
+                        <span class="cert-year">2023</span>
+                        <span class="cert-name">Google Cloud AI</span>
+                    </div>
+                    <div class="cert-item">
+                        <span class="cert-year">2023</span>
+                        <span class="cert-name">Microsoft AZ-900</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="decoration dec-1"></div>
+            <div class="decoration dec-2"></div>
+
+            <section class="main-section">
+                <h2 class="main-section-title">
+                    <span class="icon">
+                        <svg class="svg-icon" style="fill: white" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </span>
+                    Sobre Mim
+                </h2>
+                <p class="about-text">
+                    Desenvolvedor <strong>Fullstack</strong> apaixonado por criar solucoes digitais completas e inovadoras.
+                    Atualmente no <strong>5o termo de Sistemas de Informacao</strong> na FIPP e <strong>Bolsista PIBITI/CNPq</strong>
+                    na FCT-UNESP, onde desenvolvo sistemas de automacao para pesquisa em piezoeletricidade.
+                    Experiencia solida em <strong>React, TypeScript, Java Spring Boot, Python</strong> e integracao com
+                    <strong>APIs de pagamento, IA (Gemini)</strong> e bancos de dados. Proativo, dedicado e em constante
+                    busca por desafios que gerem impacto real.
+                </p>
+                <div class="soft-skills">
+                    <span class="soft-skill">Comunicacao</span>
+                    <span class="soft-skill">Resolucao de Problemas</span>
+                    <span class="soft-skill">Proatividade</span>
+                    <span class="soft-skill">Trabalho em Equipe</span>
+                    <span class="soft-skill">Negociacao</span>
+                </div>
+            </section>
+
+            <section class="main-section">
+                <h2 class="main-section-title">
+                    <span class="icon">
+                        <svg class="svg-icon" style="fill: white" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+                    </span>
+                    Experiencia
+                </h2>
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div>
+                            <h3 class="experience-title">Bolsista de Iniciacao Tecnologica (PIBITI)</h3>
+                            <p class="experience-company">FCT-UNESP / CNPq</p>
+                        </div>
+                        <span class="experience-period">Set 2025 - Set 2026</span>
+                    </div>
+                    <div class="experience-description">
+                        <ul>
+                            <li>Desenvolvimento de software de controle em malha fechada com <strong>Arduino</strong> para equipamento de medicao piezoeletrica</li>
+                            <li>Integracao de atuadores pneumaticos e sensores de carga <strong>HX711</strong> com comunicacao serial</li>
+                            <li>Aplicacao desktop em <strong>Python/PyQt5</strong> com graficos em tempo real e maquina de estados</li>
+                            <li>Preparacao de documentacao para <strong>registro de patente e software</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="main-section">
+                <h2 class="main-section-title">
+                    <span class="icon">
+                        <svg class="svg-icon" style="fill: white" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                    </span>
+                    Projetos em Destaque
+                </h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">ContabilPro - SaaS de Admissao Digital</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Plataforma SaaS para escritorios de contabilidade. Wizard de 8 etapas, validacao de CPF,
+                            mascaras para documentos brasileiros, conformidade LGPD, auto-preenchimento via CEP e Gemini AI.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">React 19</span>
+                            <span class="tech-tag">TypeScript</span>
+                            <span class="tech-tag">Supabase</span>
+                            <span class="tech-tag">Gemini AI</span>
+                            <span class="tech-tag">Framer Motion</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">QuoteFys - SaaS de Orcamentos com IA</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Plataforma completa para geracao automatica de orcamentos. 12 tabelas PostgreSQL com RLS,
+                            assinaturas MercadoPago (webhooks HMAC), automacao WhatsApp via Twilio e geracao de PDF.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                            <span class="tech-tag">MercadoPago</span>
+                            <span class="tech-tag">Twilio</span>
+                            <span class="tech-tag">Gemini AI</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">Previsao de Mercado com ML</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Pipeline de ML para previsao de indices financeiros. Random Forest, AdaBoost e MLP Neural
+                            Network com indicadores tecnicos (SMA, RSI, MACD). Modelo MLP: 52.78% de acuracia.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Scikit-learn</span>
+                            <span class="tech-tag">Pandas</span>
+                            <span class="tech-tag">NumPy</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">DOARC - Sistema de Gestao de Doacoes</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Sistema fullstack para ONG. Dashboard, CRUD completo, controle de estoque,
+                            agendamento de entregas e relatorios com exportacao PDF/Excel. Conformidade LGPD.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Java</span>
+                            <span class="tech-tag">Spring Boot</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                            <span class="tech-tag">REST API</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">Portfolio Interativo OS-Style</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Portfolio em formato de sistema operacional. Gerenciador de janelas custom, terminal com
+                            25+ comandos, 11 jogos em Canvas, calculadora cientifica. +10.000 linhas de JS puro.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">Canvas API</span>
+                            <span class="tech-tag">Web Audio</span>
+                            <span class="tech-tag">ES Modules</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="main-section">
+                <h2 class="main-section-title">
+                    <span class="icon">
+                        <svg class="svg-icon" style="fill: white" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+                    </span>
+                    Formacao
+                </h2>
+                <div class="education-item">
+                    <h3 class="education-title">Bacharelado em Sistemas de Informacao</h3>
+                    <p class="education-institution">FIPP - Faculdade de Informatica de Presidente Prudente</p>
+                    <p class="education-period">2023 - 2026 (5o termo)</p>
+                </div>
+                <div class="education-item">
+                    <h3 class="education-title">Iniciacao Tecnologica - Piezoeletricidade</h3>
+                    <p class="education-institution">LabElTec - FCT UNESP (Bolsa PIBITI/CNPq)</p>
+                    <p class="education-period">Pesquisa em nanotecnologia e materiais piezoeletricos</p>
+                </div>
+            </section>
+
+            <section class="main-section">
+                <h2 class="main-section-title">
+                    <span class="icon">
+                        <svg class="svg-icon" style="fill: white" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+                    </span>
+                    Tech Stack
+                </h2>
+                <div class="stack-grid">
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/react/61DAFB" alt="React">
+                        </div>
+                        <div class="stack-name">React</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/typescript/3178C6" alt="TypeScript">
+                        </div>
+                        <div class="stack-name">TypeScript</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/openjdk/FFFFFF" alt="Java">
+                        </div>
+                        <div class="stack-name">Java</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/spring/6DB33F" alt="Spring">
+                        </div>
+                        <div class="stack-name">Spring</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/python/3776AB" alt="Python">
+                        </div>
+                        <div class="stack-name">Python</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/cplusplus/00599C" alt="C++">
+                        </div>
+                        <div class="stack-name">C / C++</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/go/00ADD8" alt="Go">
+                        </div>
+                        <div class="stack-name">Go</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/postgresql/4169E1" alt="PostgreSQL">
+                        </div>
+                        <div class="stack-name">PostgreSQL</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/mongodb/47A248" alt="MongoDB">
+                        </div>
+                        <div class="stack-name">MongoDB</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/supabase/3FCF8E" alt="Supabase">
+                        </div>
+                        <div class="stack-name">Supabase</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/googlegemini/8E75B2" alt="Gemini AI">
+                        </div>
+                        <div class="stack-name">Gemini AI</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/googlecloud/4285F4" alt="Google Cloud">
+                        </div>
+                        <div class="stack-name">GCP</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/git/F05032" alt="Git">
+                        </div>
+                        <div class="stack-name">Git</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/githubactions/2088FF" alt="GitHub Actions">
+                        </div>
+                        <div class="stack-name">CI/CD</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/nextdotjs/FFFFFF" alt="Next.js">
+                        </div>
+                        <div class="stack-name">Next.js</div>
+                    </div>
+                    <div class="stack-item">
+                        <div class="stack-icon">
+                            <img src="https://cdn.simpleicons.org/vercel/FFFFFF" alt="Vercel">
+                        </div>
+                        <div class="stack-name">Vercel</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <button class="print-btn no-print" onclick="window.print()" title="Imprimir / Salvar PDF">
+        <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+    </button>
+</body>
+</html>

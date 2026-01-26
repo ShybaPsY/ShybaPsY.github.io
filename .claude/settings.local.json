@@ -12,7 +12,12 @@
       "WebFetch(domain:github.com)",
       "Bash(dir /s \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\")",
       "Bash(node -e:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git -C \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\" config user.name)",
+      "Bash(git -C \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\" config user.email)",
+      "Bash(npm install:*)",
+      "Bash(npm run generate-cv:*)",
+      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\\\\CV - Gabriel Mendes Lopes.pdf\")"
     ],
     "deny": [],
     "ask": []
