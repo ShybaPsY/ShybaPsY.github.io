@@ -45,34 +45,259 @@
             background: #0f172a;
         }
 
+        /* PDF Mode - Applied via JavaScript before PDF generation */
+        body.pdf-mode .no-print,
+        body.pdf-mode .print-btn {
+            display: none !important;
+        }
+
+        body.pdf-mode .cv-container {
+            display: block !important;
+            min-height: auto !important;
+        }
+
+        body.pdf-mode .sidebar {
+            display: grid !important;
+            grid-template-columns: 140px 1fr 1fr 1fr !important;
+            gap: 15px !important;
+            padding: 15px 20px !important;
+            align-items: start !important;
+        }
+
+        body.pdf-mode .sidebar::before {
+            display: none !important;
+        }
+
+        body.pdf-mode .profile-section {
+            margin-bottom: 0 !important;
+        }
+
+        body.pdf-mode .avatar-ring {
+            width: 55px !important;
+            height: 55px !important;
+            margin-bottom: 5px !important;
+        }
+
+        body.pdf-mode .name {
+            font-size: 0.95rem !important;
+        }
+
+        body.pdf-mode .title {
+            font-size: 0.65rem !important;
+        }
+
+        body.pdf-mode .sidebar-section {
+            margin-bottom: 0 !important;
+        }
+
+        body.pdf-mode .section-title {
+            font-size: 0.65rem !important;
+            margin-bottom: 8px !important;
+        }
+
+        body.pdf-mode .contact-item {
+            padding: 4px 0 !important;
+            font-size: 0.7rem !important;
+        }
+
+        body.pdf-mode .contact-icon {
+            width: 22px !important;
+            height: 22px !important;
+        }
+
+        body.pdf-mode .skill-item {
+            margin-bottom: 6px !important;
+        }
+
+        body.pdf-mode .skill-header {
+            font-size: 0.7rem !important;
+        }
+
+        body.pdf-mode .skill-bar {
+            height: 3px !important;
+        }
+
+        body.pdf-mode .language-item {
+            padding: 4px 8px !important;
+            margin-bottom: 4px !important;
+        }
+
+        body.pdf-mode .language-name {
+            font-size: 0.7rem !important;
+        }
+
+        body.pdf-mode .language-level {
+            font-size: 0.6rem !important;
+        }
+
+        body.pdf-mode .cert-item {
+            padding: 4px 8px !important;
+            margin-bottom: 4px !important;
+        }
+
+        body.pdf-mode .cert-year {
+            font-size: 0.55rem !important;
+        }
+
+        body.pdf-mode .cert-name {
+            font-size: 0.65rem !important;
+        }
+
+        body.pdf-mode .main-content {
+            padding: 15px 20px !important;
+            background: transparent !important;
+        }
+
+        body.pdf-mode .main-section {
+            margin-bottom: 15px !important;
+        }
+
+        body.pdf-mode .main-section:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        body.pdf-mode .main-section-title {
+            font-size: 0.95rem !important;
+            margin-bottom: 10px !important;
+        }
+
+        body.pdf-mode .about-text {
+            font-size: 0.8rem !important;
+            line-height: 1.4 !important;
+        }
+
+        body.pdf-mode .experience-item,
+        body.pdf-mode .education-item {
+            padding: 12px 15px !important;
+            margin-bottom: 10px !important;
+        }
+
+        body.pdf-mode .experience-title,
+        body.pdf-mode .education-title {
+            font-size: 0.85rem !important;
+        }
+
+        body.pdf-mode .experience-description {
+            font-size: 0.75rem !important;
+        }
+
+        body.pdf-mode .experience-description li {
+            margin-bottom: 3px !important;
+        }
+
+        body.pdf-mode .project-card {
+            padding: 12px !important;
+        }
+
+        body.pdf-mode .project-title {
+            font-size: 0.8rem !important;
+        }
+
+        body.pdf-mode .project-description {
+            font-size: 0.7rem !important;
+            line-height: 1.3 !important;
+        }
+
+        body.pdf-mode .tech-tags {
+            gap: 4px !important;
+        }
+
+        body.pdf-mode .tech-tag {
+            font-size: 0.55rem !important;
+            padding: 2px 6px !important;
+        }
+
+        body.pdf-mode .soft-skill {
+            font-size: 0.65rem !important;
+            padding: 3px 8px !important;
+        }
+
+        body.pdf-mode .decoration {
+            display: none !important;
+        }
+
+        body.pdf-mode .projects-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+        }
+
+        body.pdf-mode .stack-grid {
+            grid-template-columns: repeat(8, 1fr) !important;
+            gap: 8px !important;
+        }
+
+        body.pdf-mode .stack-item {
+            padding: 8px 4px !important;
+        }
+
+        body.pdf-mode .stack-icon img {
+            width: 28px !important;
+            height: 28px !important;
+        }
+
+        body.pdf-mode .stack-name {
+            font-size: 0.6rem !important;
+        }
+
         /* Print Styles */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
         @media print {
-            body {
-                background: white;
-                color: #1e293b;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+            @page {
+                size: A4;
+                margin: 0;
             }
-            .cv-container {
-                box-shadow: none;
-                max-width: 100%;
+
+            html, body, .sidebar, .main-content, .cv-container {
+                background: var(--dark-light) !important;
             }
-            .sidebar {
-                background: #1e293b !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .no-print {
+
+            .sidebar::before {
                 display: none !important;
             }
-            .skill-bar-fill {
-                background: #6366f1 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+
+            .no-print, .print-btn {
+                display: none !important;
             }
+
+            .cv-container {
+                min-height: auto !important;
+            }
+
+            .main-content {
+                padding-top: 25px !important;
+            }
+
+            .main-section {
+                padding-top: 15px !important;
+            }
+
+            .decoration {
+                display: none !important;
+            }
+
+            /* Prevent page breaks inside individual items only */
+            .sidebar-section,
+            .language-grid,
+            .language-item,
+            .cert-grid,
+            .cert-item,
+            .education-item,
+            .experience-item,
             .project-card {
-                break-inside: avoid;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
             }
+
+            /* Keep section titles with their content */
+            .main-section-title {
+                break-after: avoid !important;
+                page-break-after: avoid !important;
+            }
+
         }
 
         .cv-container {
@@ -181,7 +406,7 @@
         }
 
         .section-title {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -205,7 +430,7 @@
             gap: 12px;
             padding: 10px 0;
             color: var(--gray-light);
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             text-decoration: none;
             transition: all 0.3s ease;
         }
@@ -234,7 +459,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 6px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         .skill-name {
@@ -245,7 +470,7 @@
         .skill-level {
             color: var(--gray);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
         }
 
         .skill-bar {
@@ -278,12 +503,12 @@
         }
 
         .language-name {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: var(--white);
         }
 
         .language-level {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             color: var(--accent);
             font-weight: 500;
         }
@@ -306,7 +531,7 @@
         }
 
         .cert-year {
-            font-size: 0.65rem;
+            font-size: 0.8rem;
             color: var(--accent);
             font-family: 'JetBrains Mono', monospace;
             background: rgba(34, 211, 238, 0.1);
@@ -315,7 +540,7 @@
         }
 
         .cert-name {
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             color: var(--gray-light);
         }
 
@@ -391,7 +616,7 @@
         }
 
         .experience-period {
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             color: var(--gray);
             font-family: 'JetBrains Mono', monospace;
             background: rgba(99, 102, 241, 0.1);
@@ -463,7 +688,7 @@
         }
 
         .project-date {
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             color: var(--gray);
             font-family: 'JetBrains Mono', monospace;
             background: rgba(99, 102, 241, 0.1);
@@ -485,7 +710,7 @@
         }
 
         .tech-tag {
-            font-size: 0.65rem;
+            font-size: 0.8rem;
             padding: 4px 10px;
             background: rgba(34, 211, 238, 0.1);
             color: var(--accent);
@@ -564,7 +789,7 @@
         }
 
         .stack-name {
-            font-size: 0.65rem;
+            font-size: 0.8rem;
             color: var(--gray-light);
             font-weight: 500;
         }
@@ -636,7 +861,7 @@
         }
 
         .soft-skill {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             padding: 6px 12px;
             background: rgba(139, 92, 246, 0.1);
             color: #a78bfa;
@@ -652,7 +877,7 @@
             <div class="profile-section">
                 <div class="avatar-ring">
                     <div class="avatar">
-                        <img src="assets/img/profile.png" alt="Gabriel Mendes Lopes">
+                        <img src="assets/img/profile.jpg" alt="Gabriel Mendes Lopes">
                     </div>
                 </div>
                 <h1 class="name">Gabriel Mendes Lopes</h1>
@@ -860,7 +1085,7 @@
                             <span class="tech-tag">React 19</span>
                             <span class="tech-tag">TypeScript</span>
                             <span class="tech-tag">Supabase</span>
-                            <span class="tech-tag">Gemini AI</span>
+                            <span class="tech-tag">TailwindCSS</span>
                             <span class="tech-tag">Framer Motion</span>
                         </div>
                     </div>
@@ -876,10 +1101,28 @@
                         </p>
                         <div class="tech-tags">
                             <span class="tech-tag">React</span>
+                            <span class="tech-tag">TypeScript</span>
+                            <span class="tech-tag">Supabase</span>
+                            <span class="tech-tag">TailwindCSS</span>
+                            <span class="tech-tag">Vercel</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3 class="project-title">BomServico - Plataforma de Classificados</h3>
+                            <span class="project-date">2025</span>
+                        </div>
+                        <p class="project-description">
+                            Sistema fullstack de classificados para prestadores de servicos. Autenticacao JWT,
+                            upload de imagens, sistema de mensagens e painel administrativo.
+                        </p>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Java</span>
+                            <span class="tech-tag">Spring Boot</span>
                             <span class="tech-tag">PostgreSQL</span>
-                            <span class="tech-tag">MercadoPago</span>
-                            <span class="tech-tag">Twilio</span>
-                            <span class="tech-tag">Gemini AI</span>
+                            <span class="tech-tag">JWT</span>
+                            <span class="tech-tag">Bootstrap</span>
                         </div>
                     </div>
 

@@ -17,7 +17,11 @@
       "Bash(git -C \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\" config user.email)",
       "Bash(npm install:*)",
       "Bash(npm run generate-cv:*)",
-      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\\\\CV - Gabriel Mendes Lopes.pdf\")"
+      "Bash(dir \"C:\\\\Users\\\\Nitro\\\\Desktop\\\\Github\\\\ShybaPsY.github.io\\\\CV - Gabriel Mendes Lopes.pdf\")",
+      "Bash(copy:*)",
+      "Bash(ls:*)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless --disable-gpu --print-to-pdf=\"C:/Users/Nitro/Desktop/Github/ShybaPsY.github.io/CV - Gabriel Mendes Lopes.pdf\" --no-margins \"file:///C:/Users/Nitro/Desktop/Github/ShybaPsY.github.io/cv.html\")",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless --disable-gpu --print-to-pdf=\"C:/Users/Nitro/Desktop/Github/ShybaPsY.github.io/CV - Gabriel Mendes Lopes \\(EN\\).pdf\" --no-margins \"file:///C:/Users/Nitro/Desktop/Github/ShybaPsY.github.io/cv-en.html\")"
     ],
     "deny": [],
     "ask": []
