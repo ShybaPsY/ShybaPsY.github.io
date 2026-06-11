@@ -446,26 +446,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const minimizeBtn = terminal.querySelector('.button.yellow');
             const maximizeBtn = terminal.querySelector('.button.green');
 
-            if (closeBtn) {
-                closeBtn.addEventListener('click', (e) => {
+            const bindButton = (btn, action) => {
+                if (!btn) return;
+                btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    this.close();
+                    action();
                 });
-            }
+                btn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        action();
+                    }
+                });
+            };
 
-            if (minimizeBtn) {
-                minimizeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.minimize();
-                });
-            }
-
-            if (maximizeBtn) {
-                maximizeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggleMaximize();
-                });
-            }
+            bindButton(closeBtn, () => this.close());
+            bindButton(minimizeBtn, () => this.minimize());
+            bindButton(maximizeBtn, () => this.toggleMaximize());
 
             // Add terminal to taskbar on init
             Taskbar.addWindow('terminal', 'Terminal');

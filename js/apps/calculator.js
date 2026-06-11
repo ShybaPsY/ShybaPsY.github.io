@@ -18,13 +18,48 @@ export const CalculatorApp = {
     calculusInput: '',
     calculusOutput: '',
 
+    mathLibsPromise: null,
+
     init(WindowManager, AchievementManager) {
         this.WindowManager = WindowManager;
         this.AchievementManager = AchievementManager;
         this.loadHistory();
     },
 
+    // Algebrite e MathJax (~1.5MB) só são baixados quando a calculadora abre,
+    // para não pesar o carregamento inicial da página
+    loadMathLibs() {
+        if (this.mathLibsPromise) return this.mathLibsPromise;
+
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        const loadScript = (src) => new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.defer = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+
+        this.mathLibsPromise = Promise.allSettled([
+            loadScript('https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.min.js'),
+            loadScript('https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js')
+        ]);
+        return this.mathLibsPromise;
+    },
+
     open() {
+        this.loadMathLibs();
+
         if (this.WindowManager.windows['calculator']) {
             this.WindowManager.focusWindow('calculator');
             return;

@@ -100,8 +100,7 @@ Snake, Pong, Tetris, Breakout, Space Invaders, Asteroids, Dino Run, 2048, Flappy
 │   │   ├── music-player.js   # Player de música
 │   │   ├── ascii-player.js   # Player ASCII art
 │   │   ├── projetos-app.js   # Showcase de projetos
-│   │   ├── theme-picker.js   # Seletor de temas
-│   │   └── projects-data.json
+│   │   └── theme-picker.js   # Seletor de temas
 │   ├── core/
 │   │   ├── window-manager.js # Gerenciador de janelas
 │   │   ├── theme-manager.js  # Gerenciador de temas
@@ -117,7 +116,8 @@ Snake, Pong, Tetris, Breakout, Space Invaders, Asteroids, Dino Run, 2048, Flappy
 │   │   ├── spotlight.js      # Busca universal
 │   │   └── wallpaper-manager.js
 │   ├── games/
-│   │   └── games-app.js      # 11 mini-games em Canvas
+│   │   ├── games-app.js      # Menu e infraestrutura dos jogos
+│   │   └── *.js              # 11 mini-games em módulos separados
 │   ├── i18n/
 │   │   └── i18n.js           # Sistema de internacionalização
 │   ├── locales/

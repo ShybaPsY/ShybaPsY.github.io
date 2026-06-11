@@ -166,6 +166,7 @@ export const Terminal = {
                 if (this.historyIndex < this.commandHistory.length - 1) {
                     this.historyIndex++;
                     this.commandInput.value = this.commandHistory[this.historyIndex];
+                    this.commandInput.setSelectionRange(this.commandInput.value.length, this.commandInput.value.length);
                     this.scheduleCursorUpdate();
                 } else {
                     this.historyIndex = this.commandHistory.length;

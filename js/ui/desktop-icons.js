@@ -14,9 +14,19 @@ export const DesktopIcons = {
         const icons = document.querySelectorAll('.desktop-icon');
 
         icons.forEach(icon => {
+            icon.setAttribute('role', 'button');
+            icon.setAttribute('tabindex', '0');
+            const label = icon.querySelector('.icon-label');
+            if (label) icon.setAttribute('aria-label', label.textContent);
+
             icon.addEventListener('click', () => {
-                const appName = icon.dataset.app;
-                this.openApp(appName);
+                this.openApp(icon.dataset.app);
+            });
+            icon.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.openApp(icon.dataset.app);
+                }
             });
         });
     },

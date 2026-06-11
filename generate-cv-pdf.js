@@ -57,8 +57,8 @@ async function generatePDF(cvFile, outputFile) {
 async function generateAllPDFs() {
     console.log('=== CV PDF Generator ===\n');
 
-    await generatePDF('cv.html', 'CV - Gabriel Mendes Lopes.pdf');
-    await generatePDF('cv-en.html', 'CV - Gabriel Mendes Lopes (EN).pdf');
+    await generatePDF('cv.html', 'CV - Gabriel Mendes Lopes - Desenvolvedor Fullstack.pdf');
+    await generatePDF('cv-en.html', 'CV - Gabriel Mendes Lopes - Fullstack Developer.pdf');
 
     console.log('\n=== All PDFs generated successfully! ===');
 }

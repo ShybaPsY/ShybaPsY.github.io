@@ -2,10 +2,12 @@
   "name": "shybapsy.github.io",
   "version": "1.0.0",
   "description": "Portfolio pessoal em formato de sistema operacional interativo. Uma experiência desktop completa rodando no navegador, com terminal, jogos, calculadora e muito mais.",
-  "main": "script.js",
+  "main": "js/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-cv": "node generate-cv-pdf.js"
+    "generate-cv": "node generate-cv-pdf.js",
+    "optimize-images": "node optimize-images.js",
+    "smoke": "node smoke-test.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   },
   "homepage": "https://github.com/ShybaPsY/ShybaPsY.github.io#readme",
   "devDependencies": {
-    "puppeteer": "^24.36.0"
+    "puppeteer": "^24.36.0",
+    "sharp": "^0.35.0"
   }
 }

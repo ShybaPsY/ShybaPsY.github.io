@@ -44,9 +44,9 @@ export const WindowManager = {
             ${resizeHandles}
             <div class="app-window-header">
                 <div class="app-window-buttons">
-                    <div class="app-window-btn red" data-action="close"></div>
-                    <div class="app-window-btn yellow" data-action="minimize"></div>
-                    <div class="app-window-btn green" data-action="maximize"></div>
+                    <div class="app-window-btn red" data-action="close" role="button" tabindex="0" aria-label="Close window"></div>
+                    <div class="app-window-btn yellow" data-action="minimize" role="button" tabindex="0" aria-label="Minimize window"></div>
+                    <div class="app-window-btn green" data-action="maximize" role="button" tabindex="0" aria-label="Maximize window"></div>
                 </div>
                 <span class="app-window-title">${title}</span>
             </div>
@@ -57,19 +57,24 @@ export const WindowManager = {
         this.setupWindowDrag(windowEl);
         if (resizable) this.setupWindowResize(windowEl);
 
-        // Button handlers
-        windowEl.querySelector('.app-window-btn.red').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.closeWindow(appId);
-        });
-        windowEl.querySelector('.app-window-btn.yellow').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.minimizeWindow(appId);
-        });
-        windowEl.querySelector('.app-window-btn.green').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.maximizeWindow(appId);
-        });
+        // Button handlers (click + keyboard)
+        const bindWindowButton = (selector, action) => {
+            const btn = windowEl.querySelector(selector);
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                action();
+            });
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    action();
+                }
+            });
+        };
+        bindWindowButton('.app-window-btn.red', () => this.closeWindow(appId));
+        bindWindowButton('.app-window-btn.yellow', () => this.minimizeWindow(appId));
+        bindWindowButton('.app-window-btn.green', () => this.maximizeWindow(appId));
 
         windowEl.addEventListener('mousedown', () => {
             this.focusWindow(appId);

@@ -6,6 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gabriel Mendes Lopes - Desenvolvedor Fullstack</title>
 
+    <!-- SEO -->
+    <meta name="description"
+        content="Portfólio de Gabriel Mendes Lopes, Desenvolvedor Fullstack. Um sistema operacional interativo no navegador com terminal, projetos, jogos e muito mais.">
+    <meta name="author" content="Gabriel Mendes Lopes">
+    <link rel="canonical" href="https://shybapsy.github.io/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shybapsy.github.io/">
+    <meta property="og:title" content="Gabriel Mendes Lopes - Desenvolvedor Fullstack">
+    <meta property="og:description"
+        content="Portfólio interativo em formato de sistema operacional no navegador: terminal, projetos, jogos e muito mais.">
+    <meta property="og:image" content="https://shybapsy.github.io/assets/img/og-image.jpg">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:locale:alternate" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Gabriel Mendes Lopes - Desenvolvedor Fullstack">
+    <meta name="twitter:description"
+        content="Portfólio interativo em formato de sistema operacional no navegador: terminal, projetos, jogos e muito mais.">
+    <meta name="twitter:image" content="https://shybapsy.github.io/assets/img/og-image.jpg">
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="./favicon.ico?v=1">
     <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico?v=1">
@@ -20,6 +43,20 @@
 </head>
 
 <body>
+    <noscript>
+        <div style="font-family: 'Fira Code', monospace; max-width: 640px; margin: 60px auto; padding: 24px; color: #f8f8f2; background: #282a36; border: 1px solid #6272a4; border-radius: 8px;">
+            <h1 style="font-size: 1.3rem;">Gabriel Mendes Lopes — Desenvolvedor Fullstack</h1>
+            <p>Este portfólio é um sistema operacional interativo que roda no navegador e precisa de JavaScript
+                habilitado. / This portfolio is an interactive browser OS and requires JavaScript.</p>
+            <ul style="list-style: none; padding: 0; line-height: 2;">
+                <li>📄 <a href="cv.html" style="color: #8be9fd;">Currículo (PT)</a> · <a href="cv-en.html" style="color: #8be9fd;">Resume (EN)</a></li>
+                <li>💻 <a href="https://github.com/ShybaPsY" style="color: #8be9fd;">github.com/ShybaPsY</a></li>
+                <li>💼 <a href="https://www.linkedin.com/in/gabriel-lopes-18b839270/" style="color: #8be9fd;">LinkedIn</a></li>
+                <li>✉️ <a href="mailto:asdgabrielmlopes@gmail.com" style="color: #8be9fd;">asdgabrielmlopes@gmail.com</a></li>
+            </ul>
+        </div>
+    </noscript>
+
     <!-- Boot Sequence Overlay -->
     <div id="boot-overlay">
         <div id="boot-content"></div>
@@ -153,9 +190,9 @@
 
             <div id="terminal-header">
                 <div class="buttons">
-                    <div class="button red" data-action="close" title="Close"></div>
-                    <div class="button yellow" data-action="minimize" title="Minimize"></div>
-                    <div class="button green" data-action="maximize" title="Maximize"></div>
+                    <div class="button red" data-action="close" title="Close" role="button" tabindex="0" aria-label="Close terminal"></div>
+                    <div class="button yellow" data-action="minimize" title="Minimize" role="button" tabindex="0" aria-label="Minimize terminal"></div>
+                    <div class="button green" data-action="maximize" title="Maximize" role="button" tabindex="0" aria-label="Maximize terminal"></div>
                 </div>
                 <div class="terminal-title">gabriel_lopes@portfolio: ~</div>
             </div>
@@ -200,27 +237,7 @@
         </div>
     </div>
 
-    <!-- Algebrite for Calculus Calculator -->
-    <script src="https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.min.js"></script>
-
-    <!-- MathJax for Math Rendering -->
-    <script>
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            svg: {
-                fontCache: 'global'
-            },
-            startup: {
-                ready: () => {
-                    MathJax.startup.defaultReady();
-                }
-            }
-        };
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+    <!-- Algebrite e MathJax são carregados sob demanda pela calculadora (js/apps/calculator.js) -->
 
     <!-- Main Script (ES6 Module) -->
     <script type="module" src="js/main.js"></script>

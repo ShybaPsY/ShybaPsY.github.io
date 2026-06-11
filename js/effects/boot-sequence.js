@@ -108,7 +108,7 @@ export const BootSequence = {
         ];
 
         for (const line of lines) {
-            this.content.innerHTML += line + '\n';
+            this.content.appendChild(document.createTextNode(line + '\n'));
             await this.delay(50);
         }
 
@@ -122,14 +122,14 @@ export const BootSequence = {
         ];
 
         for (const mod of modules) {
-            this.content.innerHTML += `  [OK] ${mod}\n`;
+            this.content.appendChild(document.createTextNode(`  [OK] ${mod}\n`));
             await this.delay(80);
         }
 
-        this.content.innerHTML += '\n' + t('boot.starting') + '\n';
+        this.content.appendChild(document.createTextNode('\n' + t('boot.starting') + '\n'));
         await this.delay(300);
 
-        this.content.innerHTML += '\n<div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>';
+        this.content.insertAdjacentHTML('beforeend', '\n<div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>');
 
         const progressBar = document.getElementById('boot-progress');
         for (let i = 0; i <= 100; i += 5) {

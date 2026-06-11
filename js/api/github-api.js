@@ -6,54 +6,59 @@ import { t } from '../i18n/i18n.js';
 
 export const GitHubAPI = {
     username: 'ShybaPsY',
-    cache: {
-        stats: null,
-        timestamp: 0
+    cacheKey: 'github-stats-cache',
+    cacheTime: 60 * 60 * 1000, // 1 hour
+
+    readCache() {
+        try {
+            const cached = JSON.parse(localStorage.getItem(this.cacheKey));
+            if (cached && (Date.now() - cached.timestamp < this.cacheTime)) {
+                return cached.stats;
+            }
+        } catch (err) { /* cache corrompido ou indisponível */ }
+        return null;
     },
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+
+    writeCache(stats) {
+        try {
+            localStorage.setItem(this.cacheKey, JSON.stringify({ stats, timestamp: Date.now() }));
+        } catch (err) { /* localStorage cheio ou indisponível */ }
+    },
 
     async fetchStats() {
-        const now = Date.now();
-        if (this.cache.stats && (now - this.cache.timestamp < this.cacheTime)) {
-            return this.cache.stats;
-        }
+        const cached = this.readCache();
+        if (cached) return cached;
 
         try {
-            const reposResponse = await fetch(`https://api.github.com/users/${this.username}/repos?per_page=100`);
+            const [reposResponse, userResponse] = await Promise.all([
+                fetch(`https://api.github.com/users/${this.username}/repos?per_page=100`),
+                fetch(`https://api.github.com/users/${this.username}`)
+            ]);
             if (!reposResponse.ok) throw new Error('Failed to fetch repos');
+            if (!userResponse.ok) throw new Error('Failed to fetch user');
             const repos = await reposResponse.json();
+            const userData = await userResponse.json();
 
             const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
 
+            // Linguagem principal de cada repo (campo "language" já vem em /repos,
+            // evitando uma chamada extra por repositório e o rate limit da API)
             const languages = {};
-            let totalBytes = 0;
-
+            let totalCounted = 0;
             for (const repo of repos) {
-                try {
-                    const langResponse = await fetch(`https://api.github.com/repos/${this.username}/${repo.name}/languages`);
-                    if (langResponse.ok) {
-                        const langData = await langResponse.json();
-                        for (const [lang, bytes] of Object.entries(langData)) {
-                            languages[lang] = (languages[lang] || 0) + bytes;
-                            totalBytes += bytes;
-                        }
-                    }
-                } catch (err) {
-                    console.warn(`Failed to fetch languages for ${repo.name}:`, err);
+                if (repo.language && !repo.fork) {
+                    languages[repo.language] = (languages[repo.language] || 0) + 1;
+                    totalCounted++;
                 }
             }
 
             const languageStats = Object.entries(languages)
-                .map(([lang, bytes]) => ({
+                .map(([lang, count]) => ({
                     name: lang,
-                    percentage: ((bytes / totalBytes) * 100).toFixed(2)
+                    percentage: ((count / totalCounted) * 100).toFixed(2)
                 }))
                 .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
                 .slice(0, 6);
-
-            const userResponse = await fetch(`https://api.github.com/users/${this.username}`);
-            if (!userResponse.ok) throw new Error('Failed to fetch user');
-            const userData = await userResponse.json();
 
             const stats = {
                 totalStars,
@@ -61,8 +66,7 @@ export const GitHubAPI = {
                 languages: languageStats
             };
 
-            this.cache.stats = stats;
-            this.cache.timestamp = now;
+            this.writeCache(stats);
 
             return stats;
         } catch (error) {

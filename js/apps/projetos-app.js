@@ -134,7 +134,7 @@ export const ProjetosApp = {
                     <div class="projetos-card-front">
                         <div class="projetos-card-thumbnail">
                             ${project.thumbnail
-                ? `<img src="${project.thumbnail}" alt="${project.title}">`
+                ? `<img src="${project.thumbnail}" alt="${project.title}" loading="lazy" decoding="async">`
                 : this.getProjectIcon(project)}
                         </div>
                         <div class="projetos-card-info">
@@ -328,7 +328,7 @@ export const ProjetosApp = {
                 ? `
                             <div class="carousel-images" id="carousel-images">
                                 ${project.images.map((img, i) => `
-                                    <img src="${img}" alt="${project.title} - ${i + 1}" class="carousel-image ${i === 0 ? 'active' : ''}" data-index="${i}">
+                                    <img src="${img}" alt="${project.title} - ${i + 1}" class="carousel-image ${i === 0 ? 'active' : ''}" data-index="${i}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async">
                                 `).join('')}
                             </div>
                             ${imageCount > 1 ? `
