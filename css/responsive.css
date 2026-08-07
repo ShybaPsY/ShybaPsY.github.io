@@ -1,144 +1,254 @@
 /* ================================================
-   RESPONSIVE STYLES
+   RESPONSIVO
+   Num celular não existe mesa de trabalho: arrastar,
+   redimensionar e empilhar janelas não fazem sentido.
+   Abaixo de 760px cada janela vira uma folha inteira e
+   a taskbar passa a ser o alternador entre elas. Os
+   ícones viram um lançador atrás das folhas.
    ================================================ */
 
-@media (max-width: 600px) {
-    #terminal {
-        height: 95vh;
-        max-height: none;
-        border-radius: 0;
+@media (max-width: 760px) {
+
+    /* ---- Janelas viram folhas de tela cheia ---------------------- */
+
+    #terminal,
+    .app-window {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: var(--taskbar-h) !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        backdrop-filter: blur(18px) saturate(150%);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
     }
 
-    body {
-        padding: 0;
+    #terminal.is-active,
+    .app-window.is-active {
+        border-top-color: var(--line-accent);
+    }
+
+    /* Arrastar e redimensionar não existem nesse formato */
+    .resize-handle,
+    .app-resize-handle {
+        display: none !important;
+    }
+
+    #terminal-header,
+    .app-window-header {
+        cursor: default;
+        border-radius: 0 !important;
+        height: 44px;
+        padding: 0 14px;
+    }
+
+    /* Alvos de toque de 44px sem inchar o desenho do semáforo */
+    .app-window-btn,
+    #terminal-header .button {
+        width: 14px;
+        height: 14px;
+    }
+
+    .app-window-buttons,
+    #terminal-header .buttons {
+        gap: 14px;
+        padding: 14px 6px;
+        margin: -14px -6px;
+    }
+
+    /* Sem hover no toque: o semáforo já nasce preenchido */
+    .app-window-btn,
+    #terminal-header .button {
+        box-shadow: inset 0 0 0 7px currentColor;
+    }
+
+    .app-window-title,
+    .terminal-title {
+        max-width: calc(100% - 110px);
+        font-size: 10.5px;
+    }
+
+    /* ---- Terminal ------------------------------------------------- */
+
+    #terminal-body {
+        padding: 0.85rem 0.75rem 1rem;
+        font-size: 13px;
+    }
+
+    #terminal-body::before {
+        top: -0.85rem;
+        margin: -0.85rem -0.75rem 0;
     }
 
     .ascii-art {
-        font-size: 0.5em;
+        font-size: min(13px, 2.6vw);
+        line-height: 1.15;
     }
 
-    /* Taskbar adjustments for mobile */
-    #taskbar {
-        height: 36px;
-        padding: 0 4px;
-        gap: 4px;
+    .app-window-body {
+        padding: 12px;
     }
 
-    #taskbar-start {
-        padding: 4px 8px;
-        font-size: 10px;
+    /* ---- Ícones viram lançador ------------------------------------ */
+
+    #desktop {
+        padding: 0;
     }
 
-    .taskbar-window-btn {
-        padding: 4px 8px;
-        font-size: 10px;
-    }
-
-    #taskbar-clock {
-        font-size: 10px;
-        min-width: 40px;
-    }
-
-    /* Desktop icons adjustments */
     .desktop-icons {
-        gap: 10px;
-        top: 10px;
-        left: 10px;
+        position: absolute;
+        inset: 0 0 var(--taskbar-h) 0;
+        width: auto;
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        justify-content: center;
+        gap: 2px;
+        padding: 26px 10px;
+        overflow-y: auto;
     }
 
     .desktop-icon {
-        padding: 8px 10px;
-    }
-
-    .icon-image {
-        font-size: 28px;
+        width: 25%;
+        min-width: 78px;
+        max-width: 108px;
+        padding: 14px 4px 12px;
     }
 
     .icon-image svg {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
     }
 
     .icon-label {
-        font-size: 9px;
+        font-size: 10px;
+        white-space: normal;
+        line-height: 1.25;
     }
 
-    /* App windows adjustments */
-    .app-window {
-        min-width: 260px;
-        min-height: 160px;
+    /* ---- Sistema --------------------------------------------------- */
+
+    .snap-preview {
+        display: none !important;
     }
 
-    .app-window-title {
-        font-size: 11px;
+    #spotlight-overlay {
+        padding-top: 8vh;
     }
 
-    /* Games menu adjustments */
-    .games-menu {
-        grid-template-columns: 1fr;
-        gap: 8px;
+    .achievement-toast {
+        right: 10px;
+        left: 10px;
+        padding: 10px 14px;
+    }
+
+    .achievement-icon {
+        font-size: 22px;
+    }
+
+    .achievement-name {
+        font-size: 12.5px;
+    }
+
+    /* O bicho de estimação atrapalha mais do que diverte numa tela
+       pequena, onde ele fica sobre o conteúdo. */
+    #desktop-pet {
+        display: none;
+    }
+
+    /* ---- Boot ------------------------------------------------------- */
+
+    #boot-content {
+        font-size: 17px;
+        padding: 14px;
+    }
+
+    .boot-lang-title {
+        font-size: 21px;
+    }
+
+    .boot-lang-option {
+        grid-template-columns: 30px 36px 1fr;
+        padding: 12px 14px;
+        font-size: 19px;
+    }
+
+    .boot-lang-name {
+        font-size: 19px;
+    }
+
+    .boot-lang-hint {
+        font-size: 15px;
+        white-space: normal;
+    }
+
+    .boot-progress {
+        font-size: 15px;
+    }
+
+    /* ---- Grades internas dos apps ------------------------------------ */
+
+    .games-menu,
+    .theme-grid,
+    .gallery-grid,
+    .projetos-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
     }
 
     .game-option {
-        padding: 10px;
+        padding: 12px;
     }
 
     .game-option-title {
         font-size: 14px;
     }
-
-    /* Theme picker adjustments */
-    .theme-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Gallery adjustments */
-    .gallery-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Boot overlay adjustments */
-    #boot-content {
-        font-size: 12px;
-        padding: 15px;
-    }
-
-    .boot-progress {
-        width: 250px;
-        height: 16px;
-    }
-
-    /* Achievement toast adjustments */
-    .achievement-toast {
-        bottom: 50px;
-        right: 10px;
-        left: 10px;
-        padding: 10px 12px;
-    }
-
-    .achievement-icon {
-        font-size: 24px;
-    }
-
-    .achievement-name {
-        font-size: 12px;
-    }
 }
 
+/* Telas muito estreitas: só encolhe o que já cabia mal */
 @media (max-width: 400px) {
-    .ascii-art {
-        font-size: 0.4em;
+    #terminal-body {
+        padding: 0.7rem 0.55rem 0.9rem;
+        font-size: 12.5px;
     }
 
-    #terminal-body {
-        padding: 0.5rem;
+    #terminal-body::before {
+        top: -0.7rem;
+        margin: -0.7rem -0.55rem 0;
+    }
+
+    .desktop-icon {
+        width: 33.33%;
     }
 
     .prompt {
-        font-size: 0.9em;
+        font-size: 0.95em;
     }
 
     #command-input {
-        font-size: 0.9em;
+        font-size: 0.95em;
+    }
+}
+
+/* Tablets e notebooks pequenos: a janela padrão do terminal (820px)
+   encostaria nas bordas. */
+@media (min-width: 761px) and (max-width: 1080px) {
+    #terminal {
+        max-width: calc(100vw - 72px);
+    }
+
+    .desktop-icons {
+        max-height: calc(100vh - 130px);
     }
 }

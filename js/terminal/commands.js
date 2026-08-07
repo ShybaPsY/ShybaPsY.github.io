@@ -4,15 +4,19 @@
 
 import { t } from '../i18n/i18n.js';
 import { getRickrollCommand, getAnimatedSL } from '../features/easter-eggs.js';
+import { buildNeofetch } from './neofetch.js';
 
 export function createCommands(dependencies) {
     const {
         ThemeManager,
+        WindowManager,
         ThemePickerApp,
         ASCIIPlayerApp,
         MusicApp,
         GamesApp,
         ProjetosApp,
+        AsciiMirrorApp,
+        AsciiPortrait,
         AchievementManager,
         GitHubAPI,
         QuoteAPI,
@@ -71,8 +75,13 @@ export function createCommands(dependencies) {
             return t('commands.tree');
         },
 
-        neofetch: function() {
-            const uptime = Math.floor((Date.now() - performance.timing.navigationStart) / 1000);
+        // O logo é o retrato do Gabriel amostrado na rampa ASCII em tempo
+        // real. Se a imagem não carregar, cai no logo estático do i18n.
+        neofetch: async function() {
+            const live = await buildNeofetch({ ThemeManager, WindowManager });
+            if (live) return live;
+
+            const uptime = Math.floor((Date.now() - performance.timeOrigin) / 1000);
             const theme = ThemeManager?.current || 'default';
             return t('commands.neofetch', { uptime, theme });
         },
@@ -153,20 +162,20 @@ export function createCommands(dependencies) {
             return t('commands.open_themes');
         },
 
+        'open mirror': function() {
+            AsciiMirrorApp?.open();
+            return t('commands.open_mirror');
+        },
+
+        portrait: function() {
+            // dispara sem await para o terminal liberar o input
+            AsciiPortrait?.play();
+            return t('commands.portrait');
+        },
+
         conquistas: function() {
-            if (AchievementManager) {
-                const achievements = AchievementManager.getAll();
-                if (achievements.length > 0) {
-                    const translatedAchievements = achievements.map(a => {
-                        const translated = t(`achievements.${a}`);
-                        // If translation exists and is different from the key, use it
-                        return translated !== `achievements.${a}` ? translated : a;
-                    });
-                    return `<span class="highlight">${t('commands.conquistas_title')}</span>\n\n${translatedAchievements.map(a => `  - ${a}`).join('\n')}`;
-                }
-                return t('commands.conquistas_empty');
-            }
-            return t('commands.conquistas_unavailable');
+            if (!AchievementManager) return t('commands.conquistas_unavailable');
+            return AchievementManager.listAchievements();
         },
 
         theme: function(args) {
@@ -188,9 +197,7 @@ export function createCommands(dependencies) {
             return t('commands.theme_not_found', { theme: themeName });
         },
 
-        exit: function() {
-            window.dispatchEvent(new CustomEvent('terminal-closed'));
-            return t('terminal.closing_terminal');
-        }
+        // obs: "exit", "clear" e "matrix" são tratados direto em terminal.js,
+        // antes da consulta a este objeto
     };
 }

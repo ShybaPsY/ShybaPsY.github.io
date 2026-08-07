@@ -46,7 +46,7 @@ export const Terminal = {
 </span>`,
 
     init(dependencies) {
-        const { ThemeManager, WindowManager, AchievementManager, MatrixEffect, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, ProjetosApp, GitHubAPI, QuoteAPI } = dependencies;
+        const { ThemeManager, WindowManager, AchievementManager, MatrixEffect, ThemePickerApp, ASCIIPlayerApp, MusicApp, GamesApp, ProjetosApp, AsciiMirrorApp, AsciiPortrait, GitHubAPI, QuoteAPI } = dependencies;
 
         this.ThemeManager = ThemeManager;
         this.WindowManager = WindowManager;
@@ -61,21 +61,30 @@ export const Terminal = {
         this.cursor = document.getElementById('cursor');
         this.inputMirror = document.getElementById('input-mirror');
 
-        // Create welcome message using translations
-        this.welcomeMessage = this.buildWelcomeMessage();
+        // O init roda antes de i18n.init() (que só acontece depois da
+        // escolha de idioma no boot), então montar a mensagem agora
+        // logava quatro "Translation missing" a cada carregamento. O
+        // comando 'bemvindo' remonta a mensagem na hora em que é usado,
+        // quando as traduções já existem.
+        this.welcomeMessage = '';
 
         // Create commands with dependencies
         this.commands = createCommands({
             ThemeManager,
+            WindowManager,
             ThemePickerApp,
             ASCIIPlayerApp,
             MusicApp,
             GamesApp,
             ProjetosApp,
+            AsciiMirrorApp,
+            AsciiPortrait,
             AchievementManager,
             GitHubAPI,
             QuoteAPI,
-            welcomeMessage: this.welcomeMessage
+            // Função, não string: a mensagem é montada no momento do uso,
+            // com as traduções do idioma que o usuário escolheu.
+            welcomeMessage: () => this.buildWelcomeMessage()
         });
 
         // Initialize tab completion and fuzzy search
@@ -179,6 +188,26 @@ export const Terminal = {
         });
     },
 
+    // Resolve um comando para { handler, args, base }: tenta a string exata
+    // primeiro (ex: "download cv") e depois primeira palavra + argumentos
+    // (ex: "theme dracula" -> theme(["dracula"])). Retorna null se não existir.
+    resolveCommand(normalizedCommand) {
+        if (this.commands[normalizedCommand]) {
+            return { handler: this.commands[normalizedCommand], args: [], base: normalizedCommand };
+        }
+
+        if (normalizedCommand.includes(' ')) {
+            const parts = normalizedCommand.split(/\s+/);
+            let base = parts[0];
+            if (aliases[base]) base = aliases[base];
+            if (this.commands[base]) {
+                return { handler: this.commands[base], args: parts.slice(1), base };
+            }
+        }
+
+        return null;
+    },
+
     escapeHtml(value = '') {
         return value.replace(/[&<>"']/g, (char) => {
             switch (char) {
@@ -247,12 +276,33 @@ export const Terminal = {
     },
 
     async typeMessage(targetElement, htmlString, speed) {
+        // speed 0 = saída instantânea. Algumas respostas são um retrato do
+        // sistema num instante (neofetch), não um fluxo sendo digitado —
+        // e digitar mil caracteres de arte ASCII levaria vários segundos.
+        // Só usado em saídas nossas, nunca em texto vindo do usuário.
+        if (!speed) {
+            targetElement.innerHTML = htmlString;
+            this.terminalBody.scrollTop = this.terminalBody.scrollHeight;
+            return;
+        }
+
         const sourceElement = document.createElement('div');
         sourceElement.innerHTML = htmlString;
         await this.typeNodeContents(targetElement, sourceElement, speed);
     },
 
     async executeCommand(command) {
+        // se outra resposta ainda está sendo digitada (ex: comando vindo do
+        // Spotlight ou menu de contexto), finaliza a digitação atual primeiro
+        // para as saídas não se entrelaçarem
+        if (this.isTyping) {
+            this.skipTyping = true;
+            while (this.isTyping) {
+                await new Promise(resolve => setTimeout(resolve, 25));
+            }
+            this.skipTyping = false;
+        }
+
         this.commandInput.disabled = true;
         this.setCursorLock(true);
         TabCompletion.reset();
@@ -304,6 +354,7 @@ export const Terminal = {
 
         let responseText;
         let speed = 8;
+        const resolved = this.resolveCommand(normalizedCommand);
 
         // Handle clear command
         if (normalizedCommand === 'clear') {
@@ -334,15 +385,18 @@ export const Terminal = {
             return;
         }
         // Handle regular commands
-        else if (this.commands[normalizedCommand]) {
-            const commandValue = this.commands[normalizedCommand];
-            if (typeof commandValue === 'function') {
-                responseText = await commandValue();
+        else if (resolved) {
+            const { handler, args, base } = resolved;
+            if (typeof handler === 'function') {
+                responseText = await handler(args);
             } else {
-                responseText = commandValue;
+                responseText = handler;
             }
-            if (normalizedCommand === 'help' || normalizedCommand === 'bemvindo') {
+            if (base === 'help' || base === 'bemvindo') {
                 speed = 5;
+            }
+            if (base === 'neofetch') {
+                speed = 0;
             }
         }
         // Command not found - try fuzzy search
@@ -406,7 +460,13 @@ export const Terminal = {
     },
 
     buildWelcomeMessage() {
-        return t('terminal.ascii_art') + `
+        // O banner largo tem 78 colunas e não cabe num celular. Abaixo de
+        // 760px entra a versão de 51 colunas, que ainda é legível.
+        const artKey = window.innerWidth < 760
+            ? 'terminal.ascii_art_compact'
+            : 'terminal.ascii_art';
+
+        return t(artKey) + `
   <span class="highlight">${t('terminal.welcome_intro')}</span>
 
   ${t('terminal.welcome_name')}
