@@ -1,171 +1,154 @@
 // ================================================
-// WALLPAPER MANAGER MODULE - Enhanced Version
+// WALLPAPER MANAGER
+//
+// Antes, cada papel de parede era um degradê CSS pintado no body — e o
+// campo ASCII era desenhado por cima dele. Dois fundos empilhados, sem
+// relação: nos papéis claros o campo sumia (as cores dele são feitas
+// para fundo escuro) e nos verdes os dois brigavam pelo mesmo espaço.
+//
+// Agora o fundo do desktop é SEMPRE o campo ASCII, e o papel de parede
+// diz de que cores ele é feito. "Arctic" faz o campo ir de azul profundo
+// no topo a gelo no pé; "Toxic" o deixa verde-ácido e denso. Não existe
+// mais imagem por trás — só a matéria do sistema, tingida pela escolha.
+//
+// Cada preset define:
+//   bg       cor sólida atrás do campo (sempre escura, para o texto ler)
+//   low/mid/high  a rampa de cor, do vale à crista
+//   drift    quanto a rampa escorrega de cima para baixo (degradê vertical)
+//   density  quantidade de tinta (1 = padrão)
+//   ramp     conjunto de caracteres, quando o preset é sobre textura
 // ================================================
 
 import { t } from '../i18n/i18n.js';
+import { AsciiField } from '../effects/ascii-field.js';
 
 export const WallpaperManager = {
     currentWallpaper: 'none',
-    animationStyleEl: null,
 
     wallpapers: {
-        // === NO WALLPAPER ===
+        // === PADRÃO: segue o tema ===
         'none': {
-            name: null, // Will use translation
-            type: 'none'
+            name: null, // usa tradução
+            type: 'none',
+            field: null // sem paleta = cores do tema
         },
 
-        // === ANIMATED GRADIENTS ===
+        // === PALETAS COM MOVIMENTO VERTICAL FORTE ===
         'animated-aurora': {
-            name: '✨ Aurora Animated',
+            name: '✨ Aurora',
             type: 'animated',
-            css: 'linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a3e, #44337a, #0f0c29)',
-            animation: 'gradientShift 15s ease infinite',
-            size: '400% 400%'
+            field: { bg: '#0b0918', low: '#171233', mid: '#4a3a8c', high: '#b79cff', drift: 0.55 }
         },
         'animated-sunset': {
-            name: '✨ Sunset Animated',
+            name: '✨ Sunset',
             type: 'animated',
-            css: 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
-            animation: 'gradientShift 12s ease infinite',
-            size: '400% 400%'
+            field: { bg: '#140a12', low: '#2a1220', mid: '#c9524d', high: '#ffc06a', drift: 0.75 }
         },
         'animated-neon': {
             name: '✨ Neon Pulse',
             type: 'animated',
-            css: 'linear-gradient(-45deg, #0a0a0a, #1a0030, #000030, #001a1a, #0a0a0a)',
-            animation: 'gradientShift 20s ease infinite',
-            size: '400% 400%'
+            field: { bg: '#07070d', low: '#12102a', mid: '#6c1f6b', high: '#ff5cf4', drift: 0.5 }
         },
         'animated-ocean': {
             name: '✨ Deep Ocean',
             type: 'animated',
-            css: 'linear-gradient(-45deg, #0c1445, #1a237e, #0d47a1, #01579b, #006064, #0c1445)',
-            animation: 'gradientShift 18s ease infinite',
-            size: '400% 400%'
+            field: { bg: '#050d1f', low: '#0a1a3d', mid: '#14528f', high: '#57dced', drift: 0.62 }
         },
         'animated-fire': {
             name: '✨ Fire Storm',
             type: 'animated',
-            css: 'linear-gradient(-45deg, #1a0000, #4a0000, #8b0000, #cc3300, #ff6600, #4a0000)',
-            animation: 'gradientShift 10s ease infinite',
-            size: '400% 400%'
+            field: { bg: '#100303', low: '#2a0808', mid: '#a83015', high: '#ffab48', drift: 0.78 }
         },
 
-        // === STATIC GRADIENTS ===
+        // === PALETAS ESTÁTICAS ===
         'gradient-synthwave': {
             name: '🌆 Synthwave',
             type: 'gradient',
-            css: 'linear-gradient(180deg, #0a0a0a 0%, #1a0030 20%, #2d1b4e 40%, #ff006e 80%, #ff6b35 100%)'
+            field: { bg: '#0c0618', low: '#1c0a35', mid: '#b02070', high: '#ffa25c', drift: 0.8 }
         },
         'gradient-midnight': {
             name: '🌙 Midnight',
             type: 'gradient',
-            css: 'linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 30%, #141428 60%, #0a0a14 100%)'
+            field: { bg: '#08080f', low: '#12142c', mid: '#313a6b', high: '#8b97d4', drift: 0.32 }
         },
         'gradient-forest': {
             name: '🌲 Forest',
             type: 'gradient',
-            css: 'linear-gradient(160deg, #0d1b0e 0%, #1a3a1c 30%, #2d5a2e 60%, #1a3a1c 100%)'
+            field: { bg: '#070f08', low: '#0f2411', mid: '#2f6b33', high: '#9bd894', drift: 0.5 }
         },
         'gradient-nebula': {
             name: '🌌 Nebula',
             type: 'gradient',
-            css: 'radial-gradient(ellipse at 20% 50%, #2d1b4e 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, #0d47a1 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, #4a0072 0%, transparent 40%), linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 100%)'
+            field: { bg: '#08081a', low: '#131033', mid: '#422f7a', high: '#8fb0ff', drift: 0.45 }
         },
         'gradient-vaporwave': {
             name: '🎮 Vaporwave',
             type: 'gradient',
-            css: 'linear-gradient(180deg, #0a0a14 0%, #1a0a2e 20%, #3d1a5c 40%, #ff71ce 70%, #01cdfe 90%, #05ffa1 100%)'
+            field: { bg: '#0d0718', low: '#1d0f33', mid: '#c94fa5', high: '#6ceaff', drift: 0.82 }
         },
         'gradient-bloodmoon': {
             name: '🔴 Blood Moon',
             type: 'gradient',
-            css: 'radial-gradient(circle at 75% 25%, #8b0000 0%, transparent 35%), linear-gradient(180deg, #0a0000 0%, #1a0505 40%, #2d0a0a 70%, #0a0000 100%)'
+            field: { bg: '#0b0203', low: '#1e0508', mid: '#7f1522', high: '#ff6b74', drift: 0.5 }
         },
         'gradient-arctic': {
             name: '❄️ Arctic',
             type: 'gradient',
-            css: 'linear-gradient(180deg, #0a1628 0%, #1a3a5c 30%, #2d5a7b 50%, #4a90a4 70%, #87ceeb 100%)'
+            field: { bg: '#060d18', low: '#0d1c30', mid: '#2f6f9e', high: '#c2efff', drift: 0.68 }
         },
         'gradient-toxic': {
             name: '☢️ Toxic',
             type: 'gradient',
-            css: 'radial-gradient(circle at 30% 70%, #00ff00 0%, transparent 30%), radial-gradient(circle at 70% 30%, #39ff14 0%, transparent 25%), linear-gradient(180deg, #0a0a0a 0%, #0a1a0a 50%, #0a0a0a 100%)'
+            field: { bg: '#060b06', low: '#0c1c0c', mid: '#2f8a1f', high: '#a8ff45', drift: 0.4, density: 1.15 }
         },
 
-        // === PATTERNS ===
+        // === TEXTURAS: mudam o alfabeto do campo, não a cor ===
+        // ATENÇÃO ao escolher glifos para uma `ramp`: cada linha é
+        // desenhada como uma string única sobre uma grade fixa, então
+        // qualquer caractere que não tenha exatamente a largura de avanço
+        // da fonte desalinha a linha inteira. Medidos em Fira Code:
+        // seguros → . : - = + * # % @ o O 0 | / ~ , · •
+        // quebram → ✦ (1.36x)  ∙ (0.92x)
         'pattern-grid': {
             name: '📐 Grid',
             type: 'pattern',
-            css: 'repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,255,255,0.05) 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255,255,255,0.05) 50px)',
-            bg: 'var(--background)'
+            field: { ramp: ' .:-=+*#%@', density: 1.35 }
         },
         'pattern-dots': {
             name: '⚫ Dots',
             type: 'pattern',
-            css: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-            size: '20px 20px',
-            bg: 'var(--background)'
+            field: { ramp: ' ....:::·oO', density: 0.8 }
         },
         'pattern-diagonal': {
-            name: '📏 Diagonal Lines',
+            name: '📏 Diagonal',
             type: 'pattern',
-            css: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)',
-            bg: 'var(--background)'
+            field: { ramp: ' ..///|||#@', density: 1.05 }
         },
         'pattern-hexagon': {
             name: '⬡ Hexagons',
             type: 'pattern',
-            css: 'radial-gradient(circle farthest-side at 0% 50%, transparent 47%, rgba(255,255,255,0.04) 49%, transparent 51%), radial-gradient(circle farthest-side at 100% 50%, transparent 47%, rgba(255,255,255,0.04) 49%, transparent 51%)',
-            size: '60px 35px',
-            bg: 'var(--background)'
+            field: { ramp: ' ..::ooOO0@', density: 0.95 }
         },
         'pattern-waves': {
             name: '🌊 Waves',
             type: 'pattern',
-            css: 'radial-gradient(ellipse 100% 100% at 50% 100%, transparent 40%, rgba(255,255,255,0.03) 41%, transparent 42%), radial-gradient(ellipse 100% 100% at 50% 0%, transparent 40%, rgba(255,255,255,0.03) 41%, transparent 42%)',
-            size: '100px 50px',
-            bg: 'var(--background)'
+            field: { ramp: ' ..,,~~--==', density: 1.1, low: '#12203a', mid: '#2f6f9e', high: '#7dcfff', bg: '#070d18', drift: 0.35 }
         },
         'pattern-circuit': {
             name: '🔌 Circuit',
             type: 'pattern',
-            css: 'linear-gradient(90deg, transparent 48%, rgba(0,255,136,0.1) 49%, rgba(0,255,136,0.1) 51%, transparent 52%), linear-gradient(0deg, transparent 48%, rgba(0,255,136,0.1) 49%, rgba(0,255,136,0.1) 51%, transparent 52%)',
-            size: '40px 40px',
-            bg: '#0a0a14'
+            field: { ramp: ' ..--==++#|', density: 1.2, low: '#0a1a12', mid: '#127a4a', high: '#4dffab', bg: '#050a08', drift: 0.25 }
         },
         'pattern-stars': {
             name: '⭐ Starfield',
             type: 'pattern',
-            css: 'radial-gradient(2px 2px at 20px 30px, #fff, transparent), radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent), radial-gradient(1px 1px at 90px 40px, #fff, transparent), radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.6), transparent), radial-gradient(1px 1px at 160px 20px, #fff, transparent)',
-            size: '200px 100px',
-            bg: '#0a0a14'
+            field: { ramp: ' ........*•', density: 0.55, low: '#161a2e', mid: '#5b6591', high: '#ffffff', bg: '#05060d', drift: 0.2 }
         }
     },
 
     init() {
-        // Inject animation keyframes
-        this.injectAnimations();
-
         const saved = localStorage.getItem('wallpaper');
-        if (saved && this.wallpapers[saved]) {
-            this.apply(saved);
-        }
-    },
-
-    injectAnimations() {
-        if (this.animationStyleEl) return;
-
-        this.animationStyleEl = document.createElement('style');
-        this.animationStyleEl.textContent = `
-            @keyframes gradientShift {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-            }
-        `;
-        document.head.appendChild(this.animationStyleEl);
+        this.apply(saved && this.wallpapers[saved] ? saved : 'none');
     },
 
     apply(wallpaperId) {
@@ -175,48 +158,23 @@ export const WallpaperManager = {
         this.currentWallpaper = wallpaperId;
         const body = document.body;
 
-        // Reset all styles first
+        // Limpa qualquer resíduo do sistema antigo de imagem de fundo —
+        // inclusive de quem tem um papel de parede salvo de antes.
         body.style.backgroundImage = '';
-        body.style.backgroundColor = '';
         body.style.backgroundSize = '';
         body.style.backgroundPosition = '';
         body.style.backgroundRepeat = '';
         body.style.animation = '';
 
-        switch (wallpaper.type) {
-            case 'none':
-                // Just use the theme's background color
-                break;
+        // O fundo sólido é escuro por definição: é o que garante que os
+        // rótulos dos ícones e o texto sobre o vidro continuem legíveis.
+        body.style.backgroundColor = wallpaper.field?.bg || '';
 
-            case 'animated':
-                body.style.backgroundImage = wallpaper.css;
-                body.style.backgroundSize = wallpaper.size || '400% 400%';
-                body.style.animation = wallpaper.animation;
-                break;
+        AsciiField.applyPreset(wallpaper.field);
 
-            case 'gradient':
-                body.style.backgroundImage = wallpaper.css;
-                body.style.backgroundSize = 'cover';
-                body.style.backgroundPosition = 'center';
-                break;
-
-            case 'image':
-                body.style.backgroundImage = `url('${wallpaper.url}')`;
-                body.style.backgroundSize = 'cover';
-                body.style.backgroundPosition = 'center';
-                body.style.backgroundRepeat = 'no-repeat';
-                break;
-
-            case 'pattern':
-                body.style.backgroundImage = wallpaper.css;
-                body.style.backgroundColor = wallpaper.bg || 'var(--background)';
-                if (wallpaper.size) {
-                    body.style.backgroundSize = wallpaper.size;
-                }
-                break;
-        }
-
-        localStorage.setItem('wallpaper', wallpaperId);
+        try {
+            localStorage.setItem('wallpaper', wallpaperId);
+        } catch (err) { /* localStorage indisponível */ }
     },
 
     getList() {

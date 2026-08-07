@@ -33,24 +33,26 @@ export const BootSequence = {
     },
 
     async showLanguageSelector() {
+        // Sem emoji de bandeira: no Windows elas caem para as letras "BR"/"US"
+        // desalinhadas. O código do país em caixa é legível em todo sistema.
         this.content.innerHTML = `
             <div class="boot-language-select">
                 <div class="boot-lang-title">SELECT LANGUAGE / SELECIONE O IDIOMA</div>
-                <div class="boot-lang-divider">════════════════════════════════════════</div>
+                <div class="boot-lang-divider">${'═'.repeat(80)}</div>
                 <div class="boot-lang-options">
-                    <div class="boot-lang-option" data-lang="pt" tabindex="0">
+                    <button type="button" class="boot-lang-option" data-lang="pt">
                         <span class="boot-lang-key">[1]</span>
-                        <span class="boot-lang-flag">🇧🇷</span>
-                        <span class="boot-lang-name">Português (BR)</span>
-                    </div>
-                    <div class="boot-lang-option" data-lang="en" tabindex="0">
+                        <span class="boot-lang-flag">BR</span>
+                        <span class="boot-lang-name">Português</span>
+                    </button>
+                    <button type="button" class="boot-lang-option" data-lang="en">
                         <span class="boot-lang-key">[2]</span>
-                        <span class="boot-lang-flag">🇺🇸</span>
-                        <span class="boot-lang-name">English (US)</span>
-                    </div>
+                        <span class="boot-lang-flag">US</span>
+                        <span class="boot-lang-name">English</span>
+                    </button>
                 </div>
                 <div class="boot-lang-hint">
-                    Press 1/2 or click to select • Pressione 1/2 ou clique para selecionar
+                    Press 1/2 or click &middot; Pressione 1/2 ou clique
                 </div>
             </div>
         `;
@@ -97,18 +99,18 @@ export const BootSequence = {
 
         const lines = [
             t('boot.bios_title'),
-            t('boot.copyright'),
+            { text: t('boot.copyright'), cls: 'boot-dim' },
             '',
             t('boot.detecting_hardware'),
-            '  ' + t('boot.cpu'),
-            '  ' + t('boot.ram'),
-            '  ' + t('boot.gpu'),
+            { text: '  ' + t('boot.cpu'), cls: 'boot-dim' },
+            { text: '  ' + t('boot.ram'), cls: 'boot-dim' },
+            { text: '  ' + t('boot.gpu'), cls: 'boot-dim' },
             '',
             t('boot.loading_modules'),
         ];
 
         for (const line of lines) {
-            this.content.appendChild(document.createTextNode(line + '\n'));
+            this.writeLine(line);
             await this.delay(50);
         }
 
@@ -117,30 +119,58 @@ export const BootSequence = {
             'WindowManager',
             'GamesApp',
             'MusicApp',
-            'ParticleSystem',
+            'AsciiField',
             'AchievementEngine'
         ];
 
         for (const mod of modules) {
-            this.content.appendChild(document.createTextNode(`  [OK] ${mod}\n`));
+            this.writeLine({ text: `  [ OK ] `, cls: 'boot-ok', suffix: mod });
             await this.delay(80);
         }
 
-        this.content.appendChild(document.createTextNode('\n' + t('boot.starting') + '\n'));
-        await this.delay(300);
+        this.writeLine('');
+        this.writeLine(t('boot.starting'));
+        await this.delay(240);
 
-        this.content.insertAdjacentHTML('beforeend', '\n<div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>');
+        // Barra de progresso com borda dithered: a frente da barra passa
+        // por ░▒▓ antes de virar █, como um dither de verdade.
+        const bar = document.createElement('div');
+        bar.className = 'boot-progress';
+        this.content.appendChild(bar);
 
-        const progressBar = document.getElementById('boot-progress');
-        for (let i = 0; i <= 100; i += 5) {
-            progressBar.style.width = i + '%';
-            await this.delay(30);
+        const WIDTH = 34;
+        const EDGE = ['░', '▒', '▓'];
+        for (let i = 0; i <= 100; i += 4) {
+            const exact = (i / 100) * WIDTH;
+            const full = Math.floor(exact);
+            const frac = exact - full;
+            const edge = full < WIDTH ? EDGE[Math.min(2, Math.floor(frac * 3))] : '';
+            const rest = Math.max(0, WIDTH - full - (edge ? 1 : 0));
+            bar.innerHTML =
+                `[${'█'.repeat(full)}${edge}<span class="boot-dim">${'░'.repeat(rest)}</span>]` +
+                `  ${String(i).padStart(3, ' ')}%`;
+            await this.delay(26);
         }
 
-        await this.delay(200);
+        await this.delay(260);
         this.overlay.classList.add('fade-out');
-        await this.delay(500);
+        await this.delay(520);
         this.overlay.classList.add('hidden');
+    },
+
+    // Aceita string simples ou { text, cls, suffix }: o texto vem do i18n,
+    // o suffix é o nome do módulo, e nenhum dos dois é entrada do usuário.
+    writeLine(line) {
+        if (typeof line === 'string') {
+            this.content.appendChild(document.createTextNode(line + '\n'));
+            return;
+        }
+        const span = document.createElement('span');
+        span.className = line.cls || '';
+        span.textContent = line.text;
+        this.content.appendChild(span);
+        if (line.suffix) this.content.appendChild(document.createTextNode(line.suffix));
+        this.content.appendChild(document.createTextNode('\n'));
     },
 
     delay(ms) {
