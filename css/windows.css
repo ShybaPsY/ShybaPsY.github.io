@@ -1,5 +1,8 @@
 /* ================================================
-   APP WINDOWS STYLES
+   APP WINDOWS
+   As janelas são vidro sobre o campo ASCII: o fundo
+   continua visível através da interface, porque ele
+   é o material do sistema, não um papel de parede.
    ================================================ */
 
 #app-windows {
@@ -14,10 +17,12 @@
 
 .app-window {
     position: absolute;
-    background-color: var(--background);
-    border: 1px solid var(--comment);
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    background: var(--surface-glass);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-2);
     min-width: 280px;
     min-height: 180px;
     display: flex;
@@ -26,11 +31,28 @@
     overflow: hidden;
     transform: translateZ(0);
     backface-visibility: hidden;
+    transition: box-shadow var(--dur) var(--ease-out),
+        border-color var(--dur) var(--ease-out);
+}
+
+/* A janela ativa é a única que brilha. Todas as outras recuam. */
+.app-window.is-active {
+    border-color: var(--line-accent);
+    box-shadow: var(--shadow-focus);
+}
+
+.app-window:not(.is-active) .app-window-title {
+    color: var(--text-dim);
+}
+
+.app-window:not(.is-active) .app-window-btn {
+    filter: saturate(0.25) brightness(0.8);
 }
 
 .app-window.dragging {
     transition: none !important;
     will-change: left, top;
+    cursor: grabbing;
 }
 
 .app-window.resizing {
@@ -38,14 +60,33 @@
     will-change: width, height;
 }
 
+/* Durante o arraste o blur custa caro e a sombra cresce para
+   vender o "descolou da mesa". */
+.app-window.dragging,
+.app-window.resizing {
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+.app-window.dragging {
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7),
+        0 0 0 1px var(--line-accent);
+}
+
+/* ---- Barra de título ------------------------------------------ */
+
 .app-window-header {
-    background-color: var(--comment);
-    padding: 8px 12px;
+    position: relative;
+    background: var(--surface-chrome);
+    padding: 0 12px;
+    height: 36px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     cursor: grab;
     user-select: none;
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--inner-highlight);
+    flex: 0 0 auto;
 }
 
 .app-window-header.dragging {
@@ -53,100 +94,133 @@
 }
 
 .app-window-title {
-    color: var(--background);
-    font-weight: bold;
-    font-size: 13px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 140px);
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transition: color var(--dur) var(--ease-out);
 }
 
-.app-window-close {
+/* ---- Semáforo -------------------------------------------------
+   Anéis vazados que preenchem no hover, com as cores do tema ativo
+   em vez das cores fixas do macOS. */
+
+.app-window-buttons {
+    display: flex;
+    gap: 8px;
+    z-index: 1;
+}
+
+.app-window-btn,
+#terminal-header .button {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #ff5f56;
     cursor: pointer;
-    transition: transform 0.15s ease, filter 0.15s ease;
+    position: relative;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px currentColor;
+    transition: box-shadow var(--dur-fast) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out),
+        filter var(--dur) var(--ease-out);
 }
 
-.app-window-close:hover {
-    transform: scale(1.3);
-    filter: brightness(1.2);
+.app-window-btn.red,
+#terminal-header .button.red {
+    color: var(--btn-close);
 }
+
+.app-window-btn.yellow,
+#terminal-header .button.yellow {
+    color: var(--btn-min);
+}
+
+.app-window-btn.green,
+#terminal-header .button.green {
+    color: var(--btn-max);
+}
+
+.app-window-buttons:hover .app-window-btn,
+#terminal-header .buttons:hover .button {
+    box-shadow: inset 0 0 0 6px currentColor;
+}
+
+.app-window-btn:hover,
+#terminal-header .button:hover {
+    transform: scale(1.18);
+    box-shadow: inset 0 0 0 6px currentColor, 0 0 10px -1px currentColor;
+}
+
+.app-window-btn:active,
+#terminal-header .button:active {
+    transform: scale(0.92);
+}
+
+/* Glifo dentro do botão, revelado junto com o preenchimento */
+.app-window-btn::after,
+#terminal-header .button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0;
+    color: var(--background);
+    transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.app-window-buttons:hover .app-window-btn::after,
+#terminal-header .buttons:hover .button::after {
+    opacity: 1;
+}
+
+.app-window-btn.red::after,
+#terminal-header .button.red::after {
+    content: '\00d7';
+    font-size: 11px;
+}
+
+.app-window-btn.yellow::after,
+#terminal-header .button.yellow::after {
+    content: '\2212';
+    font-size: 11px;
+}
+
+.app-window-btn.green::after,
+#terminal-header .button.green::after {
+    content: '+';
+    font-size: 10px;
+}
+
+/* ---- Corpo ----------------------------------------------------- */
 
 .app-window-body {
     flex: 1;
     padding: 16px;
     overflow: hidden;
-    color: var(--foreground);
+    color: var(--text);
     display: flex;
     flex-direction: column;
     min-height: 0;
     contain: layout style;
 }
 
-/* Window Buttons (Minimize/Maximize/Close) */
-.app-window-buttons {
-    display: flex;
-    gap: 8px;
-}
+/* ---- Alças de redimensionamento -------------------------------- */
 
-.app-window-btn {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-.app-window-btn:hover {
-    transform: scale(1.15);
-    filter: brightness(1.1);
-}
-
-.app-window-btn:active {
-    transform: scale(0.95);
-}
-
-.app-window-btn.red { background-color: #ff5f56; }
-.app-window-btn.yellow { background-color: #ffbd2e; }
-.app-window-btn.green { background-color: #27c93f; }
-
-/* Button icons on hover */
-.app-window-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8px;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    color: rgba(0, 0, 0, 0.6);
-    line-height: 1;
-}
-
-.app-window-btn:hover::after {
-    opacity: 1;
-}
-
-.app-window-btn.red::after {
-    content: '×';
-    font-size: 10px;
-}
-
-.app-window-btn.yellow::after {
-    content: '−';
-    font-size: 12px;
-    margin-top: -1px;
-}
-
-.app-window-btn.green::after {
-    content: '+';
-    font-size: 10px;
-}
-
-/* App Window Resize Handles */
 .app-resize-handle {
     position: absolute;
     z-index: 10;
@@ -154,9 +228,9 @@
 
 .app-resize-e {
     right: -4px;
-    top: 30px;
+    top: 36px;
     bottom: 8px;
-    width: 8px;
+    width: 10px;
     cursor: e-resize;
 }
 
@@ -164,14 +238,33 @@
     bottom: -4px;
     left: 8px;
     right: 8px;
-    height: 8px;
+    height: 10px;
     cursor: s-resize;
 }
 
 .app-resize-se {
-    bottom: -4px;
-    right: -4px;
-    width: 14px;
-    height: 14px;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
     cursor: se-resize;
+}
+
+/* Marca de canto: três traços diagonais, como num terminal de verdade */
+.app-resize-se::after {
+    content: '';
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 10px;
+    height: 10px;
+    background:
+        linear-gradient(135deg, transparent 46%, var(--line-strong) 46%, var(--line-strong) 54%, transparent 54%),
+        linear-gradient(135deg, transparent 71%, var(--line-strong) 71%, var(--line-strong) 79%, transparent 79%);
+    opacity: 0.7;
+    transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.app-window:hover .app-resize-se::after {
+    opacity: 1;
 }

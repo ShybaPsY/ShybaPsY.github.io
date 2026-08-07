@@ -36,7 +36,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=VT323&display=swap"
+        rel="stylesheet">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/main.css">
@@ -68,106 +70,122 @@
     <!-- Context Menu -->
     <div id="context-menu" class="context-menu"></div>
 
-    <!-- Desktop Layer -->
+    <!-- Desktop Layer
+         Os nove ícones dividem a mesma construção: uma pastilha de
+         20x20 na grade de 24, marca em stroke 1.75 e uma cor do tema
+         por app. É o que os faz parecer do mesmo sistema em vez de
+         nove ícones avulsos de biblioteca. -->
     <div id="desktop">
         <div class="desktop-icons">
-            <div class="desktop-icon" data-app="terminal">
+            <div class="desktop-icon" data-app="terminal" data-accent="green">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--green)" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="18" rx="2" />
-                        <path d="M6 9l4 3-4 3" />
-                        <path d="M12 15h6" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M7.5 9.25 10.25 12 7.5 14.75" />
+                        <path d="M12.75 15.25h4" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.terminal">Terminal</span>
             </div>
-            <div class="desktop-icon" data-app="themes">
+            <div class="desktop-icon" data-app="themes" data-accent="magenta">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 2a10 10 0 0 1 0 20" />
-                        <circle cx="12" cy="12" r="4" fill="var(--magenta)" />
-                        <circle cx="12" cy="5" r="2" fill="var(--red)" />
-                        <circle cx="18" cy="10" r="2" fill="var(--yellow)" />
-                        <circle cx="16" cy="17" r="2" fill="var(--green)" />
-                        <circle cx="8" cy="17" r="2" fill="var(--cyan)" />
-                        <circle cx="6" cy="10" r="2" fill="var(--blue)" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <rect x="6.25" y="6.25" width="5" height="5" rx="1.2" fill="var(--green)" stroke="none" />
+                        <rect x="12.75" y="6.25" width="5" height="5" rx="1.2" fill="var(--cyan)" stroke="none" />
+                        <rect x="6.25" y="12.75" width="5" height="5" rx="1.2" fill="var(--yellow)" stroke="none" />
+                        <rect x="12.75" y="12.75" width="5" height="5" rx="1.2" fill="var(--magenta)" stroke="none" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.themes">Themes</span>
             </div>
-            <div class="desktop-icon" data-app="player">
+            <div class="desktop-icon" data-app="player" data-accent="cyan">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--cyan)" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                        <path d="M8 21h8" />
-                        <path d="M12 17v4" />
-                        <text x="12" y="12" text-anchor="middle" font-size="6" fill="var(--green)"
-                            stroke="none">ASCII</text>
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M9.75 7.75 17 12l-7.25 4.25z" fill="currentColor" fill-opacity="0.2" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.ascii_player">ASCII Player</span>
             </div>
-            <div class="desktop-icon" data-app="music">
+            <div class="desktop-icon" data-app="music" data-accent="magenta">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--magenta)"
-                        stroke-width="2">
-                        <path d="M9 18V5l12-2v13" />
-                        <circle cx="6" cy="18" r="3" fill="var(--magenta)" />
-                        <circle cx="18" cy="16" r="3" fill="var(--magenta)" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M10.5 15.5V7.25l6.25-1.15v8.15" />
+                        <circle cx="8.6" cy="15.6" r="1.9" fill="currentColor" fill-opacity="0.22" />
+                        <circle cx="14.85" cy="14.35" r="1.9" fill="currentColor" fill-opacity="0.22" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.music">Music</span>
             </div>
-            <div class="desktop-icon" data-app="games">
+            <div class="desktop-icon" data-app="games" data-accent="green">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--green)" stroke-width="2">
-                        <rect x="2" y="6" width="20" height="12" rx="3" />
-                        <circle cx="8" cy="12" r="2" fill="var(--yellow)" />
-                        <circle cx="16" cy="10" r="1.5" fill="var(--red)" />
-                        <circle cx="18" cy="12" r="1.5" fill="var(--blue)" />
-                        <circle cx="16" cy="14" r="1.5" fill="var(--green)" />
-                        <circle cx="14" cy="12" r="1.5" fill="var(--yellow)" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M6.5 12h3.5" />
+                        <path d="M8.25 10.25v3.5" />
+                        <circle cx="15" cy="10.75" r="1.15" fill="currentColor" stroke="none" />
+                        <circle cx="17.25" cy="13.5" r="1.15" fill="currentColor" stroke="none" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.games">Games</span>
             </div>
-            <div class="desktop-icon" data-app="projetos">
+            <div class="desktop-icon" data-app="projetos" data-accent="cyan">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--cyan)" stroke-width="2">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                        <polyline points="9 13 12 16 15 13" stroke="var(--green)" />
-                        <line x1="12" y1="12" x2="12" y2="16" stroke="var(--green)" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M6.25 16.75V8.5a1 1 0 0 1 1-1h2.9l1.35 1.85h5.25a1 1 0 0 1 1 1v6.4a1 1 0 0 1-1 1H7.25a1 1 0 0 1-1-1z" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.projetos">Projetos</span>
             </div>
-            <div class="desktop-icon" data-app="notepad">
+            <div class="desktop-icon" data-app="notepad" data-accent="yellow">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--yellow)" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                        <line x1="10" y1="9" x2="8" y2="9" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M8 8.5h8" />
+                        <path d="M8 12h8" />
+                        <path d="M8 15.5h4.75" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.notepad">Notepad</span>
             </div>
-            <div class="desktop-icon" data-app="calculator">
+            <div class="desktop-icon" data-app="mirror" data-accent="green">
                 <div class="icon-image">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--blue)" stroke-width="2">
-                        <rect x="4" y="2" width="16" height="20" rx="2" />
-                        <rect x="6" y="4" width="12" height="4" fill="var(--comment)" stroke="none" />
-                        <circle cx="8" cy="12" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="12" cy="12" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="16" cy="12" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="8" cy="16" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="12" cy="16" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="16" cy="16" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="8" cy="20" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="12" cy="20" r="1" fill="var(--foreground)" stroke="none" />
-                        <circle cx="16" cy="20" r="1" fill="var(--foreground)" stroke="none" />
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <!-- cantos de visor com o @ no meio: o caractere mais denso da rampa -->
+                        <path d="M6.75 9.5v-1.5a1 1 0 0 1 1-1h1.5" />
+                        <path d="M14.75 7h1.5a1 1 0 0 1 1 1v1.5" />
+                        <path d="M17.25 14.5V16a1 1 0 0 1-1 1h-1.5" />
+                        <path d="M9.25 17h-1.5a1 1 0 0 1-1-1v-1.5" />
+                        <text x="12" y="14.4" text-anchor="middle" font-family="'IBM Plex Mono', monospace"
+                            font-size="7.5" font-weight="600" fill="currentColor" stroke="none">@</text>
+                    </svg>
+                </div>
+                <span class="icon-label" data-i18n="desktop.mirror">ASCII Mirror</span>
+            </div>
+            <div class="desktop-icon" data-app="calculator" data-accent="blue">
+                <div class="icon-image">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                        stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="icon-chip" x="2" y="2" width="20" height="20" rx="5.5" />
+                        <path d="M7 8.25h10" />
+                        <circle cx="8" cy="12.25" r="1.05" fill="currentColor" stroke="none" />
+                        <circle cx="12" cy="12.25" r="1.05" fill="currentColor" stroke="none" />
+                        <circle cx="16" cy="12.25" r="1.05" fill="currentColor" stroke="none" />
+                        <circle cx="8" cy="16.25" r="1.05" fill="currentColor" stroke="none" />
+                        <circle cx="12" cy="16.25" r="1.05" fill="currentColor" stroke="none" />
+                        <circle cx="16" cy="16.25" r="1.05" fill="var(--green)" stroke="none" />
                     </svg>
                 </div>
                 <span class="icon-label" data-i18n="desktop.calculadora">Calculadora</span>

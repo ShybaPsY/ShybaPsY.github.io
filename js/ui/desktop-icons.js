@@ -20,15 +20,26 @@ export const DesktopIcons = {
             if (label) icon.setAttribute('aria-label', label.textContent);
 
             icon.addEventListener('click', () => {
+                this.pulse(icon);
                 this.openApp(icon.dataset.app);
             });
             icon.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    this.pulse(icon);
                     this.openApp(icon.dataset.app);
                 }
             });
         });
+    },
+
+    // Anel de acento que expande do ícone no instante do clique: confirma
+    // a ação antes mesmo de a janela terminar de abrir.
+    pulse(icon) {
+        icon.classList.remove('launching');
+        void icon.offsetWidth;
+        icon.classList.add('launching');
+        setTimeout(() => icon.classList.remove('launching'), 520);
     },
 
     openApp(appName) {
@@ -56,6 +67,9 @@ export const DesktopIcons = {
                 break;
             case 'calculator':
                 this.apps.CalculatorApp?.open();
+                break;
+            case 'mirror':
+                this.apps.AsciiMirrorApp?.open();
                 break;
         }
     }

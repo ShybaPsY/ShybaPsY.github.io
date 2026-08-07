@@ -1,16 +1,21 @@
 /* ================================================
-   TERMINAL STYLES
+   TERMINAL
+   Mesma matéria das outras janelas, mas o corpo é
+   mais opaco: aqui se lê texto longo, e o campo ASCII
+   não pode competir com ele.
    ================================================ */
 
 #terminal {
-    width: 800px;
+    width: 820px;
     max-width: calc(100vw - 40px);
-    height: 500px;
+    height: 520px;
     max-height: calc(100vh - 100px);
-    background-color: var(--background);
-    border: 1px solid var(--comment);
-    border-radius: 8px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    background: var(--surface-glass);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-2);
     display: flex;
     flex-direction: column;
     overflow: visible;
@@ -19,19 +24,38 @@
     pointer-events: auto;
     transform: translateZ(0);
     backface-visibility: hidden;
+    transition: box-shadow var(--dur) var(--ease-out),
+        border-color var(--dur) var(--ease-out);
 }
 
+#terminal.is-active {
+    border-color: var(--line-accent);
+    box-shadow: var(--shadow-focus);
+}
+
+#terminal:not(.is-active) .terminal-title {
+    color: var(--text-dim);
+}
+
+#terminal:not(.is-active) #terminal-header .button {
+    filter: saturate(0.25) brightness(0.8);
+}
+
+/* ---- Barra de título ------------------------------------------- */
+
 #terminal-header {
-    background-color: var(--comment);
-    padding: 8px 12px;
+    position: relative;
+    background: var(--surface-chrome);
+    padding: 0 12px;
+    height: 36px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    color: var(--background);
-    font-weight: bold;
     cursor: grab;
     user-select: none;
-    border-radius: 7px 7px 0 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0;
+    box-shadow: var(--inner-highlight);
+    flex: 0 0 auto;
 }
 
 #terminal-header.dragging {
@@ -45,122 +69,93 @@ body.dragging-terminal {
 body.dragging-terminal #terminal,
 body.resizing-terminal #terminal {
     transition: none !important;
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+body.dragging-terminal #terminal {
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line-accent);
 }
 
 #terminal-header .buttons {
     display: flex;
     gap: 8px;
+    z-index: 1;
 }
 
-#terminal-header .button {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
-.button.red { background-color: #ff5f56; }
-.button.yellow { background-color: #ffbd2e; }
-.button.green { background-color: #27c93f; }
-
-#terminal-header .button {
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-#terminal-header .button:hover {
-    transform: scale(1.15);
-    filter: brightness(1.1);
-}
-
-#terminal-header .button:active {
-    transform: scale(0.95);
-}
-
-/* Button icons on hover */
-#terminal-header .button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 8px;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    color: rgba(0, 0, 0, 0.6);
-}
-
-#terminal-header .button:hover::after {
-    opacity: 1;
-}
-
-#terminal-header .button.red::after {
-    content: '×';
-    font-size: 10px;
-}
-
-#terminal-header .button.yellow::after {
-    content: '−';
-    font-size: 12px;
-    margin-top: -1px;
-}
-
-#terminal-header .button.green::after {
-    content: '+';
-    font-size: 10px;
-}
+/* O visual do semáforo mora em windows.css e vale para as duas
+   barras de título; aqui só o que é do terminal. */
 
 .terminal-title {
-    font-size: 13px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 140px);
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transition: color var(--dur) var(--ease-out);
 }
+
+/* ---- Corpo ------------------------------------------------------ */
 
 #terminal-body {
     flex-grow: 1;
-    padding: 1rem;
+    padding: 1.15rem 1.25rem 1.25rem;
     overflow-y: auto;
+    overflow-x: hidden;
     word-wrap: break-word;
     position: relative;
+    background: color-mix(in srgb, var(--background) 62%, transparent);
+    line-height: 1.62;
+    font-size: 14px;
+    scroll-behavior: smooth;
+    cursor: text;
 }
 
-#terminal-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-#terminal-body::-webkit-scrollbar-track {
-    background: var(--background);
-}
-
-#terminal-body::-webkit-scrollbar-thumb {
-    background-color: var(--comment);
-    border-radius: 4px;
-}
-
-#terminal-body::-webkit-scrollbar-thumb:hover {
-    background-color: var(--foreground);
+/* Sombra no topo do scroll: avisa que tem histórico acima */
+#terminal-body::before {
+    content: '';
+    position: sticky;
+    display: block;
+    top: -1.15rem;
+    height: 18px;
+    margin: -1.15rem -1.25rem 0;
+    background: linear-gradient(to bottom, var(--surface-solid), transparent);
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* Input Styles */
 .line {
-    line-height: 1.5;
+    line-height: 1.62;
 }
 
 .prompt-line {
     display: flex;
     align-items: center;
+    gap: 0.55rem;
 }
 
 .prompt {
-    color: var(--green);
-    margin-right: 0.5rem;
-    font-weight: bold;
+    color: var(--accent);
+    font-weight: 700;
+    text-shadow: 0 0 12px var(--glow-soft);
+    flex: 0 0 auto;
 }
 
 #command-input {
     background: transparent;
     border: none;
-    color: var(--foreground);
-    font-family: 'Fira Code', monospace;
+    color: var(--text-strong);
+    font-family: var(--font-shell);
     font-size: 1em;
     flex-grow: 1;
     width: 100%;
@@ -192,12 +187,14 @@ body.resizing-terminal #terminal {
     top: 50%;
     left: 0;
     width: 8px;
-    height: 1.2em;
-    background-color: var(--foreground);
-    animation: blink 1s step-end infinite;
+    height: 1.15em;
+    background-color: var(--accent);
+    box-shadow: 0 0 10px var(--glow-soft);
+    animation: blink 1.05s steps(1, end) infinite;
     transform: translateY(-50%);
     pointer-events: none;
     z-index: 1;
+    border-radius: 1px;
 }
 
 .cursor-hidden {
@@ -205,11 +202,49 @@ body.resizing-terminal #terminal {
 }
 
 @keyframes blink {
-    from, to { background-color: transparent; }
-    50% { background-color: var(--foreground); }
+
+    from,
+    to {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
-/* Resize Handles */
+/* neofetch: retrato à esquerda, ficha do sistema à direita, numa
+   grade de caracteres só. Entrelinha apertada para o retrato não
+   sair esticado na vertical. */
+.neofetch {
+    display: block;
+    white-space: pre;
+    line-height: 1.15;
+    font-size: 12.5px;
+    overflow-x: auto;
+    padding: 2px 0 6px;
+}
+
+/* Cada linha de saída entra por baixo, como texto sendo empurrado
+   por um shell de verdade. */
+@keyframes line-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+#output>* {
+    animation: line-in 0.22s var(--ease-out) both;
+}
+
+/* ---- Alças de redimensionamento --------------------------------- */
+
 .resize-handle {
     position: absolute;
     z-index: 10;
@@ -250,32 +285,32 @@ body.resizing-terminal #terminal {
 .resize-handle-ne {
     top: -4px;
     right: -4px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     cursor: ne-resize;
 }
 
 .resize-handle-nw {
     top: -4px;
     left: -4px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     cursor: nw-resize;
 }
 
 .resize-handle-se {
     bottom: -4px;
     right: -4px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     cursor: se-resize;
 }
 
 .resize-handle-sw {
     bottom: -4px;
     left: -4px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     cursor: sw-resize;
 }
 
@@ -287,31 +322,19 @@ body.resizing-terminal * {
     cursor: inherit !important;
 }
 
-/* Terminal Minimize/Maximize Animations */
-
-#terminal.minimizing {
-    animation: terminal-minimize 0.3s ease forwards;
-}
+/* ---- Estados: minimizar / maximizar / encaixar --------------------
+   O movimento fica no WindowAnimator; aqui só os estados finais. */
 
 #terminal.minimized {
-    opacity: 0;
-    transform: scale(0.8) translateY(100px);
-    pointer-events: none;
-    visibility: hidden;
+    display: none;
 }
 
-#terminal.restoring {
-    animation: terminal-restore 0.3s ease forwards;
-}
-
-/* Snapped Terminal States */
 #terminal.snapped-left,
 #terminal.snapped-right {
-    border-radius: 8px 8px 0 0 !important;
+    border-radius: var(--r-lg) var(--r-lg) 0 0 !important;
     max-width: none;
     max-height: none;
     border-bottom: none !important;
-    box-shadow: none !important;
 }
 
 #terminal.snapped-left .resize-handle,
@@ -319,7 +342,6 @@ body.resizing-terminal * {
     display: none;
 }
 
-/* Maximized Terminal State */
 #terminal.maximized {
     border-radius: 0 !important;
     border: none !important;
@@ -336,30 +358,3 @@ body.resizing-terminal * {
     display: none;
 }
 
-#terminal.maximizing {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-@keyframes terminal-minimize {
-    0% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0.8) translateY(100px);
-    }
-}
-
-@keyframes terminal-restore {
-    0% {
-        opacity: 0;
-        transform: scale(0.8) translateY(100px);
-        visibility: visible;
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-        visibility: visible;
-    }
-}
