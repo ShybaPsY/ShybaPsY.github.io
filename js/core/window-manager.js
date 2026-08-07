@@ -2,6 +2,8 @@
 // WINDOW MANAGER MODULE
 // ================================================
 
+import { WindowAnimator } from './window-animator.js';
+
 export const WindowManager = {
     windows: {},
     highestZIndex: 100,
@@ -11,8 +13,111 @@ export const WindowManager = {
     SNAP_THRESHOLD: 30,
     TASKBAR_HEIGHT: 48,
 
+    lastPointer: null,
+
     setTaskbar(taskbar) {
         this.Taskbar = taskbar;
+    },
+
+    // A taskbar mede 48px no desktop e 44px no celular. Ler a altura real
+    // evita as três cópias do número 48 que existiam espalhadas por aqui.
+    taskbarHeight() {
+        const el = document.getElementById('taskbar');
+        return el?.offsetHeight || this.TASKBAR_HEIGHT;
+    },
+
+    // Retângulo de trabalho: a tela menos a taskbar.
+    workArea() {
+        return { width: window.innerWidth, height: window.innerHeight - this.taskbarHeight() };
+    },
+
+    // ================================================
+    // PRIMITIVAS DE JANELA
+    // Operam sobre um elemento, não sobre um appId, para que o terminal —
+    // que não mora no registro de janelas — use exatamente o mesmo código
+    // em vez da cópia que existia em main.js.
+    // ================================================
+
+    // Guarda a geometria antes de maximizar/encaixar, para poder voltar.
+    saveGeometry(el) {
+        el.dataset.prevWidth = el.style.width || `${el.offsetWidth}px`;
+        el.dataset.prevHeight = el.style.height || `${el.offsetHeight}px`;
+        el.dataset.prevLeft = el.style.left || `${el.offsetLeft}px`;
+        el.dataset.prevTop = el.style.top || `${el.offsetTop}px`;
+    },
+
+    applyGeometry(el, { left, top, width, height }) {
+        el.style.left = left;
+        el.style.top = top;
+        el.style.width = width;
+        el.style.height = height;
+    },
+
+    async animateMinimize(el, appId) {
+        await WindowAnimator.toRect(el, WindowAnimator.taskbarRect(appId));
+        el.classList.add('minimized');
+        WindowAnimator.pulseTaskbar(appId);
+    },
+
+    async animateRestore(el, appId) {
+        const rect = WindowAnimator.taskbarRect(appId);
+        el.classList.remove('minimized');
+        await WindowAnimator.fromRect(el, rect);
+    },
+
+    // Maximizar e restaurar são a mesma operação com destinos diferentes,
+    // então dividem o mesmo caminho de animação. Maximizado e encaixado
+    // são estados exclusivos: entrar num limpa o outro, senão a janela
+    // acumula classes que se contradizem.
+    async toggleMaximizeEl(el) {
+        const isMax = el.classList.contains('maximized');
+
+        if (isMax) {
+            const geo = {
+                left: el.dataset.prevLeft || '150px',
+                top: el.dataset.prevTop || '80px',
+                width: el.dataset.prevWidth || '400px',
+                height: el.dataset.prevHeight || '300px'
+            };
+            await WindowAnimator.flip(el, () => {
+                el.classList.remove('maximized', 'snapped-left', 'snapped-right');
+                this.applyGeometry(el, geo);
+            });
+        } else {
+            this.saveGeometry(el);
+            const area = this.workArea();
+            await WindowAnimator.flip(el, () => {
+                el.classList.remove('snapped-left', 'snapped-right');
+                el.classList.add('maximized');
+                this.applyGeometry(el, {
+                    left: '0', top: '0',
+                    width: `${area.width}px`,
+                    height: `${area.height}px`
+                });
+            });
+        }
+        return !isMax;
+    },
+
+    // A janela cresce a partir de onde o usuário clicou — ícone, botão da
+    // taskbar, resultado do Spotlight. Sem clique (comando digitado no
+    // terminal), ela cresce do próprio centro.
+    trackPointer() {
+        document.addEventListener('pointerdown', (e) => {
+            this.lastPointer = { x: e.clientX, y: e.clientY, t: performance.now() };
+        }, true);
+    },
+
+    applyLaunchOrigin(windowEl) {
+        const p = this.lastPointer;
+        if (!p || performance.now() - p.t > 800) return;
+        const rect = windowEl.getBoundingClientRect();
+        const ox = Math.max(0, Math.min(rect.width, p.x - rect.left));
+        const oy = Math.max(0, Math.min(rect.height, p.y - rect.top));
+        windowEl.style.transformOrigin = `${ox}px ${oy}px`;
+        windowEl.addEventListener('animationend', () => {
+            windowEl.style.transformOrigin = '';
+        }, { once: true });
     },
 
     registerCleanup(appId, handler) {
@@ -54,6 +159,7 @@ export const WindowManager = {
         `;
 
         document.getElementById('app-windows').appendChild(windowEl);
+        this.applyLaunchOrigin(windowEl);
         this.setupWindowDrag(windowEl);
         if (resizable) this.setupWindowResize(windowEl);
 
@@ -197,81 +303,66 @@ export const WindowManager = {
             document.body.appendChild(this.snapPreview);
         }
 
-        const screenW = window.innerWidth;
-        const screenH = window.innerHeight - this.TASKBAR_HEIGHT;
+        const geo = this.snapGeometry(zone);
+        if (!geo) return;
 
+        // Ao trocar de zona (esquerda -> topo), a prévia se reposiciona com
+        // um pulso, em vez de simplesmente saltar.
+        const changed = this.snapPreview.dataset.zone !== zone;
+        this.snapPreview.dataset.zone = zone;
+
+        Object.assign(this.snapPreview.style, {
+            left: `${geo.left}px`,
+            top: `${geo.top}px`,
+            width: `${geo.width}px`,
+            height: `${geo.height}px`
+        });
         this.snapPreview.classList.add('visible');
 
-        switch (zone) {
-            case 'left':
-                Object.assign(this.snapPreview.style, {
-                    left: '0', top: '0',
-                    width: `${screenW / 2}px`,
-                    height: `${screenH}px`
-                });
-                break;
-            case 'right':
-                Object.assign(this.snapPreview.style, {
-                    left: `${screenW / 2}px`, top: '0',
-                    width: `${screenW / 2}px`,
-                    height: `${screenH}px`
-                });
-                break;
-            case 'top':
-                Object.assign(this.snapPreview.style, {
-                    left: '0', top: '0',
-                    width: `${screenW}px`,
-                    height: `${screenH}px`
-                });
-                break;
+        if (changed) {
+            this.snapPreview.classList.remove('landing');
+            void this.snapPreview.offsetWidth;
+            this.snapPreview.classList.add('landing');
         }
     },
 
     hideSnapPreview() {
         if (this.snapPreview) {
-            this.snapPreview.classList.remove('visible');
+            this.snapPreview.classList.remove('visible', 'landing');
+            delete this.snapPreview.dataset.zone;
         }
     },
 
-    applySnap(windowEl, zone) {
-        const screenW = window.innerWidth;
-        const screenH = window.innerHeight - this.TASKBAR_HEIGHT;
-
-        // Save previous position for double-click restore
-        windowEl.dataset.prevWidth = windowEl.style.width || `${windowEl.offsetWidth}px`;
-        windowEl.dataset.prevHeight = windowEl.style.height || `${windowEl.offsetHeight}px`;
-        windowEl.dataset.prevLeft = windowEl.style.left || `${windowEl.offsetLeft}px`;
-        windowEl.dataset.prevTop = windowEl.style.top || `${windowEl.offsetTop}px`;
-
-        windowEl.classList.add('snapping');
+    // Geometria de cada zona de encaixe, num lugar só — antes ela estava
+    // escrita duas vezes: aqui e na pré-visualização.
+    snapGeometry(zone) {
+        const { width, height } = this.workArea();
+        const half = Math.round(width / 2);
 
         switch (zone) {
-            case 'left':
-                windowEl.style.left = '0';
-                windowEl.style.top = '0';
-                windowEl.style.width = `${screenW / 2}px`;
-                windowEl.style.height = `${screenH}px`;
-                windowEl.classList.add('snapped-left');
-                break;
-            case 'right':
-                windowEl.style.left = `${screenW / 2}px`;
-                windowEl.style.top = '0';
-                windowEl.style.width = `${screenW / 2}px`;
-                windowEl.style.height = `${screenH}px`;
-                windowEl.classList.add('snapped-right');
-                break;
-            case 'top':
-                windowEl.style.left = '0';
-                windowEl.style.top = '0';
-                windowEl.style.width = `${screenW}px`;
-                windowEl.style.height = `${screenH}px`;
-                windowEl.classList.add('maximized');
-                break;
+            case 'left': return { left: 0, top: 0, width: half, height };
+            case 'right': return { left: half, top: 0, width: width - half, height };
+            case 'top': return { left: 0, top: 0, width, height };
+            default: return null;
         }
+    },
 
-        setTimeout(() => {
-            windowEl.classList.remove('snapping');
-        }, 250);
+    async applySnap(windowEl, zone) {
+        const geo = this.snapGeometry(zone);
+        if (!geo) return;
+
+        this.saveGeometry(windowEl);
+
+        await WindowAnimator.flip(windowEl, () => {
+            windowEl.classList.remove('snapped-left', 'snapped-right', 'maximized');
+            windowEl.classList.add(zone === 'top' ? 'maximized' : `snapped-${zone}`);
+            this.applyGeometry(windowEl, {
+                left: `${geo.left}px`,
+                top: `${geo.top}px`,
+                width: `${geo.width}px`,
+                height: `${geo.height}px`
+            });
+        }, { duration: 300 });
     },
 
     setupWindowResize(windowEl) {
@@ -340,9 +431,19 @@ export const WindowManager = {
     focusWindow(appId) {
         if (!this.windows[appId]) return;
         this.windows[appId].style.zIndex = ++this.highestZIndex;
+        this.setActive(this.windows[appId]);
     },
 
-    closeWindow(appId) {
+    // Só uma janela por vez fica com a borda e o brilho de acento.
+    // O terminal entra na mesma disputa, apesar de não morar no
+    // registro de janelas.
+    setActive(targetEl) {
+        document.querySelectorAll('.app-window.is-active, #terminal.is-active')
+            .forEach(el => { if (el !== targetEl) el.classList.remove('is-active'); });
+        if (targetEl) targetEl.classList.add('is-active');
+    },
+
+    async closeWindow(appId) {
         const windowEl = this.windows[appId];
         if (!windowEl) return;
 
@@ -351,88 +452,42 @@ export const WindowManager = {
             this.appCleanupHandlers[appId]();
         }
 
-        // Animate close
-        windowEl.classList.add('closing');
-        setTimeout(() => {
-            windowEl.remove();
-            delete this.windows[appId];
+        // A janela sai do registro antes da animação: assim um segundo
+        // clique no ícone já abre uma nova em vez de focar a que morre.
+        delete this.windows[appId];
 
-            // Remove from taskbar
-            if (this.Taskbar) {
-                this.Taskbar.removeWindow(appId);
-            }
-        }, 200);
+        await WindowAnimator.close(windowEl);
+        windowEl.remove();
+
+        if (this.Taskbar) {
+            this.Taskbar.removeWindow(appId);
+        }
     },
 
-    minimizeWindow(appId) {
+    async minimizeWindow(appId) {
         const windowEl = this.windows[appId];
         if (!windowEl || windowEl.classList.contains('minimized')) return;
 
-        windowEl.classList.add('minimizing');
-        setTimeout(() => {
-            windowEl.classList.remove('minimizing');
-            windowEl.classList.add('minimized');
-
-            if (this.Taskbar) {
-                this.Taskbar.updateWindow(appId, true);
-            }
-        }, 300);
+        // A taskbar muda de estado antes da animação para o botão já estar
+        // no lugar certo quando a janela chegar nele.
+        if (this.Taskbar) this.Taskbar.updateWindow(appId, true);
+        await this.animateMinimize(windowEl, appId);
     },
 
-    restoreWindow(appId) {
+    async restoreWindow(appId) {
         const windowEl = this.windows[appId];
         if (!windowEl || !windowEl.classList.contains('minimized')) return;
 
-        windowEl.classList.remove('minimized');
-        windowEl.classList.add('restoring');
-        setTimeout(() => {
-            windowEl.classList.remove('restoring');
-        }, 300);
-
+        if (this.Taskbar) this.Taskbar.updateWindow(appId, false);
         this.focusWindow(appId);
-
-        if (this.Taskbar) {
-            this.Taskbar.updateWindow(appId, false);
-        }
+        await this.animateRestore(windowEl, appId);
     },
 
-    maximizeWindow(appId) {
+    async maximizeWindow(appId) {
         const windowEl = this.windows[appId];
         if (!windowEl) return;
 
-        const TASKBAR_HEIGHT = 48;
-
-        if (windowEl.classList.contains('maximized')) {
-            // Restore to previous size
-            windowEl.classList.add('maximizing');
-            windowEl.style.width = windowEl.dataset.prevWidth || '400px';
-            windowEl.style.height = windowEl.dataset.prevHeight || '300px';
-            windowEl.style.left = windowEl.dataset.prevLeft || '150px';
-            windowEl.style.top = windowEl.dataset.prevTop || '80px';
-            windowEl.classList.remove('maximized');
-
-            setTimeout(() => {
-                windowEl.classList.remove('maximizing');
-            }, 250);
-        } else {
-            // Save current position and maximize
-            windowEl.dataset.prevWidth = windowEl.style.width || `${windowEl.offsetWidth}px`;
-            windowEl.dataset.prevHeight = windowEl.style.height || `${windowEl.offsetHeight}px`;
-            windowEl.dataset.prevLeft = windowEl.style.left || `${windowEl.offsetLeft}px`;
-            windowEl.dataset.prevTop = windowEl.style.top || `${windowEl.offsetTop}px`;
-
-            windowEl.classList.add('maximizing');
-            windowEl.style.width = '100vw';
-            windowEl.style.height = `calc(100vh - ${TASKBAR_HEIGHT}px)`;
-            windowEl.style.left = '0';
-            windowEl.style.top = '0';
-            windowEl.classList.add('maximized');
-
-            setTimeout(() => {
-                windowEl.classList.remove('maximizing');
-            }, 250);
-        }
-
         this.focusWindow(appId);
+        await this.toggleMaximizeEl(windowEl);
     }
 };

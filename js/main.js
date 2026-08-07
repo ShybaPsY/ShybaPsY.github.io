@@ -8,6 +8,7 @@ import { i18n, t } from './i18n/i18n.js';
 // Core modules
 import { ThemeManager } from './core/theme-manager.js';
 import { WindowManager } from './core/window-manager.js';
+import { WindowAnimator } from './core/window-animator.js';
 import { KeyboardShortcuts } from './core/keyboard-shortcuts.js';
 
 // UI modules
@@ -17,7 +18,8 @@ import { DesktopIcons } from './ui/desktop-icons.js';
 
 // Effects modules
 import { BootSequence } from './effects/boot-sequence.js';
-import { ParticleBackground } from './effects/particles.js';
+import { AsciiField } from './effects/ascii-field.js';
+import { AsciiPortrait } from './effects/ascii-portrait.js';
 import { MatrixEffect } from './effects/matrix.js';
 
 // Apps modules
@@ -26,6 +28,7 @@ import { ASCIIPlayerApp } from './apps/ascii-player.js';
 import { MusicApp } from './apps/music-player.js';
 import { NotepadApp } from './apps/notepad.js';
 import { CalculatorApp } from './apps/calculator.js';
+import { AsciiMirrorApp } from './apps/ascii-mirror.js';
 
 // Games module
 import { GamesApp } from './games/games-app.js';
@@ -58,6 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize achievement manager first to load saved achievements
     AchievementManager.init();
 
+    // Reapply saved theme before anything renders
+    ThemeManager.init();
+
     // Initialize apps with their dependencies
     ThemePickerApp.init(WindowManager, ThemeManager, AchievementManager);
     ASCIIPlayerApp.init(WindowManager, AchievementManager);
@@ -66,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ProjetosApp.init(WindowManager, AchievementManager);
     NotepadApp.init(WindowManager, AchievementManager);
     CalculatorApp.init(WindowManager, AchievementManager);
+    AsciiMirrorApp.init(WindowManager, AchievementManager);
 
     // Initialize terminal with all dependencies
     Terminal.init({
@@ -78,6 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         MusicApp,
         GamesApp,
         ProjetosApp,
+        AsciiMirrorApp,
+        AsciiPortrait,
         GitHubAPI,
         QuoteAPI
     });
@@ -90,7 +99,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         GamesApp,
         ProjetosApp,
         NotepadApp,
-        CalculatorApp
+        CalculatorApp,
+        AsciiMirrorApp
     });
 
     // Initialize context menu
@@ -102,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ProjetosApp,
         NotepadApp,
         CalculatorApp,
+        AsciiMirrorApp,
         Terminal
     });
 
@@ -124,12 +135,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         ProjetosApp,
         NotepadApp,
         CalculatorApp,
+        AsciiMirrorApp,
         Terminal
     });
 
     // Initialize taskbar and connect to WindowManager
     Taskbar.init(WindowManager, commandInput, terminal);
     WindowManager.setTaskbar(Taskbar);
+    WindowManager.trackPointer();
 
     // ================================================
     // TERMINAL DRAG FUNCTIONALITY
@@ -207,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const maxLeft = window.innerWidth - terminal.offsetWidth;
-            const maxTop = window.innerHeight - terminal.offsetHeight - 48;
+            const maxTop = window.innerHeight - terminal.offsetHeight - WindowManager.taskbarHeight();
 
             targetX = Math.max(0, Math.min(clientX - offsetX, maxLeft));
             targetY = Math.max(0, Math.min(clientY - offsetY, maxTop));
@@ -261,12 +274,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Bring terminal to front when clicked anywhere on it
         terminal.addEventListener('mousedown', () => {
             terminal.style.zIndex = ++WindowManager.highestZIndex;
+            WindowManager.setActive(terminal);
         });
+        commandInput?.addEventListener('focus', () => WindowManager.setActive(terminal));
+        WindowManager.setActive(terminal);
 
         // Center terminal on load
         const centerTerminal = () => {
             const left = (window.innerWidth - terminal.offsetWidth) / 2;
-            const top = (window.innerHeight - terminal.offsetHeight - 48) / 2;
+            const top = (window.innerHeight - terminal.offsetHeight - WindowManager.taskbarHeight()) / 2;
             terminal.style.left = `${Math.max(0, left)}px`;
             terminal.style.top = `${Math.max(0, top)}px`;
         };
@@ -276,7 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isDragging) {
                 const rect = terminal.getBoundingClientRect();
                 const maxLeft = window.innerWidth - terminal.offsetWidth;
-                const maxTop = window.innerHeight - terminal.offsetHeight - 48;
+                const maxTop = window.innerHeight - terminal.offsetHeight - WindowManager.taskbarHeight();
 
                 if (rect.left > maxLeft || rect.top > maxTop) {
                     terminal.style.left = `${Math.max(0, Math.min(rect.left, maxLeft))}px`;
@@ -469,21 +485,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             Taskbar.addWindow('terminal', 'Terminal');
         },
 
-        close() {
+        // Fechar, minimizar, restaurar e maximizar são as mesmas operações
+        // das outras janelas — o terminal só não mora no registro do
+        // WindowManager. Por isso aqui se chama as primitivas dele com o
+        // elemento, em vez de manter uma segunda implementação.
+
+        async close() {
             if (this.isClosed) return;
 
             this.isClosed = true;
             this.isMinimized = false;
-            terminal.classList.add('minimizing');
 
-            setTimeout(() => {
-                terminal.classList.remove('minimizing');
-                terminal.classList.add('minimized');
-                Taskbar.removeWindow('terminal');
-            }, 300);
+            await WindowAnimator.close(terminal);
+            terminal.classList.add('minimized');
+            Taskbar.removeWindow('terminal');
         },
 
-        open() {
+        async open() {
             if (!this.isClosed) {
                 this.focus();
                 return;
@@ -491,89 +509,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             this.isClosed = false;
             this.isMinimized = false;
-            terminal.classList.remove('minimized');
-            terminal.classList.add('restoring');
 
-            setTimeout(() => {
-                terminal.classList.remove('restoring');
-            }, 300);
-
-            terminal.style.zIndex = ++WindowManager.highestZIndex;
+            // O botão volta para a taskbar antes da animação, para a janela
+            // ter de onde nascer.
             Taskbar.addWindow('terminal', 'Terminal');
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
+            WindowManager.setActive(terminal);
+
+            await WindowManager.animateRestore(terminal, 'terminal');
 
             // Reset terminal content
             Terminal.reset();
         },
 
-        minimize() {
+        async minimize() {
             if (this.isMinimized || this.isClosed) return;
 
             this.isMinimized = true;
-            terminal.classList.add('minimizing');
-
-            setTimeout(() => {
-                terminal.classList.remove('minimizing');
-                terminal.classList.add('minimized');
-                Taskbar.updateWindow('terminal', true);
-            }, 300);
+            Taskbar.updateWindow('terminal', true);
+            await WindowManager.animateMinimize(terminal, 'terminal');
         },
 
-        restore() {
+        async restore() {
             if (!this.isMinimized) return;
 
             this.isMinimized = false;
-            terminal.classList.remove('minimized');
-            terminal.classList.add('restoring');
-
-            setTimeout(() => {
-                terminal.classList.remove('restoring');
-            }, 300);
-
-            terminal.style.zIndex = ++WindowManager.highestZIndex;
             Taskbar.updateWindow('terminal', false);
+            terminal.style.zIndex = ++WindowManager.highestZIndex;
+            WindowManager.setActive(terminal);
+
+            await WindowManager.animateRestore(terminal, 'terminal');
             commandInput.focus();
         },
 
-        toggleMaximize() {
-            const TASKBAR_HEIGHT = 48;
-
-            if (this.isMaximized) {
-                // Restore previous size
-                terminal.classList.add('maximizing');
-                if (this.prevState) {
-                    terminal.style.width = this.prevState.width;
-                    terminal.style.height = this.prevState.height;
-                    terminal.style.left = this.prevState.left;
-                    terminal.style.top = this.prevState.top;
-                }
-                terminal.classList.remove('maximized');
-                this.isMaximized = false;
-
-                setTimeout(() => {
-                    terminal.classList.remove('maximizing');
-                }, 250);
-            } else {
-                // Save current state
-                this.prevState = {
-                    width: terminal.style.width || `${terminal.offsetWidth}px`,
-                    height: terminal.style.height || `${terminal.offsetHeight}px`,
-                    left: terminal.style.left || `${terminal.offsetLeft}px`,
-                    top: terminal.style.top || `${terminal.offsetTop}px`
-                };
-
-                // Maximize
-                terminal.classList.add('maximizing');
-                terminal.style.width = '100vw';
-                terminal.style.height = `calc(100vh - ${TASKBAR_HEIGHT}px)`;
-                terminal.style.left = '0';
-                terminal.style.top = '0';
-                terminal.classList.add('maximized');
-                this.isMaximized = true;
-
-                setTimeout(() => {
-                    terminal.classList.remove('maximizing');
-                }, 250);
-            }
+        async toggleMaximize() {
+            this.isMaximized = await WindowManager.toggleMaximizeEl(terminal);
         },
 
         focus() {
@@ -627,14 +597,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STARTUP SEQUENCE
     // ================================================
     async function startup() {
+        // Segura os ícones e o terminal fora de cena até o boot terminar,
+        // para que a área de trabalho se monte em cascata em vez de
+        // aparecer inteira de uma vez.
+        document.body.classList.add('booting');
+
         // Run boot sequence first (includes language selection)
         await BootSequence.run();
 
         // Update all elements with data-i18n attributes
         i18n.updatePageTranslations();
 
-        // Initialize all systems
-        ParticleBackground.init();
+        // Fundo de ondas ASCII interativo (nasce sob o véu do retrato,
+        // para já estar lá quando a intro se dispersar — sem "pisque")
+        AsciiField.init();
+
+        // ASCII portrait intro: caracteres se montam formando o retrato
+        await AsciiPortrait.play();
+
+        // A área de trabalho entra: ícones em cascata, terminal materializando
+        document.body.classList.replace('booting', 'booted');
 
         // Initialize Desktop Pet
         DesktopPet.init();
