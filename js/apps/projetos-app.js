@@ -1,26 +1,62 @@
 // ================================================
-// PROJETOS APP MODULE
-// Project showcase with animations, carousel, and 3D flip cards
+// PROJETOS — NAVEGADOR DE DOIS PAINÉIS
+//
+// A versão anterior era um grid de cartões 3D que viravam no hover, com
+// um carrossel de destaques em cima e um modal por baixo. Três camadas
+// para chegar no texto, e três problemas:
+//
+//   1. Os nove projetos estão marcados featured: true, então o carrossel
+//      de "destaques" era o portfólio inteiro, repetido no grid logo
+//      abaixo. Nada era destaque de nada.
+//   2. A mesma `description` aparecia na frente do cartão, no verso do
+//      cartão e de novo no modal. O texto bom — `fullDescription`, que é
+//      onde ele conta o que construiu — ficava escondido a dois cliques.
+//   3. Virar o cartão trocava a miniatura por um botão. Movimento que
+//      tirava informação da tela.
+//
+// Agora são dois painéis: à esquerda o portfólio inteiro, visível de uma
+// vez e agrupado por área; à direita o projeto selecionado, por completo.
+// É a gramática de um gerenciador de arquivos — que é o idioma deste
+// sistema — e resolve o problema de fato: dá para varrer nove projetos
+// sem rolar e ler um a fundo sem abrir nada.
 // ================================================
 
-import { t, i18n } from '../i18n/i18n.js';
+import { i18n, t } from '../i18n/i18n.js';
 
 export const ProjetosApp = {
     WindowManager: null,
     AchievementManager: null,
     projects: [],
-    featuredProjects: [],
-    carouselIndex: 0,
-    carouselInterval: null,
-    particleAnimationId: null,
+    groups: [],
+    selectedId: null,
+    shotIndex: 0,
+    filter: '',
+    keyHandler: null,
+
+    // Áreas derivadas da stack de cada projeto. Ordem importa: o primeiro
+    // que casar vence. Fica em código, e não no JSON, para continuar
+    // valendo quando um projeto novo for adicionado.
+    CATEGORIES: [
+        { id: 'saas', test: p => /saas/i.test(p.title) || p.stackHas(/supabase|mercadopago|twilio/) },
+        { id: 'fullstack', test: p => p.stackHas(/spring/) },
+        { id: 'dados', test: p => p.stackHas(/scikit|pandas|numpy|matplotlib|seaborn/) },
+        { id: 'sistemas', test: p => p.stackHas(/arduino|c\+\+|pyqt/) },
+        { id: 'web', test: () => true }
+    ],
+
+    // O mesmo produto aparecia escrito de duas formas, o que quebrava
+    // qualquer tentativa de filtrar por tecnologia.
+    TECH_ALIAS: {
+        'tailwindcss': 'Tailwind CSS',
+        'lucide react': 'Lucide',
+        'bootstrap 5': 'Bootstrap',
+        'google gemini ai': 'Gemini AI'
+    },
 
     init(WindowManager, AchievementManager) {
         this.WindowManager = WindowManager;
         this.AchievementManager = AchievementManager;
-        this.projects = i18n.getProjects() || [];
-        this.featuredProjects = this.projects.filter(p => p.featured);
 
-        // Register cleanup handler
         if (WindowManager) {
             WindowManager.registerCleanup('projetos', () => this.cleanup());
         }
@@ -29,12 +65,13 @@ export const ProjetosApp = {
     open() {
         if (!this.WindowManager) return;
 
-        // Refresh projects data in case language changed
-        this.projects = i18n.getProjects() || [];
-        this.featuredProjects = this.projects.filter(p => p.featured);
+        this.loadProjects();
+        this.filter = '';
+        this.selectedId = this.projects[0]?.id || null;
+        this.shotIndex = 0;
 
-        const content = `<div class="projetos-container" id="projetos-content"></div>`;
-        this.WindowManager.createWindow('projetos', t('projetos.title'), 650, 700, content);
+        const content = `<div class="pj" id="pj-root"></div>`;
+        this.WindowManager.createWindow('projetos', t('projetos.title'), 880, 620, content);
         this.render();
 
         if (this.AchievementManager) {
@@ -42,494 +79,273 @@ export const ProjetosApp = {
         }
     },
 
-    render() {
-        const container = document.getElementById('projetos-content');
-        if (!container) return;
+    // ================================================
+    // DADOS
+    // ================================================
 
-        container.innerHTML = `
-            ${this.renderHeader()}
-            <div class="projetos-grid" id="projetos-grid">
-                ${this.renderProjectCards()}
-            </div>
-        `;
-
-        this.initEventListeners();
-        this.initParticles();
+    normalizeTech(tech) {
+        return this.TECH_ALIAS[String(tech).toLowerCase().trim()] || tech;
     },
 
-    renderHeader() {
-        return `
-            <div class="projetos-header">
-                <canvas class="projetos-particles" id="projetos-particles"></canvas>
-                <div class="projetos-title">${t('projetos.title')}</div>
-                <div class="projetos-subtitle">${t('projetos.subtitle')}</div>
-                <div class="projetos-search">
-                    <span class="projetos-search-icon">$</span>
-                    <input
-                        type="text"
-                        class="projetos-search-input"
-                        id="projetos-search"
-                        placeholder="${t('projetos.search_placeholder')}"
-                    >
-                </div>
-            </div>
-        `;
-    },
+    loadProjects() {
+        const raw = i18n.getProjects() || [];
 
-    renderFeaturedCarousel() {
-        if (this.featuredProjects.length === 0) return '';
-
-        const slides = this.featuredProjects.map((project, index) => `
-            <div class="projetos-carousel-slide" data-index="${index}">
-                <div class="projetos-carousel-title">${project.title}</div>
-                <div class="projetos-carousel-desc">${project.description}</div>
-                <div class="projetos-carousel-tech">
-                    ${project.techStack.slice(0, 4).map(tech =>
-            `<span class="projetos-tech-badge">${tech}</span>`
-        ).join('')}
-                </div>
-            </div>
-        `).join('');
-
-        const dots = this.featuredProjects.map((_, index) => `
-            <div class="projetos-carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>
-        `).join('');
-
-        return `
-            <div class="projetos-featured">
-                <div class="projetos-featured-label">⭐ ${t('projetos.featured')}</div>
-                <button class="projetos-carousel-arrow prev" id="carousel-prev">❮</button>
-                <button class="projetos-carousel-arrow next" id="carousel-next">❯</button>
-                <div class="projetos-carousel" id="projetos-carousel">
-                    ${slides}
-                </div>
-                <div class="projetos-carousel-nav" id="carousel-nav">
-                    ${dots}
-                </div>
-            </div>
-        `;
-    },
-
-    renderProjectCards(filter = '') {
-        const filteredProjects = this.projects.filter(project => {
-            if (!filter) return true;
-            const searchLower = filter.toLowerCase();
-            return project.title.toLowerCase().includes(searchLower) ||
-                project.description.toLowerCase().includes(searchLower) ||
-                project.techStack.some(tech => tech.toLowerCase().includes(searchLower));
-        });
-
-        if (filteredProjects.length === 0) {
-            return `
-                <div class="projetos-no-results">
-                    <div class="projetos-no-results-icon">🔍</div>
-                    <div class="projetos-no-results-text">${t('projetos.no_results')}</div>
-                </div>
-            `;
-        }
-
-        return filteredProjects.map((project, index) => `
-            <div class="projetos-card" style="animation-delay: ${index * 0.1}s" data-id="${project.id}">
-                <div class="projetos-card-inner">
-                    <div class="projetos-card-front">
-                        <div class="projetos-card-thumbnail">
-                            ${project.thumbnail
-                ? `<img src="${project.thumbnail}" alt="${project.title}" loading="lazy" decoding="async">`
-                : this.getProjectIcon(project)}
-                        </div>
-                        <div class="projetos-card-info">
-                            <div class="projetos-card-title">${project.title}</div>
-                            <div class="projetos-card-desc">${project.description}</div>
-                            <div class="projetos-card-tech-mini">
-                                ${project.techStack.slice(0, 2).map(tech =>
-                    `<span class="projetos-tech-mini">${tech}</span>`
-                ).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="projetos-card-back">
-                        <div>
-                            <div class="projetos-card-back-title">${project.title}</div>
-                            <div class="projetos-card-back-desc">${project.description}</div>
-                        </div>
-                        <div>
-                            <div class="projetos-card-back-links">
-                                ${project.githubUrl ? `
-                                    <a href="${project.githubUrl}" target="_blank" class="projetos-card-link github" onclick="event.stopPropagation()">
-                                        GitHub
-                                    </a>
-                                ` : ''}
-                                ${project.liveUrl ? `
-                                    <a href="${project.liveUrl}" target="_blank" class="projetos-card-link" onclick="event.stopPropagation()">
-                                        Demo
-                                    </a>
-                                ` : ''}
-                            </div>
-                            <button class="projetos-card-details-btn" data-id="${project.id}">
-                                ${t('projetos.view_details')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    },
-
-    getProjectIcon(project) {
-        const title = project.title.toLowerCase();
-        const stack = project.techStack.join(' ').toLowerCase();
-
-        if (title.includes('api') || stack.includes('api')) return '{ }';
-        if (title.includes('chat') || stack.includes('socket')) return '< >';
-        if (title.includes('e-commerce') || title.includes('store')) return '[ ]';
-        if (stack.includes('react') || stack.includes('vue')) return '< />';
-        if (stack.includes('node') || stack.includes('express')) return '> _';
-        if (stack.includes('mobile') || stack.includes('native')) return '[ ]';
-
-        return '</>';
-    },
-
-    initEventListeners() {
-        // Search
-        const searchInput = document.getElementById('projetos-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.filterProjects(e.target.value);
-            });
-        }
-
-        // Carousel navigation
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.navigateCarousel(-1));
-        }
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.navigateCarousel(1));
-        }
-
-        // Carousel dots
-        const dots = document.querySelectorAll('.projetos-carousel-dot');
-        dots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                const index = parseInt(dot.dataset.index);
-                this.goToSlide(index);
-            });
-        });
-
-        // Card detail buttons
-        const detailBtns = document.querySelectorAll('.projetos-card-details-btn');
-        detailBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const projectId = btn.dataset.id;
-                this.openProjectDetail(projectId);
-            });
-        });
-
-        // Cards click (optional - also open detail)
-        const cards = document.querySelectorAll('.projetos-card');
-        cards.forEach(card => {
-            card.addEventListener('dblclick', () => {
-                const projectId = card.dataset.id;
-                this.openProjectDetail(projectId);
-            });
-        });
-    },
-
-    filterProjects(searchTerm) {
-        const grid = document.getElementById('projetos-grid');
-        if (grid) {
-            grid.innerHTML = this.renderProjectCards(searchTerm);
-
-            // Re-attach event listeners for new cards
-            const detailBtns = grid.querySelectorAll('.projetos-card-details-btn');
-            detailBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const projectId = btn.dataset.id;
-                    this.openProjectDetail(projectId);
-                });
-            });
-
-            const cards = grid.querySelectorAll('.projetos-card');
-            cards.forEach(card => {
-                card.addEventListener('dblclick', () => {
-                    const projectId = card.dataset.id;
-                    this.openProjectDetail(projectId);
-                });
-            });
-        }
-    },
-
-    startCarouselAutoplay() {
-        if (this.featuredProjects.length <= 1) return;
-
-        this.carouselInterval = setInterval(() => {
-            this.navigateCarousel(1);
-        }, 5000);
-    },
-
-    navigateCarousel(direction) {
-        const newIndex = this.carouselIndex + direction;
-        const maxIndex = this.featuredProjects.length - 1;
-
-        if (newIndex < 0) {
-            this.goToSlide(maxIndex);
-        } else if (newIndex > maxIndex) {
-            this.goToSlide(0);
-        } else {
-            this.goToSlide(newIndex);
-        }
-    },
-
-    goToSlide(index) {
-        this.carouselIndex = index;
-
-        const carousel = document.getElementById('projetos-carousel');
-        if (carousel) {
-            carousel.style.transform = `translateX(-${index * 100}%)`;
-        }
-
-        const dots = document.querySelectorAll('.projetos-carousel-dot');
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === index);
-        });
-
-        // Reset autoplay timer
-        if (this.carouselInterval) {
-            clearInterval(this.carouselInterval);
-            this.startCarouselAutoplay();
-        }
-    },
-
-    openProjectDetail(projectId) {
-        const project = this.projects.find(p => p.id === projectId);
-        if (!project) return;
-
-        const hasImages = project.images && project.images.length > 0;
-        const imageCount = hasImages ? project.images.length : 0;
-
-        // Create modal overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'projetos-modal-overlay';
-        overlay.id = 'projetos-modal';
-
-        overlay.innerHTML = `
-            <div class="projetos-modal">
-                <div class="projetos-modal-header">
-                    <div class="projetos-modal-title">${project.title}</div>
-                    <button class="projetos-modal-close" id="modal-close">✕</button>
-                </div>
-                <div class="projetos-modal-content">
-                    <div class="projetos-modal-carousel">
-                        ${hasImages
-                ? `
-                            <div class="carousel-images" id="carousel-images">
-                                ${project.images.map((img, i) => `
-                                    <img src="${img}" alt="${project.title} - ${i + 1}" class="carousel-image ${i === 0 ? 'active' : ''}" data-index="${i}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async">
-                                `).join('')}
-                            </div>
-                            ${imageCount > 1 ? `
-                                <button class="carousel-nav carousel-prev" id="carousel-prev">‹</button>
-                                <button class="carousel-nav carousel-next" id="carousel-next">›</button>
-                                <div class="carousel-dots" id="carousel-dots">
-                                    ${project.images.map((_, i) => `
-                                        <span class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        `
-                : `<div class="projetos-modal-carousel-placeholder">${this.getProjectIcon(project)}</div>`
-            }
-                    </div>
-                    <div class="projetos-modal-desc">${project.fullDescription || project.description}</div>
-                    <div class="projetos-modal-tech">
-                        ${project.techStack.map(tech =>
-                `<span class="projetos-modal-tech-badge">${tech}</span>`
-            ).join('')}
-                    </div>
-                    <div class="projetos-modal-meta">
-                        <span>${this.formatDate(project.date)}</span>
-                        ${project.featured ? `<span>${t('projetos.featured_project')}</span>` : ''}
-                    </div>
-                    <div class="projetos-modal-links">
-                        ${project.githubUrl ? `
-                            <a href="${project.githubUrl}" target="_blank" class="projetos-modal-link github">
-                                ${t('projetos.view_github')}
-                            </a>
-                        ` : ''}
-                        ${project.liveUrl ? `
-                            <a href="${project.liveUrl}" target="_blank" class="projetos-modal-link live">
-                                ${t('projetos.view_demo')}
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(overlay);
-
-        // Animate in
-        requestAnimationFrame(() => {
-            overlay.classList.add('active');
-        });
-
-        // Carousel navigation
-        if (hasImages && imageCount > 1) {
-            let currentIndex = 0;
-            const images = overlay.querySelectorAll('.carousel-image');
-            const dots = overlay.querySelectorAll('.carousel-dot');
-            const prevBtn = overlay.querySelector('#carousel-prev');
-            const nextBtn = overlay.querySelector('#carousel-next');
-
-            const showImage = (index) => {
-                images.forEach((img, i) => img.classList.toggle('active', i === index));
-                dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-                currentIndex = index;
+        this.projects = raw.map(p => {
+            const stack = [...new Set((p.techStack || []).map(t => this.normalizeTech(t)))];
+            const item = {
+                ...p,
+                stack,
+                year: (p.date || '').slice(0, 4),
+                images: p.images?.length ? p.images : (p.thumbnail ? [p.thumbnail] : []),
+                stackHas: (re) => stack.some(t => re.test(t.toLowerCase()))
             };
+            item.category = this.CATEGORIES.find(c => c.test(item)).id;
+            return item;
+        });
 
-            prevBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showImage((currentIndex - 1 + imageCount) % imageCount);
-            });
+        this.buildGroups();
+    },
 
-            nextBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showImage((currentIndex + 1) % imageCount);
-            });
+    // Agrupa os projetos visíveis pelas áreas, preservando a ordem de
+    // CATEGORIES para a lista não dançar entre filtros.
+    buildGroups() {
+        const term = this.filter.trim().toLowerCase();
+        const matches = (p) => !term ||
+            p.title.toLowerCase().includes(term) ||
+            p.id.toLowerCase().includes(term) ||
+            p.description.toLowerCase().includes(term) ||
+            p.stack.some(s => s.toLowerCase().includes(term));
 
-            dots.forEach(dot => {
-                dot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showImage(parseInt(dot.dataset.index));
-                });
-            });
+        const visible = this.projects.filter(matches);
 
-            // Auto-advance every 2 seconds
-            const autoAdvance = setInterval(() => {
-                showImage((currentIndex + 1) % imageCount);
-            }, 2000);
+        this.groups = this.CATEGORIES
+            .map(c => ({ id: c.id, items: visible.filter(p => p.category === c.id) }))
+            .filter(g => g.items.length);
+    },
 
-            // Store interval to clear on modal close
-            overlay.dataset.carouselInterval = autoAdvance;
+    visibleProjects() {
+        return this.groups.flatMap(g => g.items);
+    },
+
+    selected() {
+        return this.projects.find(p => p.id === this.selectedId) || null;
+    },
+
+    // ================================================
+    // RENDER
+    // ================================================
+
+    escape(str) {
+        return String(str ?? '').replace(/[&<>"]/g,
+            m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+    },
+
+    render() {
+        const root = document.getElementById('pj-root');
+        if (!root) return;
+
+        root.innerHTML = `
+            <div class="pj-bar">
+                <span class="pj-prompt">$</span>
+                <input type="text" class="pj-search" id="pj-search"
+                       placeholder="${this.escape(t('projetos.search_placeholder'))}"
+                       value="${this.escape(this.filter)}" autocomplete="off">
+                <span class="pj-count">${this.visibleProjects().length}/${this.projects.length}</span>
+            </div>
+            <div class="pj-body">
+                <nav class="pj-list" id="pj-list" role="listbox"
+                     aria-label="${this.escape(t('projetos.title'))}">
+                    ${this.renderList()}
+                </nav>
+                <section class="pj-detail" id="pj-detail">
+                    ${this.renderDetail()}
+                </section>
+            </div>
+        `;
+
+        this.bindEvents();
+    },
+
+    renderList() {
+        if (!this.groups.length) {
+            return `<p class="pj-empty">${this.escape(t('projetos.no_results'))}</p>`;
         }
 
-        // Close handlers
-        const closeBtn = document.getElementById('modal-close');
-        closeBtn.addEventListener('click', () => this.closeModal());
+        return this.groups.map(g => `
+            <div class="pj-group">${g.id}/</div>
+            ${g.items.map(p => `
+                <button type="button" class="pj-item${p.id === this.selectedId ? ' is-on' : ''}"
+                        role="option" aria-selected="${p.id === this.selectedId}" data-id="${this.escape(p.id)}">
+                    <span class="pj-item-name">${this.escape(p.id)}</span>
+                    <span class="pj-item-year">${this.escape(p.year)}</span>
+                </button>
+            `).join('')}
+        `).join('');
+    },
 
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                this.closeModal();
+    renderDetail() {
+        const p = this.selected();
+        if (!p) return `<p class="pj-empty">${this.escape(t('projetos.no_results'))}</p>`;
+
+        // O título traz "Nome - Subtítulo"; separar dá uma hierarquia real
+        // em vez de uma linha longa só.
+        const [name, ...rest] = p.title.split(/\s+[-–—]\s+/);
+        const sub = rest.join(' — ');
+        const shots = p.images;
+        const shot = shots[Math.min(this.shotIndex, shots.length - 1)];
+
+        return `
+            <header class="pj-head">
+                <h2 class="pj-title">${this.escape(name)}</h2>
+                ${sub ? `<p class="pj-sub">${this.escape(sub)}</p>` : ''}
+            </header>
+
+            ${shot ? `
+                <figure class="pj-shot">
+                    <img src="${this.escape(shot)}" alt="${this.escape(name)}" loading="lazy" decoding="async">
+                    ${shots.length > 1 ? `
+                        <button type="button" class="pj-shot-nav pj-prev" data-step="-1" aria-label="anterior">‹</button>
+                        <button type="button" class="pj-shot-nav pj-next" data-step="1" aria-label="próxima">›</button>
+                        <figcaption class="pj-shot-count">${this.shotIndex + 1}/${shots.length}</figcaption>
+                    ` : ''}
+                </figure>
+            ` : ''}
+
+            <p class="pj-desc">${this.escape(p.fullDescription || p.description)}</p>
+
+            <dl class="pj-spec">
+                <dt>stack</dt>
+                <dd class="pj-stack">
+                    ${p.stack.map(s => `
+                        <button type="button" class="pj-tech" data-tech="${this.escape(s)}">${this.escape(s)}</button>
+                    `).join('')}
+                </dd>
+                ${p.year ? `<dt>ano</dt><dd>${this.escape(p.year)}</dd>` : ''}
+                <dt>área</dt><dd>${this.escape(p.category)}</dd>
+            </dl>
+        `;
+    },
+
+    // Redesenha só o painel que mudou: trocar de projeto não deve recriar
+    // o campo de busca e roubar o foco de quem está digitando.
+    refreshDetail() {
+        const el = document.getElementById('pj-detail');
+        if (el) {
+            el.innerHTML = this.renderDetail();
+            el.scrollTop = 0;
+        }
+        document.querySelectorAll('#pj-list .pj-item').forEach(b => {
+            const on = b.dataset.id === this.selectedId;
+            b.classList.toggle('is-on', on);
+            b.setAttribute('aria-selected', String(on));
+        });
+    },
+
+    refreshList() {
+        const list = document.getElementById('pj-list');
+        const count = document.querySelector('#pj-root .pj-count');
+        if (list) list.innerHTML = this.renderList();
+        if (count) count.textContent = `${this.visibleProjects().length}/${this.projects.length}`;
+    },
+
+    // ================================================
+    // INTERAÇÃO
+    // ================================================
+
+    select(id, { scroll = false } = {}) {
+        if (!id || id === this.selectedId) return;
+        this.selectedId = id;
+        this.shotIndex = 0;
+        this.refreshDetail();
+
+        if (scroll) {
+            document.querySelector(`#pj-list .pj-item[data-id="${CSS.escape(id)}"]`)
+                ?.scrollIntoView({ block: 'nearest' });
+        }
+    },
+
+    // ↑/↓ e j/k percorrem a lista sem tirar a mão do teclado — que é como
+    // se navega em qualquer coisa parecida com isto.
+    step(delta) {
+        const list = this.visibleProjects();
+        if (!list.length) return;
+        const i = list.findIndex(p => p.id === this.selectedId);
+        const next = list[Math.max(0, Math.min(list.length - 1, (i < 0 ? 0 : i + delta)))];
+        this.select(next.id, { scroll: true });
+    },
+
+    stepShot(delta) {
+        const p = this.selected();
+        if (!p || p.images.length < 2) return;
+        const n = p.images.length;
+        this.shotIndex = (this.shotIndex + delta + n) % n;
+        this.refreshDetail();
+    },
+
+    applyFilter(term) {
+        this.filter = term;
+        this.buildGroups();
+
+        // Se o projeto aberto sumiu do filtro, abre o primeiro que sobrou.
+        const visible = this.visibleProjects();
+        if (visible.length && !visible.some(p => p.id === this.selectedId)) {
+            this.selectedId = visible[0].id;
+            this.shotIndex = 0;
+            this.refreshDetail();
+        }
+        this.refreshList();
+    },
+
+    bindEvents() {
+        const root = document.getElementById('pj-root');
+        if (!root) return;
+
+        // render() pode rodar mais de uma vez na vida da janela; sem isto,
+        // cada passada empilharia mais um listener global de teclado.
+        this.cleanup();
+
+        const search = document.getElementById('pj-search');
+        search?.addEventListener('input', (e) => this.applyFilter(e.target.value));
+
+        root.addEventListener('click', (e) => {
+            const item = e.target.closest('.pj-item');
+            if (item) { this.select(item.dataset.id); return; }
+
+            const nav = e.target.closest('.pj-shot-nav');
+            if (nav) { this.stepShot(Number(nav.dataset.step)); return; }
+
+            // Clicar numa tecnologia filtra por ela: o estado vai para a
+            // busca, então dá para ver e desfazer o que foi aplicado.
+            const tech = e.target.closest('.pj-tech');
+            if (tech && search) {
+                search.value = tech.dataset.tech;
+                this.applyFilter(tech.dataset.tech);
+                search.focus();
             }
         });
 
-        // ESC key to close
-        const escHandler = (e) => {
-            if (e.key === 'Escape') {
-                this.closeModal();
-                document.removeEventListener('keydown', escHandler);
+        this.keyHandler = (e) => {
+            if (!document.getElementById('pj-root')) return;
+            if (!root.contains(document.activeElement) && document.activeElement !== document.body) return;
+
+            const typing = document.activeElement === search;
+
+            if (e.key === 'ArrowDown' || (!typing && e.key === 'j')) { e.preventDefault(); this.step(1); }
+            else if (e.key === 'ArrowUp' || (!typing && e.key === 'k')) { e.preventDefault(); this.step(-1); }
+            else if (e.key === 'ArrowLeft' && !typing) { this.stepShot(-1); }
+            else if (e.key === 'ArrowRight' && !typing) { this.stepShot(1); }
+            else if (e.key === 'Escape' && typing && search.value) {
+                search.value = '';
+                this.applyFilter('');
             }
         };
-        document.addEventListener('keydown', escHandler);
-    },
-
-    closeModal() {
-        const modal = document.getElementById('projetos-modal');
-        if (modal) {
-            // Clear carousel auto-advance interval
-            if (modal.dataset.carouselInterval) {
-                clearInterval(parseInt(modal.dataset.carouselInterval));
-            }
-            modal.classList.remove('active');
-            setTimeout(() => {
-                modal.remove();
-            }, 300);
-        }
-    },
-
-    formatDate(dateStr) {
-        if (!dateStr) return 'N/A';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString(i18n.getDateLocale(), {
-            year: 'numeric',
-            month: 'long'
-        });
-    },
-
-    initParticles() {
-        const canvas = document.getElementById('projetos-particles');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const particles = [];
-        const particleCount = 30;
-
-        const resizeCanvas = () => {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        };
-        resizeCanvas();
-
-        // Create particles
-        for (let i = 0; i < particleCount; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 2 + 1,
-                speedX: (Math.random() - 0.5) * 0.5,
-                speedY: (Math.random() - 0.5) * 0.5,
-                opacity: Math.random() * 0.5 + 0.2
-            });
-        }
-
-        const getColor = (varName) => {
-            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-        };
-
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            particles.forEach(p => {
-                // Update position
-                p.x += p.speedX;
-                p.y += p.speedY;
-
-                // Wrap around
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
-
-                // Draw particle
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = getColor('--green');
-                ctx.globalAlpha = p.opacity;
-                ctx.fill();
-            });
-
-            ctx.globalAlpha = 1;
-            this.particleAnimationId = requestAnimationFrame(animate);
-        };
-
-        animate();
+        document.addEventListener('keydown', this.keyHandler);
     },
 
     cleanup() {
-        if (this.carouselInterval) {
-            clearInterval(this.carouselInterval);
-            this.carouselInterval = null;
+        if (this.keyHandler) {
+            document.removeEventListener('keydown', this.keyHandler);
+            this.keyHandler = null;
         }
-        if (this.particleAnimationId) {
-            cancelAnimationFrame(this.particleAnimationId);
-            this.particleAnimationId = null;
-        }
-        this.carouselIndex = 0;
-        this.closeModal();
     }
 };
