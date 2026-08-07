@@ -1,0 +1,453 @@
+/* ================================================
+   COMPONENTES COMPARTILHADOS
+   Os apps foram escritos em momentos diferentes e cada um
+   inventou seu botão, seu painel e seu campo de texto. Esta
+   camada entra depois de todos eles e os reconcilia num
+   vocabulário só, tirando também as cores fixas do Dracula
+   que sobreviviam em alguns lugares e quebravam os outros
+   seis temas.
+   ================================================ */
+
+/* ================================================
+   1. BOTÕES DE CHROME
+   Superfície discreta, contorno fino, acento no hover.
+   ================================================ */
+
+.ascii-btn,
+.music-btn,
+.notepad-btn,
+.notepad-tab-add,
+.game-back-btn,
+.calculator-mode button,
+.calculator-base-selector button,
+.calc-history-toggle,
+.history-clear,
+.history-close,
+.gallery-viewer-close {
+    background: var(--surface-raised);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-out),
+        color var(--dur-fast) var(--ease-out),
+        border-color var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
+}
+
+.ascii-btn:hover,
+.music-btn:hover,
+.notepad-btn:hover,
+.notepad-tab-add:hover,
+.game-back-btn:hover,
+.calculator-mode button:hover,
+.calculator-base-selector button:hover,
+.calc-history-toggle:hover,
+.history-clear:hover,
+.history-close:hover,
+.gallery-viewer-close:hover {
+    background: var(--accent-wash-strong);
+    color: var(--text-strong);
+    border-color: var(--line-accent);
+    box-shadow: 0 0 18px -6px var(--glow);
+}
+
+.ascii-btn:active,
+.music-btn:active,
+.notepad-btn:active,
+.game-back-btn:active,
+.calculator-mode button:active {
+    transform: scale(0.97);
+}
+
+/* Estado ligado: preenchido com o acento */
+.ascii-btn.active,
+.music-btn.playing,
+.calculator-mode button.active,
+.calculator-base-selector button.active,
+.notepad-tab.active {
+    background: var(--accent);
+    color: var(--background);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.ascii-btn:disabled,
+.music-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.ascii-btn:focus-visible,
+.music-btn:focus-visible,
+.notepad-btn:focus-visible,
+.game-back-btn:focus-visible,
+.calculator-mode button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ================================================
+   2. SUPERFÍCIES AFUNDADAS
+   Onde a aplicação mostra o resultado do que faz:
+   tela, canvas, editor, visor.
+   ================================================ */
+
+.ascii-display,
+.ascii-mirror-stage,
+.music-visualizer,
+.game-canvas-container,
+.calculator-display,
+.notepad-editor,
+.calculus-output,
+.history-list {
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+}
+
+.calculator-display:hover {
+    border-color: var(--line-strong);
+}
+
+/* ================================================
+   3. CAMPOS DE TEXTO
+   ================================================ */
+
+.station-select,
+.calculus-input,
+.notepad-editor {
+    background: var(--surface-sunken);
+    color: var(--text-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: var(--font-shell);
+    outline: none;
+    transition: border-color var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur) var(--ease-out);
+}
+
+.station-select:hover,
+.calculus-input:hover {
+    border-color: var(--line-strong);
+}
+
+.station-select:focus,
+.calculus-input:focus,
+.notepad-editor:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+.station-select::placeholder,
+.calculus-input::placeholder,
+.notepad-editor::placeholder {
+    color: var(--text-dim);
+}
+
+/* ================================================
+   4. CARTÕES SELECIONÁVEIS
+   Tema, jogo, item de histórico: todos se comportam igual.
+   ================================================ */
+
+.theme-card,
+.game-option,
+.history-item,
+.gallery-item {
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-out),
+        border-color var(--dur-fast) var(--ease-out),
+        transform var(--dur) var(--ease-out),
+        box-shadow var(--dur) var(--ease-out);
+}
+
+.theme-card:hover,
+.game-option:hover,
+.history-item:hover,
+.gallery-item:hover {
+    background: var(--accent-wash);
+    border-color: var(--line-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.7), 0 0 20px -8px var(--glow);
+}
+
+.theme-card.active {
+    border-color: var(--accent);
+    background: var(--accent-wash-strong);
+    box-shadow: inset 0 0 0 1px var(--line-accent);
+}
+
+.theme-card:focus-visible,
+.game-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+
+/* ================================================
+   7. JOGOS
+   ================================================ */
+
+.game-option-title {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--text-strong);
+    letter-spacing: var(--track-tight);
+}
+
+.game-option-desc {
+    font-family: var(--font-ui);
+    font-size: clamp(9px, 2vw, 10.5px);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.game-score,
+.game-info {
+    font-family: var(--font-ui);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-strong);
+}
+
+.game-canvas {
+    border-radius: var(--r-sm);
+}
+
+/* ================================================
+   8. BLOCO DE NOTAS
+   ================================================ */
+
+.notepad-toolbar,
+.notepad-tabs {
+    border-bottom: 1px solid var(--line);
+}
+
+.notepad-tab {
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm) var(--r-sm) 0 0;
+    font-family: var(--font-ui);
+    font-size: 11px;
+}
+
+.notepad-tab:hover {
+    background: var(--accent-wash);
+}
+
+.notepad-editor {
+    font-family: var(--font-shell);
+    line-height: 1.65;
+}
+
+.notepad-status {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-top: 1px solid var(--line);
+}
+
+/* ================================================
+   9. CALCULADORA
+   O teclado mantém a hierarquia por cor que ela já tinha;
+   aqui só o enquadramento e o visor entram no sistema.
+   ================================================ */
+
+.calculator-mode button,
+.calculator-base-selector button {
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+}
+
+.calculator-expression {
+    font-family: var(--font-shell);
+    color: var(--text-dim);
+}
+
+.calculator-result {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--text-strong);
+    font-variant-numeric: tabular-nums;
+}
+
+.calc-btn {
+    font-family: var(--font-ui);
+    font-weight: 500;
+    border-radius: var(--r-sm);
+    transition: filter var(--dur-fast) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
+}
+
+.calc-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+/* O teclado guardava uma paleta fixa (azul/verde/vermelho de outro
+   design system) que ignorava os sete temas. A hierarquia continua a
+   mesma — número, função, operador, igual, limpar —, só que agora
+   ela é escrita nas cores do tema ativo. */
+.calc-btn-number {
+    background: color-mix(in srgb, var(--foreground) 13%, var(--background));
+    color: var(--text-strong);
+    font-weight: 500;
+}
+
+.calc-btn-number:hover:not(.disabled) {
+    background: color-mix(in srgb, var(--foreground) 22%, var(--background));
+}
+
+.calc-btn-function {
+    background: color-mix(in srgb, var(--foreground) 8%, var(--background));
+    color: var(--text-muted);
+}
+
+.calc-btn-function:hover {
+    background: color-mix(in srgb, var(--foreground) 16%, var(--background));
+    color: var(--text-strong);
+}
+
+.calc-btn-operator {
+    background: var(--blue);
+    color: var(--background);
+    font-weight: 700;
+}
+
+.calc-btn-equals {
+    background: var(--accent);
+    color: var(--background);
+    font-weight: 700;
+}
+
+.calc-btn-clear {
+    background: var(--red);
+    color: var(--background);
+    font-weight: 700;
+}
+
+.calc-btn-hex {
+    background: var(--magenta);
+    color: var(--background);
+    font-weight: 700;
+}
+
+.calc-btn-bitwise {
+    background: var(--cyan);
+    color: var(--background);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.calc-btn-calculus {
+    background: var(--magenta);
+    color: var(--background);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.calc-btn-operator:hover,
+.calc-btn-equals:hover,
+.calc-btn-clear:hover,
+.calc-btn-bitwise:hover,
+.calc-btn-calculus:hover,
+.calc-btn-hex:hover:not(.disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 0 18px -6px currentColor;
+}
+
+.base-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.base-value {
+    font-family: var(--font-shell);
+    color: var(--text-strong);
+}
+
+.history-header {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--line);
+}
+
+.calculator-history {
+    background: color-mix(in srgb, var(--background) 92%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--line);
+}
+
+.calc-toast {
+    background: color-mix(in srgb, var(--background) 92%, transparent);
+    border: 1px solid var(--line-accent);
+    border-radius: var(--r-sm);
+    color: var(--accent);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    box-shadow: var(--shadow-2);
+}
+
+/* ================================================
+   10. THEME PICKER
+   ================================================ */
+
+.theme-card-name {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--text-strong);
+}
+
+.theme-color-swatch {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+/* ================================================
+   11. ASCII PLAYER / MIRROR
+   ================================================ */
+
+.ascii-display {
+    font-family: var(--font-shell);
+    color: var(--accent);
+}
+
+.ascii-mirror-message {
+    font-family: var(--font-ui);
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.music-info {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+}
+
+.visualizer-bar {
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+}

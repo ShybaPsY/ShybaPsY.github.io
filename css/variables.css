@@ -1,5 +1,9 @@
 /* ================================================
-   THEME DEFINITIONS - Color Variables
+   PALETTES + DESIGN TOKENS
+   Cada tema define só as 12 cores abaixo. Todo o resto
+   (superfícies, linhas, brilhos, sombras) é derivado
+   delas na seção DESIGN TOKENS, então um tema novo não
+   precisa saber nada sobre a UI.
    ================================================ */
 
 /* Tokyo Night (Default) */
@@ -112,4 +116,102 @@
     --cyan: #94e2d5;
     --cyan-rgb: 148, 226, 213;
     --red: #f38ba8;
+}
+
+
+/* ================================================
+   DESIGN TOKENS
+   Declarados em :root para que o color-mix leia a
+   paleta que venceu a cascata no <html>.
+   ================================================ */
+
+:root {
+    /* --- Tipografia -------------------------------------------
+       Cada face marca uma camada do sistema: o firmware fala em
+       VT323, o sistema operacional em IBM Plex Mono, o shell em
+       Fira Code. A fonte diz onde você está. */
+    --font-crt: 'VT323', 'Fira Code', monospace;
+    --font-ui: 'IBM Plex Mono', 'Fira Code', ui-monospace, monospace;
+    --font-shell: 'Fira Code', ui-monospace, 'Courier New', monospace;
+
+    --track-tight: -0.01em;
+    --track-wide: 0.08em;
+    --track-caps: 0.14em;
+
+    /* --- Superfícies ------------------------------------------
+       O desktop aparece através da janela: o fundo ASCII é o
+       material da interface, não um papel de parede escondido. */
+    --surface-glass: color-mix(in srgb, var(--background) 76%, transparent);
+    --surface-chrome: color-mix(in srgb, var(--background) 84%, var(--foreground) 5%);
+    --surface-raised: color-mix(in srgb, var(--background) 92%, var(--foreground) 8%);
+    --surface-sunken: color-mix(in srgb, var(--background) 88%, #000 12%);
+    --surface-hover: color-mix(in srgb, transparent 92%, var(--foreground) 8%);
+    --surface-solid: var(--background);
+
+    /* --- Linhas ----------------------------------------------- */
+    --line: color-mix(in srgb, transparent 86%, var(--foreground) 14%);
+    --line-strong: color-mix(in srgb, transparent 70%, var(--foreground) 30%);
+    --line-accent: color-mix(in srgb, transparent 55%, var(--green) 45%);
+
+    /* --- Acentos ----------------------------------------------- */
+    --accent: var(--green);
+    --accent-2: var(--cyan);
+    --accent-wash: color-mix(in srgb, transparent 88%, var(--green) 12%);
+    --accent-wash-strong: color-mix(in srgb, transparent 76%, var(--green) 24%);
+    --glow: color-mix(in srgb, transparent 68%, var(--green) 32%);
+    --glow-soft: color-mix(in srgb, transparent 86%, var(--green) 14%);
+    --glow-rgb: var(--green-rgb);
+
+    /* --- Texto --------------------------------------------------
+       --text-dim é a cor de comentário do tema: baixa de propósito,
+       serve para o que é decorativo. Texto secundário que precisa
+       ser lido (descrição de projeto, legenda) usa --text-muted,
+       que fica acima de 4.5:1 sobre as superfícies do sistema. */
+    --text: var(--foreground);
+    --text-muted: color-mix(in srgb, var(--foreground) 70%, var(--background) 30%);
+    --text-dim: var(--comment);
+    --text-strong: color-mix(in srgb, var(--foreground) 82%, #fff 18%);
+
+    /* --- Semáforo da janela: puxa do tema, não do macOS --------- */
+    --btn-close: var(--red);
+    --btn-min: var(--yellow);
+    --btn-max: var(--green);
+
+    /* --- Elevação ---------------------------------------------- */
+    --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-2: 0 10px 30px -8px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-3: 0 28px 64px -16px rgba(0, 0, 0, 0.66), 0 4px 14px rgba(0, 0, 0, 0.36);
+    --shadow-focus: 0 0 0 1px var(--line-accent), 0 0 28px -6px var(--glow),
+                    0 28px 64px -16px rgba(0, 0, 0, 0.66);
+    --inner-highlight: inset 0 1px 0 color-mix(in srgb, transparent 88%, #fff 12%);
+
+    /* --- Raios --------------------------------------------------- */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+
+    /* --- Movimento ------------------------------------------------
+       expo-out: rápido no começo, pousa devagar. É o que faz uma
+       janela parecer que tem massa. */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+    --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 0.14s;
+    --dur: 0.26s;
+    --dur-slow: 0.44s;
+
+    /* --- Métricas do sistema ------------------------------------- */
+    --taskbar-h: 48px;
+}
+
+/* Sem movimento: nada de transições longas, mas os estados
+   continuam legíveis. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --dur-fast: 0.01ms;
+        --dur: 0.01ms;
+        --dur-slow: 0.01ms;
+    }
 }

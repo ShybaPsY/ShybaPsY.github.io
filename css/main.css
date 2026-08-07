@@ -12,5 +12,8 @@
 @import url('apps.css');
 @import url('games.css');
 @import url('projetos.css');
+/* components.css entra depois dos apps: é a camada que reconcilia
+   botões, painéis e campos que cada app tinha inventado sozinho. */
+@import url('components.css');
 @import url('effects.css');
 @import url('responsive.css');

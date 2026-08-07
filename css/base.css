@@ -2,13 +2,19 @@
    BASE STYLES - Global defaults
    ================================================ */
 
-/* Theme transition */
-* {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
-* {
-    box-sizing: border-box;
+/* A cor só é animada enquanto o tema troca. Fora disso, hover e foco
+   respondem imediatamente em vez de arrastar por 300ms. */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+    transition: background-color 0.35s ease, color 0.35s ease,
+        border-color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
 }
 
 html,
@@ -17,46 +23,121 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'Fira Code', monospace;
+    color: var(--text);
+    font-family: var(--font-shell);
     font-size: 16px;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
-/* Custom Scrollbar - Global */
+body {
+    position: relative;
+    padding-bottom: var(--taskbar-h);
+    /* Space for taskbar */
+}
+
+/* ================================================
+   TYPE ROLES
+   O sistema fala em IBM Plex Mono; o shell, em Fira Code.
+   ================================================ */
+
+#taskbar,
+.app-window-header,
+#terminal-header,
+.icon-label,
+.context-menu,
+.spotlight,
+.app-window-body {
+    font-family: var(--font-ui);
+}
+
+/* O conteúdo do terminal e todo código continuam em Fira Code:
+   é a voz do shell, com as ligaduras. */
+#terminal-body,
+.ascii-art,
+code,
+pre,
+kbd {
+    font-family: var(--font-shell);
+}
+
+/* Rótulo de sistema: pequeno, caixa alta, entreletrado. Usado em
+   títulos de janela, eyebrows e chips. */
+.ui-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+/* ================================================
+   FOCO VISÍVEL
+   Um anel só, consistente, em toda a interface.
+   ================================================ */
+
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+}
+
+/* ================================================
+   SCROLLBARS
+   ================================================ */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+}
+
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--green), var(--cyan));
-    border-radius: 4px;
+    background: var(--line-strong);
+    border-radius: 99px;
+    border: 3px solid transparent;
+    background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, var(--cyan), var(--green));
+    background: var(--accent);
+    background-clip: content-box;
 }
 
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-body {
-    position: relative;
-    padding-bottom: 48px;
-    /* Space for taskbar */
+/* ================================================
+   SELEÇÃO
+   ================================================ */
+
+::selection {
+    background: var(--accent-wash-strong);
+    color: var(--text-strong);
 }
 
 /* Text Styles */
 a {
     color: var(--cyan);
     text-decoration: none;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
 }
 
 a:hover {
@@ -89,7 +170,7 @@ a:hover {
 }
 
 .comment {
-    color: var(--comment);
+    color: var(--text-dim);
 }
 
 .error {
@@ -102,4 +183,20 @@ a:hover {
     font-size: 0.8em;
     line-height: 1.2;
     white-space: pre;
+}
+
+/* ================================================
+   MOVIMENTO REDUZIDO
+   ================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

@@ -13,13 +13,9 @@
     padding: 8px;
 }
 
+/* Superfície, borda e hover vêm de components.css. */
 .game-option {
     padding: 16px 12px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
-    border: 1px solid var(--comment);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,14 +39,8 @@
     z-index: 0;
 }
 
-.game-option:hover {
-    border-color: var(--green);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
 .game-option:hover::before {
-    opacity: 0.1;
+    opacity: 0.12;
 }
 
 .game-option:active {
@@ -88,16 +78,22 @@
     box-sizing: border-box;
 }
 
+/* O canvas tem tamanho intrínseco fixo por jogo e antes desenhava
+   nesse tamanho, deixando faixas mortas dentro da janela. Agora ele
+   preenche o espaço disponível preservando a proporção — e como o
+   rendering é pixelated, a ampliação continua nítida. */
 .game-canvas {
-    border: 2px solid var(--comment);
-    border-radius: 8px;
-    background-color: #0a0a12;
-    max-width: 100%;
-    max-height: 100%;
+    flex: 1;
+    width: 100%;
+    height: 100%;
     min-height: 0;
+    object-fit: contain;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background-color: color-mix(in srgb, var(--background) 55%, #000);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 26px -8px rgba(0, 0, 0, 0.6), 0 0 26px -12px var(--glow);
 }
 
 
@@ -107,29 +103,21 @@
     color: var(--yellow);
     flex-shrink: 0;
     padding: 6px 16px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-    border: 1px solid var(--comment);
+    background: var(--surface-sunken);
+    border-radius: 99px;
+    border: 1px solid var(--line);
 }
 
+/* Cor, borda e tipografia vêm de components.css; aqui fica só o
+   que é específico do botão de voltar. */
 .game-back-btn {
     padding: 10px 24px;
-    background: linear-gradient(135deg, var(--comment) 0%, #4a5568 100%);
-    color: var(--foreground);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Fira Code', monospace;
     font-size: clamp(11px, 2vw, 13px);
-    font-weight: 500;
-    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
 .game-back-btn:hover {
-    background: linear-gradient(135deg, var(--blue) 0%, #63b3ed 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
 }
 
 .game-back-btn:active {
@@ -235,7 +223,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--comment) 0%, #4a5568 100%);
+    background: linear-gradient(135deg,
+            var(--surface-raised) 0%,
+            color-mix(in srgb, var(--foreground) 12%, var(--background)) 100%);
     border-radius: 8px;
     font-size: clamp(16px, 5vw, 28px);
     cursor: pointer;
