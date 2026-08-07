@@ -28,6 +28,13 @@ export const ContextMenu = {
         });
     },
 
+    // Última linha utilizável da tela: a taskbar fica por cima de tudo,
+    // então ela é o chão real para menus e submenus.
+    viewportBottom() {
+        const taskbar = document.getElementById('taskbar');
+        return window.innerHeight - (taskbar?.offsetHeight || 0);
+    },
+
     show(e) {
         // Check if clicking on desktop area (not on windows, taskbar, etc.)
         const isWindow = e.target.closest('.app-window') || e.target.closest('#terminal');
@@ -69,6 +76,7 @@ export const ContextMenu = {
             { label: t('context_menu.open_ascii'), action: () => this.apps.ASCIIPlayerApp?.open() },
             { label: t('context_menu.open_notepad'), action: () => this.apps.NotepadApp?.open() },
             { label: t('context_menu.open_calculator'), action: () => this.apps.CalculatorApp?.open() },
+            { label: t('context_menu.open_mirror'), action: () => this.apps.AsciiMirrorApp?.open() },
             { separator: true },
             {
                 label: t('context_menu.wallpaper'),
@@ -83,7 +91,14 @@ export const ContextMenu = {
                 }
             },
             { separator: true },
-            { label: t('context_menu.about'), action: () => this.apps.Terminal?.executeCommand('sobre') }
+            {
+                // abre o terminal antes de executar, como o Spotlight faz —
+                // senão o comando roda invisível com o terminal fechado
+                label: t('context_menu.about'), action: () => {
+                    window.dispatchEvent(new CustomEvent('open-terminal'));
+                    setTimeout(() => this.apps.Terminal?.executeCommand('sobre'), 300);
+                }
+            }
         ];
 
         this.element.innerHTML = options.map((opt, idx) => {
@@ -101,8 +116,11 @@ export const ContextMenu = {
 
         this.element.classList.add('visible');
         const rect = this.element.getBoundingClientRect();
+        const limit = this.viewportBottom();
         if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 10;
-        if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 10;
+        // O menu precisa parar acima da taskbar, não da borda da janela,
+        // senão os últimos itens ficam escondidos atrás dela.
+        if (top + rect.height > limit) top = Math.max(10, limit - rect.height - 10);
 
         this.element.style.left = `${left}px`;
         this.element.style.top = `${top}px`;
@@ -166,8 +184,9 @@ export const ContextMenu = {
         }
 
         // Check bottom edge
-        if (top + submenuRect.height > window.innerHeight - 10) {
-            top = window.innerHeight - submenuRect.height - 10;
+        const limit = this.viewportBottom();
+        if (top + submenuRect.height > limit - 10) {
+            top = limit - submenuRect.height - 10;
         }
 
         // Check top edge
