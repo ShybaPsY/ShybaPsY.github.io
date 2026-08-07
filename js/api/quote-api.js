@@ -19,35 +19,27 @@ export const QuoteAPI = {
         { text: "Experience is the name everyone gives to their mistakes.", author: "Oscar Wilde" },
         { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Harold Abelson" },
         { text: "The best error message is the one that never shows up.", author: "Thomas Fuchs" },
-        { text: "It's not a bug – it's an undocumented feature.", author: "Anonymous" }
+        { text: "It's not a bug – it's an undocumented feature.", author: "Anonymous" },
+        { text: "Premature optimization is the root of all evil.", author: "Donald Knuth" },
+        { text: "There are only two hard things in Computer Science: cache invalidation and naming things.", author: "Phil Karlton" },
+        { text: "Weeks of coding can save you hours of planning.", author: "Anonymous" },
+        { text: "Deleted code is debugged code.", author: "Jeff Sickel" },
+        { text: "Before software can be reusable it first has to be usable.", author: "Ralph Johnson" },
+        { text: "Truth can only be found in one place: the code.", author: "Robert C. Martin" },
+        { text: "The most disastrous thing that you can ever learn is your first programming language.", author: "Alan Kay" },
+        { text: "Testing leads to failure, and failure leads to understanding.", author: "Burt Rutan" }
     ],
 
     async fetch() {
-        const now = Date.now();
-        if (this.cache.quote && (now - this.cache.timestamp < this.cacheTime)) {
-            return this.cache.quote;
-        }
+        // A api.quotable.io saiu do ar (certificado expirado), então as
+        // citações vêm do pool local — sem chamada de rede que sempre falha
+        let quote;
+        do {
+            quote = this.fallbackQuotes[Math.floor(Math.random() * this.fallbackQuotes.length)];
+        } while (quote === this.cache.quote && this.fallbackQuotes.length > 1);
 
-        try {
-            const response = await fetch('https://api.quotable.io/random?tags=technology,famous-quotes');
-            if (!response.ok) {
-                throw new Error('Failed to fetch quote');
-            }
-            const data = await response.json();
-
-            const quote = {
-                text: data.content,
-                author: data.author
-            };
-
-            this.cache.quote = quote;
-            this.cache.timestamp = now;
-
-            return quote;
-        } catch (error) {
-            console.error('Quote API error:', error);
-            return this.fallbackQuotes[Math.floor(Math.random() * this.fallbackQuotes.length)];
-        }
+        this.cache.quote = quote;
+        return quote;
     },
 
     format(quote) {

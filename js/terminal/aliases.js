@@ -50,4 +50,8 @@ export const aliases = {
     'achievements': 'conquistas',
     'badges': 'conquistas',
     'trofeus': 'conquistas',
+    // Theme aliases
+    'tema': 'theme',
+    'temas': 'theme',
+    'themes': 'theme',
 };
