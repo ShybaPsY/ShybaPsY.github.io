@@ -33,6 +33,7 @@
     "did_you_mean_multiple": "Did you mean: {commands}?"
   },
   "desktop": {
+    "monitor": "Monitor",
     "terminal": "Terminal",
     "themes": "Themes",
     "ascii_player": "ASCII Player",
@@ -44,6 +45,7 @@
     "mirror": "ASCII Mirror"
   },
   "context_menu": {
+    "open_monitor": "Open Monitor",
     "open_terminal": "💻 Open Terminal",
     "open_themes": "🎨 Open Themes",
     "open_games": "🎮 Open Games",
@@ -52,7 +54,7 @@
     "open_notepad": "📝 Open Notepad",
     "open_calculator": "🔢 Open Calculator",
     "open_mirror": "🪞 Open ASCII Mirror",
-    "wallpaper": "🖼️ Wallpaper",
+  "wallpaper": "🖼️ Wallpaper",
     "toggle_crt": "📺 Toggle CRT",
     "about": "ℹ️ About"
   },
@@ -205,6 +207,11 @@
     "error_loading": "Could not load GitHub statistics.",
     "check_connection": "Check your internet connection."
   },
+  "monitor": {
+    "title": "System Monitor",
+    "processes": "Processes",
+    "unavailable": "unavailable"
+  },
   "wallpaper": {
     "none": "None",
     "animated": "✨ Animated",
@@ -219,6 +226,7 @@
     "ok": "OK"
   },
   "commands": {
+    "open_monitor": "\n  Opening System Monitor...\n",
     "help": "\n  <span class=\"highlight\">Available Commands:</span>\n\n  <span class=\"title-blue\">Portfolio:</span>\n  <span class=\"output-command\">about</span>          - Shows information about me.\n  <span class=\"output-command\">experience</span>     - Shows my professional experience.\n  <span class=\"output-command\">projects</span>       - Lists my main projects.\n  <span class=\"output-command\">skills</span>         - Lists my technical and interpersonal skills.\n  <span class=\"output-command\">courses</span>        - Shows my courses and certifications.\n  <span class=\"output-command\">languages</span>      - Lists the languages I speak.\n  <span class=\"output-command\">contact</span>        - Shows my contact information.\n  <span class=\"output-command\">github</span>         - Shows my GitHub statistics.\n  <span class=\"output-command\">resume</span>         - Link to download my resume.\n\n  <span class=\"title-blue\">Utilities:</span>\n  <span class=\"output-command\">clear</span>          - Clears the screen.\n  <span class=\"output-command\">welcome</span>        - Shows the welcome message again.\n  <span class=\"output-command\">quote</span>          - Shows an inspiring programming quote.\n  <span class=\"output-command\">achievements</span>   - Lists your unlocked achievements.\n  <span class=\"output-command\">theme</span>          - Lists themes; use theme [name] to apply.\n  <span class=\"output-command\">desktop</span>        - Shows the desktop apps.\n  <span class=\"output-command\">exit</span>           - Closes the terminal.\n  <span class=\"output-command\">extras</span>         - Extra commands and exploration.",
     "sobre": "\n  <span class=\"highlight\">About Me</span>\n\n  Hello! I'm Gabriel Mendes Lopes, a <span class=\"title-blue\">fullstack developer</span> passionate about creating efficient, scalable, and robust solutions.\n  I'm currently in the 5th semester of <span class=\"title-blue\">Information Systems at FIPP</span> (Faculty of Informatics of Presidente Prudente).\n  I live in Anhumas, SP, Brazil.\n\n  I'm a CNPq Technological Initiation Scholarship holder at <a href=\"https://www.fct.unesp.br/\" target=\"_blank\">FCT Unesp</a>.\n\n  I'm interested in application development and automation.\n  I'm proactive, dedicated, and always seeking continuous learning to become an excellent professional.",
     "experiencia": "\n  <span class=\"highlight\">Professional Experience</span>\n\n  <span class=\"output-command\">Technological Initiation Scholarship (PIBITI) - Unesp</span>\n  <span class=\"comment\">September 2025 - September 2026 (1 year)</span>\n\n  - Responsible for the development and automation of equipment for measuring piezoelectric properties (d33) in polymers.\n\n  - Development of closed-loop control software with Arduino to integrate and manage pneumatic actuators and load sensors.\n\n  - Prototyping, systematic testing for equipment validation, and documentation preparation for patent and software registration.",

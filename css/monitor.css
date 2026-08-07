@@ -1,0 +1,216 @@
+/* ================================================
+   SYSTEM MONITOR
+   Os medidores são barras de caracteres, então tudo aqui
+   vive numa grade monoespaçada — e obrigatoriamente em
+   Fira Code: em IBM Plex Mono os glifos de bloco não
+   respeitam a largura de avanço (▇▆▅▃▂ medem 1.667x) e
+   as barras sairiam tortas.
+   ================================================ */
+
+.mon {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    font-family: var(--font-shell);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Sparkline de FPS ------------------------------------------- */
+
+.mon-spark {
+    font-family: var(--font-shell);
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: pre;
+    color: var(--accent);
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    padding: 12px 10px 10px;
+    overflow: hidden;
+    text-shadow: 0 0 12px var(--glow-soft);
+}
+
+/* ---- Medidores ---------------------------------------------------- */
+
+.mon-gauges {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mon-gauge {
+    display: grid;
+    grid-template-columns: 84px 62px auto 1fr;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.mon-label {
+    font-family: var(--font-ui);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.mon-value {
+    text-align: right;
+    color: var(--text-strong);
+    font-weight: 500;
+}
+
+.mon-unit {
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-left: 2px;
+}
+
+.mon-bar {
+    white-space: pre;
+    letter-spacing: 0;
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.mon-limit {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+/* Dado que o navegador não expõe. Não vira número inventado. */
+.mon-na {
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 11px;
+}
+
+/* ---- Fatos --------------------------------------------------------- */
+
+.mon-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    margin: 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+}
+
+.mon-facts dt {
+    font-family: var(--font-ui);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    align-self: baseline;
+}
+
+.mon-facts dd {
+    margin: 0;
+    color: var(--text-strong);
+}
+
+/* ---- Tabela de processos --------------------------------------------- */
+
+.mon-sec {
+    font-family: var(--font-ui);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.mon-proc {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+}
+
+.mon-proc th {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: right;
+    padding: 0 0 6px;
+    border-bottom: 1px solid var(--line);
+}
+
+.mon-proc th:nth-child(1),
+.mon-proc th:nth-child(2) {
+    text-align: left;
+}
+
+.mon-proc td {
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--line);
+}
+
+.mon-proc tr:last-child td {
+    border-bottom: none;
+}
+
+.mon-pid {
+    color: var(--text-dim);
+    width: 34px;
+}
+
+.mon-name {
+    color: var(--text-strong);
+    padding-right: 10px;
+}
+
+.mon-num {
+    text-align: right;
+    color: var(--text-muted);
+    padding-left: 10px;
+    white-space: nowrap;
+}
+
+.mon-state {
+    text-align: right;
+    padding-left: 12px;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.mon-run {
+    color: var(--accent);
+}
+
+.mon-susp {
+    color: var(--text-dim);
+}
+
+/* ---- Estreito --------------------------------------------------------- */
+
+@media (max-width: 760px) {
+    .mon-gauge {
+        grid-template-columns: 74px 56px auto;
+    }
+
+    .mon-limit {
+        display: none;
+    }
+
+    .mon-spark,
+    .mon-bar {
+        font-size: 11px;
+    }
+}

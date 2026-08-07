@@ -61,6 +61,7 @@ export const Spotlight = {
             { type: 'app', name: 'Notepad', icon: '📝', action: () => this.apps.NotepadApp?.open() },
             { type: 'app', nameKey: 'spotlight.calculator', icon: '🔢', action: () => this.apps.CalculatorApp?.open() },
             { type: 'app', name: 'ASCII Mirror', icon: '🪞', action: () => this.apps.AsciiMirrorApp?.open() },
+            { type: 'app', name: 'Monitor', icon: '📊', action: () => this.apps.SystemMonitorApp?.open() },
 
             // Terminal Commands
             { type: 'command', name: 'sobre', descKey: 'spotlight.sobre_desc', icon: '👤', action: () => this.runCommand('sobre') },

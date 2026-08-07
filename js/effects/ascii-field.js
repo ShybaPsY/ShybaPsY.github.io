@@ -13,6 +13,8 @@
 // superfície e não pontos soltos.
 // ================================================
 
+import { SystemMetrics } from '../features/system-metrics.js';
+
 export const AsciiField = {
     canvas: null,
     ctx: null,
@@ -397,7 +399,11 @@ export const AsciiField = {
         // re-lê as cores do tema de tempos em tempos (troca de tema ao vivo)
         if (++this.frameCount % 90 === 0) this.refreshColors();
 
+        // O monitor de sistema mostra este número. Medir aqui é o que o
+        // torna um dado real em vez de uma estimativa.
+        const t0 = performance.now();
         this.drawFrame(now);
+        SystemMetrics.report('ascii-field', performance.now() - t0);
     },
 
     stop() {

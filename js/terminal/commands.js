@@ -16,6 +16,7 @@ export function createCommands(dependencies) {
         GamesApp,
         ProjetosApp,
         AsciiMirrorApp,
+        SystemMonitorApp,
         AsciiPortrait,
         AchievementManager,
         GitHubAPI,
@@ -84,6 +85,11 @@ export function createCommands(dependencies) {
             const uptime = Math.floor((Date.now() - performance.timeOrigin) / 1000);
             const theme = ThemeManager?.current || 'default';
             return t('commands.neofetch', { uptime, theme });
+        },
+
+        monitor: function() {
+            SystemMonitorApp?.open();
+            return t('commands.open_monitor');
         },
 
         sudo: function() {

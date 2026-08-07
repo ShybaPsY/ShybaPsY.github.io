@@ -15,5 +15,6 @@
 /* components.css entra depois dos apps: é a camada que reconcilia
    botões, painéis e campos que cada app tinha inventado sozinho. */
 @import url('components.css');
+@import url('monitor.css');
 @import url('effects.css');
 @import url('responsive.css');

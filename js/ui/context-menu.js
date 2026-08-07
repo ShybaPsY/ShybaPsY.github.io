@@ -77,6 +77,7 @@ export const ContextMenu = {
             { label: t('context_menu.open_notepad'), action: () => this.apps.NotepadApp?.open() },
             { label: t('context_menu.open_calculator'), action: () => this.apps.CalculatorApp?.open() },
             { label: t('context_menu.open_mirror'), action: () => this.apps.AsciiMirrorApp?.open() },
+            { label: t('context_menu.open_monitor'), action: () => this.apps.SystemMonitorApp?.open() },
             { separator: true },
             {
                 label: t('context_menu.wallpaper'),

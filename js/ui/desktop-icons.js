@@ -71,6 +71,9 @@ export const DesktopIcons = {
             case 'mirror':
                 this.apps.AsciiMirrorApp?.open();
                 break;
+            case 'monitor':
+                this.apps.SystemMonitorApp?.open();
+                break;
         }
     }
 };

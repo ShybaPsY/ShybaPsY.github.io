@@ -29,6 +29,7 @@ import { MusicApp } from './apps/music-player.js';
 import { NotepadApp } from './apps/notepad.js';
 import { CalculatorApp } from './apps/calculator.js';
 import { AsciiMirrorApp } from './apps/ascii-mirror.js';
+import { SystemMonitorApp } from './apps/system-monitor.js';
 
 // Games module
 import { GamesApp } from './games/games-app.js';
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     NotepadApp.init(WindowManager, AchievementManager);
     CalculatorApp.init(WindowManager, AchievementManager);
     AsciiMirrorApp.init(WindowManager, AchievementManager);
+    SystemMonitorApp.init(WindowManager, AchievementManager);
 
     // Initialize terminal with all dependencies
     Terminal.init({
@@ -86,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         GamesApp,
         ProjetosApp,
         AsciiMirrorApp,
+        SystemMonitorApp,
         AsciiPortrait,
         GitHubAPI,
         QuoteAPI
@@ -100,7 +103,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         ProjetosApp,
         NotepadApp,
         CalculatorApp,
-        AsciiMirrorApp
+        AsciiMirrorApp,
+        SystemMonitorApp
     });
 
     // Initialize context menu
@@ -113,6 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         NotepadApp,
         CalculatorApp,
         AsciiMirrorApp,
+        SystemMonitorApp,
         Terminal
     });
 
@@ -136,6 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         NotepadApp,
         CalculatorApp,
         AsciiMirrorApp,
+        SystemMonitorApp,
         Terminal
     });
 

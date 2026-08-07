@@ -33,6 +33,7 @@
     "did_you_mean_multiple": "Você quis dizer: {commands}?"
   },
   "desktop": {
+    "monitor": "Monitor",
     "terminal": "Terminal",
     "themes": "Themes",
     "ascii_player": "ASCII Player",
@@ -44,6 +45,7 @@
     "mirror": "ASCII Mirror"
   },
   "context_menu": {
+    "open_monitor": "Abrir Monitor",
     "open_terminal": "💻 Abrir Terminal",
     "open_themes": "🎨 Abrir Themes",
     "open_games": "🎮 Abrir Games",
@@ -52,7 +54,7 @@
     "open_notepad": "📝 Abrir Notepad",
     "open_calculator": "🔢 Abrir Calculadora",
     "open_mirror": "🪞 Abrir ASCII Mirror",
-    "wallpaper": "🖼️ Papel de Parede",
+  "wallpaper": "🖼️ Papel de Parede",
     "toggle_crt": "📺 Alternar CRT",
     "about": "ℹ️ Sobre"
   },
@@ -205,6 +207,11 @@
     "error_loading": "Não foi possível carregar as estatísticas do GitHub.",
     "check_connection": "Verifique sua conexão com a internet."
   },
+  "monitor": {
+    "title": "Monitor do Sistema",
+    "processes": "Processos",
+    "unavailable": "indisponível"
+  },
   "wallpaper": {
     "none": "Nenhum",
     "animated": "✨ Animados",
@@ -219,6 +226,7 @@
     "ok": "OK"
   },
   "commands": {
+    "open_monitor": "\n  Abrindo o Monitor do Sistema...\n",
     "help": "\n  <span class=\"highlight\">Comandos Disponíveis:</span>\n\n  <span class=\"title-blue\">Portfolio:</span>\n  <span class=\"output-command\">sobre</span>          - Mostra informações sobre mim.\n  <span class=\"output-command\">experiencia</span>    - Exibe minha experiência profissional.\n  <span class=\"output-command\">projetos</span>       - Lista meus principais projetos.\n  <span class=\"output-command\">skills</span>         - Lista minhas habilidades técnicas e interpessoais.\n  <span class=\"output-command\">cursos</span>         - Exibe meus cursos e certificações.\n  <span class=\"output-command\">idiomas</span>        - Lista os idiomas que eu falo.\n  <span class=\"output-command\">contato</span>        - Exibe minhas informações de contato.\n  <span class=\"output-command\">github</span>         - Mostra minhas estatísticas do GitHub.\n  <span class=\"output-command\">download cv</span>    - Link para baixar meu currículo.\n\n  <span class=\"title-blue\">Utilities:</span>\n  <span class=\"output-command\">clear</span>          - Limpa a tela.\n  <span class=\"output-command\">bemvindo</span>       - Mostra a mensagem de boas-vindas novamente.\n  <span class=\"output-command\">quote</span>          - Exibe uma citação inspiradora sobre programação.\n  <span class=\"output-command\">conquistas</span>     - Lista suas conquistas desbloqueadas.\n  <span class=\"output-command\">theme</span>          - Lista temas; use theme [nome] para aplicar.\n  <span class=\"output-command\">desktop</span>        - Mostra os apps do desktop.\n  <span class=\"output-command\">exit</span>           - Fecha o terminal.\n  <span class=\"output-command\">extras</span>         - Comandos extras e exploração.",
     "sobre": "\n  <span class=\"highlight\">Sobre Mim</span>\n\n  Olá! Sou Gabriel Mendes Lopes, um <span class=\"title-blue\">desenvolvedor fullstack</span> apaixonado por criar soluções eficientes, escaláveis e robustas.\n  Atualmente, estou no 5º termo do curso de <span class=\"title-blue\">Sistemas de Informação na FIPP</span> (Faculdade de Informática de Presidente Prudente).\n  Resido em Anhumas, SP.\n\n  Sou Bolsista de Iniciação Tecnológica do CNPq na <a href=\"https://www.fct.unesp.br/\" target=\"_blank\">FCT Unesp</a>.\n\n  Tenho interesse em desenvolvimento de aplicações e automações.\n  Sou proativo, dedicado e estou sempre em busca de aprendizado contínuo para me tornar um profissional de excelência.",
     "experiencia": "\n  <span class=\"highlight\">Experiência Profissional</span>\n\n  <span class=\"output-command\">Bolsista de Iniciação Tecnológica (PIBITI) - Unesp</span>\n  <span class=\"comment\">Setembro 2025 - Setembro 2026 (1 ano)</span>\n\n  - Responsável pelo desenvolvimento e automação de equipamentos para medição de propriedades piezoelétricas (d33) em polímeros.\n\n  - Desenvolvimento de software de controle em malha fechada com Arduino para integrar e gerenciar atuadores pneumáticos e sensores de carga.\n\n  - Prototipagem, execução de testes sistemáticos para validação do equipamento e preparação da documentação para registro de patente e software.",

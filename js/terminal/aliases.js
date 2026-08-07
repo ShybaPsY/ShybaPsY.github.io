@@ -50,6 +50,11 @@ export const aliases = {
     'achievements': 'conquistas',
     'badges': 'conquistas',
     'trofeus': 'conquistas',
+    // Monitor aliases
+    'htop': 'monitor',
+    'top': 'monitor',
+    'sistema': 'monitor',
+
     // Theme aliases
     'tema': 'theme',
     'temas': 'theme',
