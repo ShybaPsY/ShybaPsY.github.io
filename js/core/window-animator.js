@@ -18,6 +18,8 @@
 // pelo código — quem chama espera o fim de verdade.
 // ================================================
 
+import { WindowShatter } from '../effects/window-shatter.js';
+
 const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';   // expo-out: pousa devagar
 const EASE_IN = 'cubic-bezier(0.7, 0, 0.84, 0)';
 
@@ -97,6 +99,10 @@ export const WindowAnimator = {
 
     // O caminho inverso: nasce no botão da taskbar e cresce até a janela.
     async fromRect(el, rect, { duration = 320, easing = EASE_OUT } = {}) {
+        // O terminal, ao fechar, fica com opacity 0 inline (ver close()).
+        // Reabrir precisa desfazer isso, senão ele volta invisível.
+        el.style.opacity = '';
+
         if (this.reducedMotion() || !rect) return;
 
         const to = el.getBoundingClientRect();
@@ -117,14 +123,30 @@ export const WindowAnimator = {
         ], { duration, easing });
     },
 
-    // Fechar: a janela recua e desfoca, sem viajar para lugar nenhum —
-    // ela não foi guardada, ela deixou de existir.
-    async close(el, { duration = 200 } = {}) {
+    // Fechar: a janela se revela feita de texto e se espalha. Ela não foi
+    // guardada em lugar nenhum — deixou de existir, e o que sobra é o
+    // alfabeto do sistema decaindo pela rampa.
+    //
+    // A janela real sai rápido (160ms) enquanto a grade de caracteres já
+    // está desenhada por cima, então a troca não aparece.
+    async close(el, { duration = 160 } = {}) {
         if (this.reducedMotion()) return;
+
+        const rect = el.getBoundingClientRect();
+        const header = el.querySelector('.app-window-header, #terminal-header');
+        const shatter = WindowShatter.play(rect, header?.offsetHeight || 36);
+
         await this.run(el, [
             { transform: 'scale(1)', opacity: 1 },
-            { transform: 'scale(0.94)', opacity: 0 }
+            { transform: 'scale(0.985)', opacity: 0 }
         ], { duration, easing: EASE_IN });
+
+        // run() cancela a animação ao terminar, o que devolveria a janela a
+        // opacity 1 — e ela reapareceria inteira por trás dos caracteres
+        // durante o resto da fragmentação. fromRect() limpa isto ao abrir.
+        el.style.opacity = '0';
+
+        await shatter;
     },
 
     // Retângulo do botão desta janela na taskbar, quando existe.
