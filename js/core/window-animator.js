@@ -123,30 +123,18 @@ export const WindowAnimator = {
         ], { duration, easing });
     },
 
-    // Fechar: a janela se revela feita de texto e se espalha. Ela não foi
-    // guardada em lugar nenhum — deixou de existir, e o que sobra é o
-    // alfabeto do sistema decaindo pela rampa.
+    // Fechar: uma onda varre a janela das bordas ao centro. Ela não é
+    // desenhada por cima da janela — a janela real vai sendo recortada na
+    // mesma velocidade, então à frente da onda ela está inteira e atrás
+    // dela só sobrou o texto de que era feita.
     //
-    // A janela real sai rápido (160ms) enquanto a grade de caracteres já
-    // está desenhada por cima, então a troca não aparece.
-    async close(el, { duration = 160 } = {}) {
+    // O WindowShatter cuida de esconder o elemento no instante em que o
+    // recorte fecha, e fromRect() limpa isso ao reabrir.
+    async close(el) {
         if (this.reducedMotion()) return;
 
-        const rect = el.getBoundingClientRect();
         const header = el.querySelector('.app-window-header, #terminal-header');
-        const shatter = WindowShatter.play(rect, header?.offsetHeight || 36);
-
-        await this.run(el, [
-            { transform: 'scale(1)', opacity: 1 },
-            { transform: 'scale(0.985)', opacity: 0 }
-        ], { duration, easing: EASE_IN });
-
-        // run() cancela a animação ao terminar, o que devolveria a janela a
-        // opacity 1 — e ela reapareceria inteira por trás dos caracteres
-        // durante o resto da fragmentação. fromRect() limpa isto ao abrir.
-        el.style.opacity = '0';
-
-        await shatter;
+        await WindowShatter.play(el, header?.offsetHeight || 36);
     },
 
     // Retângulo do botão desta janela na taskbar, quando existe.
