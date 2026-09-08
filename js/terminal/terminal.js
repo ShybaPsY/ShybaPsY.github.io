@@ -392,7 +392,9 @@ export const Terminal = {
             } else {
                 responseText = handler;
             }
-            if (base === 'help' || base === 'bemvindo') {
+            // Textos longos digitam mais rápido: a 8ms/char o `sobre`
+            // levava quase 9 segundos, e ninguém espera isso para ler.
+            if (['help', 'bemvindo', 'experiencia', 'sobre', 'skills'].includes(base)) {
                 speed = 5;
             }
             if (base === 'neofetch') {

@@ -6,6 +6,8 @@
 // dispersam. Qualquer tecla ou clique pula a animação.
 // ================================================
 
+import { UiSound } from './ui-sound.js';
+
 export const AsciiPortrait = {
     IMAGE_SRC: 'assets/img/profile.jpg',
     CHARS: ' .:-=+*#%@',
@@ -20,6 +22,7 @@ export const AsciiPortrait = {
     phaseStart: 0,
     skipRequested: false,
     isPlaying: false,
+    soundTimers: [],
 
     DURATIONS: { assemble: 1600, hold: 2600, disperse: 1500 },
 
@@ -39,8 +42,9 @@ export const AsciiPortrait = {
         this.skipRequested = false;
         this.createCanvas();
         this.buildParticles(img);
+        this.scheduleSounds();
 
-        const onSkip = () => { this.skipRequested = true; };
+        const onSkip = () => { this.skipRequested = true; this.clearSounds(); };
         document.addEventListener('keydown', onSkip);
         document.addEventListener('mousedown', onSkip);
         const onMove = (e) => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; };
@@ -48,6 +52,7 @@ export const AsciiPortrait = {
 
         await this.runAnimation();
 
+        this.clearSounds();
         document.removeEventListener('keydown', onSkip);
         document.removeEventListener('mousedown', onSkip);
         document.removeEventListener('mousemove', onMove);
@@ -55,6 +60,29 @@ export const AsciiPortrait = {
         this.canvas = null;
         this.particles = [];
         this.isPlaying = false;
+    },
+
+    // Estalos espalhados pela montagem, mais densos no meio — que é
+    // quando a maioria das partículas pousa. Um por partícula seriam
+    // milhares; dezoito bastam para o ouvido ler "coisas se encaixando".
+    scheduleSounds() {
+        const N = 18;
+        for (let i = 0; i < N; i++) {
+            const t = i / (N - 1);
+            // curva em sino: começa ralo, adensa no meio, rareia no fim
+            const quando = 260 + t * 1480 + (Math.random() - 0.5) * 70;
+            this.soundTimers.push(setTimeout(
+                () => UiSound.click(0.8 + Math.random() * 0.7, 0.45 + Math.random() * 0.5),
+                quando
+            ));
+        }
+        // o assentamento final: mais grave e mais forte que os outros
+        this.soundTimers.push(setTimeout(() => UiSound.click(0.42, 1), 2020));
+    },
+
+    clearSounds() {
+        this.soundTimers.forEach(clearTimeout);
+        this.soundTimers = [];
     },
 
     loadImage(src) {
@@ -227,14 +255,16 @@ export const AsciiPortrait = {
                 if (sh > 0.92) charIdx = Math.min(chars.length - 1, charIdx + 1);
                 else if (sh < -0.92) charIdx = Math.max(1, charIdx - 1);
 
-                // repulsão do mouse
+                // O cursor ilumina em vez de empurrar: os caracteres sobem
+                // na rampa perto dele e voltam ao sair. Sem deslocamento, o
+                // retrato não se deforma — e é a mesma ideia de "cursor
+                // como fonte de luz" que o fundo do desktop usa.
                 const dx = p.tx - mx, dy = p.ty - my;
                 const d2 = dx * dx + dy * dy;
-                if (d2 < 19600) { // raio 140px
-                    const d = Math.sqrt(d2) || 1;
-                    const force = (1 - d / 140) * 46;
-                    x = p.tx + (dx / d) * force;
-                    y = p.ty + (dy / d) * force;
+                if (d2 < 22500) { // raio 150px
+                    const brilho = 1 - Math.sqrt(d2) / 150;
+                    charIdx = Math.min(chars.length - 1, charIdx + Math.round(brilho * 2.2));
+                    alpha = Math.min(1, alpha + brilho * 0.35);
                 }
             } else { // disperse
                 const t = Math.min(1, elapsed / this.DURATIONS.disperse);

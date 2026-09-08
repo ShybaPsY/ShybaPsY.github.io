@@ -21,6 +21,7 @@ import { BootSequence } from './effects/boot-sequence.js';
 import { AsciiField } from './effects/ascii-field.js';
 import { AsciiPortrait } from './effects/ascii-portrait.js';
 import { MatrixEffect } from './effects/matrix.js';
+import { UiSound } from './effects/ui-sound.js';
 
 // Apps modules
 import { ThemePickerApp } from './apps/theme-picker.js';
@@ -58,6 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const terminal = document.getElementById('terminal');
     const terminalHeader = document.getElementById('terminal-header');
     const commandInput = document.getElementById('command-input');
+
+    // Som da interface: só prepara o estado e os gatilhos de gesto; o
+    // AudioContext em si nasce no primeiro clique ou tecla do usuário.
+    UiSound.init();
 
     // Initialize achievement manager first to load saved achievements
     AchievementManager.init();

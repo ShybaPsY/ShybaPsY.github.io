@@ -3,6 +3,7 @@
 // ================================================
 
 import { i18n } from '../i18n/i18n.js';
+import { UiSound } from '../effects/ui-sound.js';
 
 export const Taskbar = {
     clockInterval: null,
@@ -31,6 +32,27 @@ export const Taskbar = {
                 document.body.classList.toggle('crt-enabled');
                 crtBtn.classList.toggle('active');
                 localStorage.setItem('crt-enabled', document.body.classList.contains('crt-enabled'));
+            });
+        }
+
+        // Mudo dos sons de interface. O estado nasce do que o UiSound
+        // leu do localStorage, então a escolha atravessa visitas.
+        const soundBtn = document.getElementById('taskbar-sound');
+        if (soundBtn) {
+            const pintar = () => {
+                soundBtn.classList.toggle('muted', !UiSound.enabled);
+                soundBtn.setAttribute('aria-pressed', String(UiSound.enabled));
+            };
+            pintar();
+
+            const alternar = () => {
+                const ligado = UiSound.toggle();
+                pintar();
+                if (ligado) UiSound.click(1, 0.8);   // confirma que voltou
+            };
+            soundBtn.addEventListener('click', alternar);
+            soundBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); }
             });
         }
 

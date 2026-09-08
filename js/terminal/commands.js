@@ -2,9 +2,34 @@
 // TERMINAL COMMANDS MODULE
 // ================================================
 
-import { t } from '../i18n/i18n.js';
+import { i18n, t } from '../i18n/i18n.js';
 import { getRickrollCommand, getAnimatedSL } from '../features/easter-eggs.js';
 import { buildNeofetch } from './neofetch.js';
+
+// Duração de um cargo em andamento, contada na hora em que o comando roda.
+// Chumbar "7 meses" no texto significaria que ele envelhece sozinho e passa
+// a mentir em algumas semanas.
+//
+// A contagem é inclusiva, como a do LinkedIn: quem começou em fevereiro
+// está em "7 meses" durante todo o mês de agosto, e não em 6.
+function duracaoDesde(ano, mes) {
+    const hoje = new Date();
+    const meses = Math.max(
+        1,
+        (hoje.getFullYear() - ano) * 12 + (hoje.getMonth() + 1 - mes) + 1
+    );
+
+    const en = i18n.currentLang === 'en';
+    const anos = Math.floor(meses / 12);
+    const resto = meses % 12;
+
+    const parte = (n, sing, plur) => `${n} ${n === 1 ? sing : plur}`;
+    const partes = [];
+    if (anos) partes.push(parte(anos, en ? 'year' : 'ano', en ? 'years' : 'anos'));
+    if (resto) partes.push(parte(resto, en ? 'month' : 'mês', en ? 'months' : 'meses'));
+
+    return partes.join(en ? ' and ' : ' e ');
+}
 
 export function createCommands(dependencies) {
     const {
@@ -34,7 +59,10 @@ export function createCommands(dependencies) {
         },
 
         experiencia: function() {
-            return t('commands.experiencia');
+            return t('commands.experiencia', {
+                aidda_duracao: duracaoDesde(2026, 2),
+                pibiti_duracao: duracaoDesde(2025, 9)
+            });
         },
 
         projetos: function() {

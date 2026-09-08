@@ -376,3 +376,20 @@ body.booting #taskbar {
         display: none;
     }
 }
+
+/* O mesmo ícone serve aos dois estados: as ondas somem e o X aparece. */
+#taskbar-sound .sound-off {
+    display: none;
+}
+
+#taskbar-sound.muted .sound-on {
+    display: none;
+}
+
+#taskbar-sound.muted .sound-off {
+    display: inline;
+}
+
+#taskbar-sound.muted {
+    color: var(--text-dim);
+}
